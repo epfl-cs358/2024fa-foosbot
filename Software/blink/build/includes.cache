@@ -1,0 +1,17 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "/home/tough/.arduino15/packages/arduino/hardware/esp32/2.0.18-20240930.arduino3/cores/esp32"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "/home/tough/.arduino15/packages/arduino/hardware/esp32/2.0.18-20240930.arduino3/variants/arduino_nano_nora"
+  },
+  {
+    "Sourcefile": "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/blink/build/sketch/blink.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]
