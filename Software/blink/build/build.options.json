@@ -1,9 +1,0 @@
-{
-  "additionalFiles": "",
-  "compiler.optimization_flags": "-Os",
-  "customBuildProperties": "build.warn_data_percentage=75",
-  "fqbn": "arduino:esp32:nano_nora:PinNumbers=default,USBMode=default,PartitionScheme=default",
-  "hardwareFolders": "/home/tough/.arduino15/packages",
-  "otherLibrariesFolders": "/home/tough/Arduino/libraries",
-  "sketchLocation": "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/blink"
-}
