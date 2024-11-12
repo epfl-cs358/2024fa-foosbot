@@ -1,0 +1,259 @@
+{
+    "version": "1.4.0",
+    "project": {
+        "name": "scala-test",
+        "directory": "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala",
+        "workspaceDir": "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala",
+        "sources": [
+            "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/src/test/scala",
+            "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/src/test/scala-2.13",
+            "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/src/test/scala-2",
+            "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/src/test/java",
+            "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/target/scala-2.13/src_managed/test"
+        ],
+        "dependencies": [
+            "scala"
+        ],
+        "classpath": [
+            "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/.bloop/scala/scala-2.13/classes",
+            "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.15/scala-library-2.13.15.jar",
+            "/home/tough/.cache/coursier/v1/https/repo.akka.io/maven/com/typesafe/akka/akka-actor_2.13/2.10.0/akka-actor_2.13-2.10.0.jar",
+            "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/jodersky/akka-serial-core_2.13/4.2.0/akka-serial-core_2.13-4.2.0.jar",
+            "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/jodersky/akka-serial-native/4.2.0/akka-serial-native-4.2.0.jar",
+            "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/com/typesafe/config/1.4.3/config-1.4.3.jar",
+            "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/jodersky/akka-serial-sync_2.13/4.2.0/akka-serial-sync_2.13-4.2.0.jar"
+        ],
+        "out": "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/.bloop/scala",
+        "classesDir": "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/.bloop/scala/scala-2.13/test-classes",
+        "resources": [
+            "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/src/test/resources",
+            "/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/target/scala-2.13/resource_managed/test"
+        ],
+        "scala": {
+            "organization": "org.scala-lang",
+            "name": "scala-compiler",
+            "version": "2.13.15",
+            "options": [
+                
+            ],
+            "jars": [
+                "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.15/scala-library-2.13.15.jar",
+                "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.15/scala-compiler-2.13.15.jar",
+                "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.15/scala-reflect-2.13.15.jar",
+                "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/io/github/java-diff-utils/java-diff-utils/4.12/java-diff-utils-4.12.jar",
+                "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jline/jline/3.26.3/jline-3.26.3.jar",
+                "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/net/java/dev/jna/jna/5.14.0/jna-5.14.0.jar"
+            ],
+            "setup": {
+                "order": "mixed",
+                "addLibraryToBootClasspath": false,
+                "addCompilerToClasspath": false,
+                "addExtraJarsToClasspath": false,
+                "manageBootClasspath": false,
+                "filterLibraryFromClasspath": false
+            }
+        },
+        "java": {
+            "options": [
+                
+            ]
+        },
+        "test": {
+            "frameworks": [
+                {
+                    "names": [
+                        "org.scalacheck.ScalaCheckFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "org.specs2.runner.Specs2Framework",
+                        "org.specs2.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "org.specs.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "org.scalatest.tools.Framework",
+                        "org.scalatest.tools.ScalaTestFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "com.novocode.junit.JUnitFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "munit.Framework"
+                    ]
+                },
+                {
+                    "names": [
+                        "zio.test.sbt.ZTestFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "weaver.framework.CatsEffect"
+                    ]
+                },
+                {
+                    "names": [
+                        "hedgehog.sbt.Framework"
+                    ]
+                }
+            ],
+            "options": {
+                "excludes": [
+                    
+                ],
+                "arguments": [
+                    
+                ]
+            }
+        },
+        "platform": {
+            "name": "jvm",
+            "config": {
+                "home": "/usr/lib/jvm/java-17-openjdk",
+                "options": [
+                    "-Duser.dir=/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala"
+                ]
+            },
+            "mainClass": [
+                
+            ]
+        },
+        "resolution": {
+            "modules": [
+                {
+                    "organization": "org.scala-lang",
+                    "name": "scala-library",
+                    "version": "2.13.15",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scala-library",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.15/scala-library-2.13.15.jar"
+                        },
+                        {
+                            "name": "scala-library",
+                            "classifier": "sources",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.15/scala-library-2.13.15-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.typesafe.akka",
+                    "name": "akka-actor_2.13",
+                    "version": "2.10.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "akka-actor_2.13",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo.akka.io/maven/com/typesafe/akka/akka-actor_2.13/2.10.0/akka-actor_2.13-2.10.0.jar"
+                        },
+                        {
+                            "name": "akka-actor_2.13",
+                            "classifier": "sources",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo.akka.io/maven/com/typesafe/akka/akka-actor_2.13/2.10.0/akka-actor_2.13-2.10.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "ch.jodersky",
+                    "name": "akka-serial-core_2.13",
+                    "version": "4.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "akka-serial-core_2.13",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/jodersky/akka-serial-core_2.13/4.2.0/akka-serial-core_2.13-4.2.0.jar"
+                        },
+                        {
+                            "name": "akka-serial-core_2.13",
+                            "classifier": "sources",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/jodersky/akka-serial-core_2.13/4.2.0/akka-serial-core_2.13-4.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "com.typesafe",
+                    "name": "config",
+                    "version": "1.4.3",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "config",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/com/typesafe/config/1.4.3/config-1.4.3.jar"
+                        },
+                        {
+                            "name": "config",
+                            "classifier": "sources",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/com/typesafe/config/1.4.3/config-1.4.3-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "ch.jodersky",
+                    "name": "akka-serial-sync_2.13",
+                    "version": "4.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "akka-serial-sync_2.13",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/jodersky/akka-serial-sync_2.13/4.2.0/akka-serial-sync_2.13-4.2.0.jar"
+                        },
+                        {
+                            "name": "akka-serial-sync_2.13",
+                            "classifier": "sources",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/jodersky/akka-serial-sync_2.13/4.2.0/akka-serial-sync_2.13-4.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "ch.jodersky",
+                    "name": "akka-serial-native",
+                    "version": "4.2.0",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "akka-serial-native",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/jodersky/akka-serial-native/4.2.0/akka-serial-native-4.2.0.jar"
+                        },
+                        {
+                            "name": "akka-serial-native",
+                            "classifier": "sources",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/jodersky/akka-serial-native/4.2.0/akka-serial-native-4.2.0-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang",
+                    "name": "scala-library",
+                    "version": "2.13.15",
+                    "configurations": "optional",
+                    "artifacts": [
+                        {
+                            "name": "scala-library",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.15/scala-library-2.13.15.jar"
+                        },
+                        {
+                            "name": "scala-library",
+                            "classifier": "sources",
+                            "path": "/home/tough/.cache/coursier/v1/https/repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.15/scala-library-2.13.15-sources.jar"
+                        }
+                    ]
+                }
+            ]
+        },
+        "tags": [
+            "test"
+        ]
+    }
+}

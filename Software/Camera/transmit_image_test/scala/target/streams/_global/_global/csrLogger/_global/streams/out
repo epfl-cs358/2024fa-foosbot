@@ -1,0 +1,10 @@
+[debug] downloaded https://repo1.maven.org/maven2/com/typesafe/config/1.4.3/config-1.4.3-sources.jar
+[debug] downloaded https://repo1.maven.org/maven2/ch/jodersky/akka-serial-core_2.13/4.2.0/akka-serial-core_2.13-4.2.0-sources.jar
+[debug] downloaded https://repo1.maven.org/maven2/ch/jodersky/akka-serial-native/4.2.0/akka-serial-native-4.2.0-sources.jar
+[debug] downloaded https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.14.0/jna-5.14.0-sources.jar
+[debug] downloaded https://repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.15/scala-reflect-2.13.15-sources.jar
+[debug] downloaded https://repo1.maven.org/maven2/org/scala-lang/scala-library/2.13.15/scala-library-2.13.15-sources.jar
+[debug] downloaded https://repo1.maven.org/maven2/ch/jodersky/akka-serial-sync_2.13/4.2.0/akka-serial-sync_2.13-4.2.0-sources.jar
+[debug] downloaded https://repo1.maven.org/maven2/org/jline/jline/3.26.3/jline-3.26.3-sources.jar
+[debug] downloaded https://repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.15/scala-compiler-2.13.15-sources.jar
+[debug] downloaded https://repo.akka.io/maven/com/typesafe/akka/akka-actor_2.13/2.10.0/akka-actor_2.13-2.10.0-sources.jar
