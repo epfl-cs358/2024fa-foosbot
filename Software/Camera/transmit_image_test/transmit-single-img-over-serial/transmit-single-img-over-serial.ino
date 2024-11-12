@@ -1,7 +1,9 @@
 // Inspired by CameraWebServerExample
 
-#include "esp_camera.h"
 #define CAMERA_MODEL_AI_THINKER
+#define CAMERA_MODEL_ESP32_CAM_BOARD
+
+#include "esp_camera.h"
 #include "camera_pins.h"
 #include <base64.hpp> // I use this library for encoding in base64. https://github.com/Densaugeo/base64_arduino/
 
@@ -33,7 +35,6 @@ void setup() {
   config.xclk_freq_hz = 20000000;
   config.frame_size = FRAMESIZE_UXGA;
   config.pixel_format = PIXFORMAT_JPEG;  // for streaming
-  //config.pixel_format = PIXFORMAT_RGB565; // for face detection/recognition
   config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
   config.fb_location = CAMERA_FB_IN_PSRAM;
   config.jpeg_quality = 12;
@@ -71,7 +72,7 @@ void setup() {
   if (s->id.PID == OV3660_PID) {
     s->set_vflip(s, 1);        // flip it back
     s->set_brightness(s, 1);   // up the brightness just a bit
-    s->set_saturation(s, -2);  // lower the saturation 
+    s->set_saturation(s, -2);  // lower the saturation
     // TODO: remove saturation
   }
   // drop down frame size for higher initial frame rate
@@ -83,16 +84,14 @@ void setup() {
 void loop() {
   // Code for taking pictures inspired by https://randomnerdtutorials.com/esp32-cam-take-photo-save-microsd-card/
   camera_fb_t * fb = NULL;
-  
+
   // Take Picture with Camera
   fb = esp_camera_fb_get();
   if(!fb) {
     Serial.println("Camera capture failed");
-    delay(500000);
     return;
   }
 
-  //frame2jpg_cb(fb, 80, jpg_out_cb cb, void *arg)
   size_t len = 0;
   uint8_t* jpeg = NULL;
   frame2jpg(fb, 80, &jpeg, &len);
@@ -115,6 +114,4 @@ void loop() {
   else {
     Serial.printf("Error while transforming frame to jpeg ! %d \n", len);
   }
-
-  delay(500000);
 }

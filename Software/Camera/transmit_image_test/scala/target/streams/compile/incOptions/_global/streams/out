@@ -1,0 +1,25 @@
+[0m[[0m[0mdebug[0m] [0m[0mCreated transactional ClassFileManager with tempDir = /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/target/scala-2.13/classes.bak[0m
+[0m[[0m[0mdebug[0m] [0m[0mAbout to delete class files:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$$anonfun$opened$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$Wrote.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$Wrote$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$$anonfun$receive$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0mWe backup class files:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$$anonfun$opened$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$Wrote.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$Wrote$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$$anonfun$receive$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0mRolling back changes to class files.[0m
+[0m[[0m[0mdebug[0m] [0m[0mRemoving generated classes:[0m
+[0m[[0m[0mdebug[0m] [0m[0mRestoring class files: [0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$$anonfun$opened$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$Wrote.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$$anonfun$receive$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$Wrote$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	Terminal.class[0m
+[0m[[0m[0mdebug[0m] [0m[0mRemoving the temporary directory used for backing up class files: /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/target/scala-2.13/classes.bak[0m
