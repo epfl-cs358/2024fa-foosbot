@@ -126,12 +126,11 @@ void loop() {
     }
   }
   else {
-    Serial.printf("Error while transforming frame to bmp. Length: %d, pointer: %p \n", len, bmp);
+    Serial.printf("Error while transforming frame to bmp. Length: %d, pointer: %p \n", len, jpg);
   }
 
   free(bmp);
   esp_camera_fb_return(fb);
 
-  Serial.println("Running !");
   delay(1000);
 }
