@@ -89,6 +89,17 @@ void setup() {
 
 void loop() {
   // Code for taking pictures inspired by https://randomnerdtutorials.com/esp32-cam-take-photo-save-microsd-card/
+  camera_fb_t * fb = NULL;
+  
+  // Take Picture with Camera
+  fb = esp_camera_fb_get();
+  if(!fb) {
+    Serial.println("Camera capture failed");
+    delay(1000);
+    return;
+  }
+  
+  
 
   Serial.println(fb->buf[2000]);
 
@@ -120,4 +131,7 @@ void loop() {
 
   free(bmp);
   esp_camera_fb_return(fb);
+
+  Serial.println("Running !");
+  delay(1000);
 }
