@@ -88,25 +88,33 @@ void loop() {
   fb = esp_camera_fb_get();
   if(!fb) {
     Serial.println("Camera capture failed");
-    delay(500000);
+    delay(1000);
     return;
   }
+  
+  
 
   //frame2jpg_cb(fb, 80, jpg_out_cb cb, void *arg)
   size_t len = 0;
-  uint8_t* jpeg = NULL;
-  frame2jpg(fb, 80, &jpeg, &len);
-  if (jpeg != NULL || len > 0) {
+  unsigned char* jpg;
+  if (frame2jpg(fb, 80, &jpg, &len)) {
 
-    int encodedLength = encode_base64_length(len);
+    /*int encodedLength = encode_base64_length(len);
 
     unsigned char stream[encodedLength+1];
-    encode_base64(stream, encodedLength, stream);
+    if (int l = encode_base64(jpg, len, stream) != encodedLength){
+      Serial.printf("Error while Encoding to Base64 ! Found Length = %d\n", l);
+      free(jpg);
+      esp_camera_fb_return(fb);
+      delay(1000);
+      return;
+    }*/
+    
     if (Serial.availableForWrite()) {
-      int sent = Serial.write(stream, encodedLength);
+      int sent = Serial.write(jpg, len);
       Serial.println();
-      if (sent != encodedLength) {
-        Serial.println("Couldn't send entire image data !");
+      if (sent != len) {
+        Serial.printf("Couldn't send entire image data ! ");
       }
     } else {
       Serial.println("Couldn't write to the Serial port !");
@@ -115,6 +123,9 @@ void loop() {
   else {
     Serial.printf("Error while transforming frame to jpeg ! %d \n", len);
   }
+  free(jpg);
+  esp_camera_fb_return(fb);
 
-  delay(500000);
+  Serial.println("Running !");
+  delay(1000);
 }
