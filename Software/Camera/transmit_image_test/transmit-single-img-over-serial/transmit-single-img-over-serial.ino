@@ -88,33 +88,10 @@ void setup() {
 
 
 void loop() {
-  // Code for taking pictures inspired by https://randomnerdtutorials.com/esp32-cam-take-photo-save-microsd-card/
-  camera_fb_t * fb = NULL;
-  
-  // Take Picture with Camera
-  fb = esp_camera_fb_get();
-  if(!fb) {
-    Serial.println("Camera capture failed");
-    delay(1000);
-    return;
-  }
 
-  /*
   size_t len = 0;
   unsigned char* jpg;
   if (frame2jpg(fb, 80, &jpg, &len)) {
-
-    /*int encodedLength = encode_base64_length(len);
-
-    unsigned char stream[encodedLength+1];
-    if (int l = encode_base64(jpg, len, stream) != encodedLength){
-      Serial.printf("Error while Encoding to Base64 ! Found Length = %d\n", l);
-      free(jpg);
-      esp_camera_fb_return(fb);
-      delay(1000);
-      return;
-    }*/
-    
     if (Serial.availableForWrite()) {
       int sent = Serial.write(jpg, len);
       Serial.println();
@@ -126,12 +103,11 @@ void loop() {
     }
   }
   else {
-    Serial.printf("Error while transforming frame to bmp. Length: %d, pointer: %p \n", len, bmp);
+    Serial.printf("Error while transforming frame to bmp. Length: %d, pointer: %p \n", len, jpg);
   }
 
   free(jpg);
   esp_camera_fb_return(fb);
 
-  Serial.println("Running !");
   delay(1000);
 }
