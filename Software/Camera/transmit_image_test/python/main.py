@@ -14,7 +14,7 @@ def main():
         if data is None:
             print("Image could not be read.")
         else:
-            f = open("img.jpg", "w")
+            f = open("img.jpg", "wb")
             f.write(data)
             f.close()
     except:

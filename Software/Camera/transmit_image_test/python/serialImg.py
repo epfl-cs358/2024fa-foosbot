@@ -24,13 +24,21 @@ class SerialImg(serial.Serial):
 
         img = b''
 
-        end = False
+        end   = False
+        inImg = False
         while not end:
             try:
-                img += self.readline()
+                line = self.readline()
 
-                # TODO: Add the right condition to end while loop
-                end = True
+                if line[:4] == 'img:':
+                    line  = line[4:]
+                    inImg = True
+                elif line[:2] == 'end':
+                    line = b''
+                    end  = True
+
+                if inImg:
+                    img += line
             except:
                 img = None
             finally:
