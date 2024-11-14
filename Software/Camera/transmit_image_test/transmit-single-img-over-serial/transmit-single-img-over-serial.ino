@@ -126,7 +126,7 @@ void loop() {
     }
   }
   else {
-    Serial.printf("Error while transforming frame to bmp. Length: %d, pointer: %p \n", len, jpg);
+    Serial.printf("Error while transforming frame to bmp. Length: %d, pointer: %p \n", len, bmp);
   }
 
   free(bmp);

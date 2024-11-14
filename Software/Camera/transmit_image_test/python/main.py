@@ -17,7 +17,7 @@ def main():
             print("Image produced seems to be empty, " +
                   "I will not write to the file.")
         else:
-            f = open("img.jpg", "wb")
+            f = open("img.bmp", "wb")
             f.write(data)
             f.close()
     except:
