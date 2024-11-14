@@ -1,4 +1,0 @@
-[0m[[0m[31merror[0m] [0m[0m/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/src/main/scala/Terminal.scala:21:13: not found: type IOException[0m
-[0m[[0m[31merror[0m] [0m[0m    case e: IOException => e.printStackTrace()[0m
-[0m[[0m[31merror[0m] [0m[0m            ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
