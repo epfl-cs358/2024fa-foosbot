@@ -93,8 +93,9 @@ void loop() {
   unsigned char* jpg;
   if (frame2jpg(fb, 80, &jpg, &len)) {
     if (Serial.availableForWrite()) {
+      Serial.print("\nimg:");
       int sent = Serial.write(jpg, len);
-      Serial.println();
+      Serial.print("\nend");
       if (sent != len) {
         Serial.printf("Couldn't send entire image data ! ");
       }
@@ -109,5 +110,5 @@ void loop() {
   free(jpg);
   esp_camera_fb_return(fb);
 
-  delay(1000);
+  delay(500000);
 }

@@ -1,2 +1,5 @@
 .ccls-cache
 Software/Camera/transmit_image_test/python/pyrightconfig.json
+*.DS_Store
+*.idea*
+Software/Camera/transmit_image_test/python/img.jpg
