@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Source : https://stackoverflow.com/questions/62031686/reading-a-serial-signal-from-a-usb-port-with-python
 import serial;
 import io;
@@ -22,3 +24,16 @@ if __name__ == '__main__' :
         except :
             pass
     pass
+
+class SerialImg(serial.Serial):
+    xonxoff = False
+    rtscts  = False
+    dsrdtr  = True
+
+    def __init__(self,
+                 port:     str = '/dev/ttyUSB0',
+                 baudrate: int = 115200,
+                 timeout:  int = 1):
+        self.port     = port,
+        self.baudrate = baudrate
+        self.timeout  = timeout
