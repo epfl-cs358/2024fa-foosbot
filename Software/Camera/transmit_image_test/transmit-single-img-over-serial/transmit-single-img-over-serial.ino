@@ -132,5 +132,5 @@ void loop() {
   free(bmp);
   esp_camera_fb_return(fb);
 
-  delay(1000);
+  delay(500000);
 }
