@@ -4,17 +4,17 @@
 import serial;
 
 class SerialImg(serial.Serial):
-    xonxoff = False
-    rtscts  = False
-    dsrdtr  = True
-
     def __init__(self,
-                 port:     str = '/dev/ttyUSB0',
+                 port:     str = "/dev/ttyUSB0",
                  baudrate: int = 115200,
                  timeout:  int = 1):
-        self.port     = port,
-        self.baudrate = baudrate
-        self.timeout  = timeout
+        serial.Serial.__init__(self,
+                               port=port,
+                               baudrate=baudrate,
+                               timeout=timeout,
+                               xonxoff=False,
+                               rtscts=False,
+                               dsrdtr=True)
 
     def getImg(self):
         """
@@ -26,20 +26,21 @@ class SerialImg(serial.Serial):
 
         end   = False
         inImg = False
-        while not end:
-            try:
+        try:
+            while not end:
                 line = self.readline()
+                print(line)
 
-                if line[:4] == 'img:':
+                if line[:4] == b'img:':
                     line  = line[4:]
                     inImg = True
-                elif line[:2] == 'end':
+                elif line[:3] == b'end':
                     line = b''
                     end  = True
 
                 if inImg:
                     img += line
-            except:
-                img = None
-            finally:
-                return img
+        except:
+            img = None
+        finally:
+            return img

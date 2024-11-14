@@ -6,13 +6,16 @@ from serialImg  import SerialImg
 
 def main():
     port = input("Port ['/dev/ttyUSB0']: ")
-    s = SerialImg() if port == '\n' else SerialImg(port=port)
+    s = SerialImg() if not port else SerialImg(port=port)
 
     try:
         data = s.getImg()
 
         if data is None:
             print("Image could not be read.")
+        elif not data:
+            print("Image produced seems to be empty, " +
+                  "I will not write to the file.")
         else:
             f = open("img.jpg", "wb")
             f.write(data)
