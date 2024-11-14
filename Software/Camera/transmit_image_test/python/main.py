@@ -8,12 +8,12 @@ def main():
     port = input("Port ['/dev/ttyUSB0']: ")
     s = SerialImg() if port == '\n' else SerialImg(port=port)
 
-    end = False
     try:
-        while not end:
-            data = s.readline()
-            print(data)
+        data = s.getImg()
 
+        if data is None:
+            print("Image could not be read.")
+        else:
             f = open("img.jpg", "w")
             f.write(data)
             f.close()
@@ -23,9 +23,6 @@ def main():
         print("Closing connection...\n")
         s.close()
         sys.exit(0)
-
-
-
 
 
 if __name__ == '__main__':
