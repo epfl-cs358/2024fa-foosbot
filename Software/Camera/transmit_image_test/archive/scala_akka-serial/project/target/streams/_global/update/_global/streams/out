@@ -1,0 +1,7 @@
+[0m[[0m[0mdebug[0m] [0m[0mnot up to date. inChanged = true, force = false[0m
+[0m[[0m[0mdebug[0m] [0m[0mUpdating ProjectRef(uri("file:/home/tough/Documents/EPFL/BA5/MIT/Group%20Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/project/"), "scala_akka-serial-build")...[0m
+[0m[[0m[0minfo[0m] [0m[0mUpdating scala_akka-serial-build[0m
+[0m[[0m[0minfo[0m] [0m[0mResolved scala_akka-serial-build dependencies[0m
+[0m[[0m[0minfo[0m] [0m[0mFetching artifacts of scala_akka-serial-build[0m
+[0m[[0m[0minfo[0m] [0m[0mFetched artifacts of scala_akka-serial-build[0m
+[0m[[0m[0mdebug[0m] [0m[0mDone updating ProjectRef(uri("file:/home/tough/Documents/EPFL/BA5/MIT/Group%20Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/project/"), "scala_akka-serial-build")[0m
