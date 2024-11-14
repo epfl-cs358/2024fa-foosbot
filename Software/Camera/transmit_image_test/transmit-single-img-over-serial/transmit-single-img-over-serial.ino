@@ -90,11 +90,11 @@ void setup() {
 void loop() {
 
   size_t len = 0;
-  unsigned char* jpg;
-  if (frame2jpg(fb, 80, &jpg, &len)) {
+  unsigned char* bmp;
+  if (frame2bmp(fb, &bmp, &len)) {
     if (Serial.availableForWrite()) {
       Serial.print("\nimg:");
-      int sent = Serial.write(jpg, len);
+      int sent = Serial.write(bmp, len);
       Serial.print("\nend");
       if (sent != len) {
         Serial.printf("Couldn't send entire image data ! ");
@@ -104,10 +104,10 @@ void loop() {
     }
   }
   else {
-    Serial.printf("Error while transforming frame to bmp. Length: %d, pointer: %p \n", len, jpg);
+    Serial.printf("Error while transforming frame to bmp. Length: %d, pointer: %p \n", len, bmp);
   }
 
-  free(jpg);
+  free(bmp);
   esp_camera_fb_return(fb);
 
   delay(500000);
