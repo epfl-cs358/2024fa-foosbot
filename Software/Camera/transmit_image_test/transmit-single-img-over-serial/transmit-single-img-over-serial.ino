@@ -5,7 +5,6 @@
 
 #include "esp_camera.h"
 #include "camera_pins.h"
-#include <base64.hpp> // I use this library for encoding in base64. https://github.com/Densaugeo/base64_arduino/
 
 
 camera_fb_t * fb = NULL;
@@ -132,5 +131,5 @@ void loop() {
   free(bmp);
   esp_camera_fb_return(fb);
 
-  delay(500000);
+  delay(1000);
 }
