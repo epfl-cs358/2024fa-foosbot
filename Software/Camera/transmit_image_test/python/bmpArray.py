@@ -55,12 +55,47 @@ class BmpArray(np.ndarray):
 
         return (xSum/total, ySum/total)
 
-    def drawSquare(self, pos: tuple[int, int], length: int):
+    def drawSquare(self,
+                   pos:    tuple[int, int],
+                   length: int,
+                   thick:  int,
+                   clr:    bytes = b'e6b400'):
         """
         Draw a square around the given position.
 
         Parameters:
             pos    (tuple[int, int]): Position to draw the square around
             length (int)            : Length of the square edges
+            thick  (int)            : Thickness of the square
+            clr    (bytes)          : Colour of the square
         """
-        pass
+
+        def drawEdge(xFrom: int, xTo: int, yFrom: int, yTo: int):
+            """
+            Draw an edge.
+
+            Parameters:
+                xFrom (int): x coordinate to draw from
+                xTo   (int): x coordinate to draw to
+                yFrom (int): y coordinate to draw from
+                yTo   (int): y coordinate to draw to
+            """
+
+            for p in self[yFrom:yTo][xFrom:xTo]:
+                p == clr
+
+        x = pos[0]
+        y = pos[1]
+
+        xLeEdge = x - length
+        xRiEdge = x + length
+        yUpEdge = y - length
+        yLoEdge = y + length
+
+        # Drawing horizontal edges
+        drawEdge(yUpEdge-thick,yUpEdge+thick,xLeEdge,xRiEdge)
+        drawEdge(yLoEdge-thick,yLoEdge+thick,xLeEdge,xRiEdge)
+
+        # Drawing vertical edges
+        drawEdge(xLeEdge-thick, xLeEdge+thick, yUpEdge, yLoEdge)
+        drawEdge(xRiEdge-thick, xRiEdge+thick, yUpEdge, yLoEdge)
