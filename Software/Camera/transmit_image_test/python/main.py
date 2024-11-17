@@ -18,11 +18,13 @@ def main():
             if img is None:
                 print("Image could not be read.")
             elif not img:
-                print("Image produced seems to be empty, " +
-                      "I will not write to the file.")
+                print("Image produced seems to be empty.")
             else:
                 array = BmpArray(img)
                 pos   = array.getBallPosition()
+                print("Ball is at position: " + str(pos))
+                array.drawSquare(pos, 200, 25)
+                array.writeToFile()
                 # TODO: Send position to Arduino UNO so that it can
                 #       understand it
     except:

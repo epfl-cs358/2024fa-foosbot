@@ -1,6 +1,6 @@
 import numpy as np
 
-class BmpArray(np.ndarray):
+class BmpArray():
 
     """ BMP image represented by a `numpy.ndarray`. """
 
@@ -13,12 +13,13 @@ class BmpArray(np.ndarray):
             img (bytes): The binary file representing the BMP image
         """
 
+        print("init")
         offset  = int(img[10])
         width   = int(img[18])
         height  = int(img[20])
         padding = 3*width % 4
 
-        self = np.split(
+        self.array = np.split(
             np.frombuffer(img, offset=offset),
             int(height)
         )[:][:-padding]
@@ -36,6 +37,7 @@ class BmpArray(np.ndarray):
             The position of the center of the ball.
         """
 
+        print("Getting ball position.")
         r = range(int(clr)-tolerance, int(clr)+tolerance)
 
         xSum  = 0
@@ -43,7 +45,7 @@ class BmpArray(np.ndarray):
         total = 0
 
         yCurr = 0
-        for a in self:
+        for a in self.array:
             xCurr = 0
             for p in a:
                 if int(p) in r:
@@ -53,7 +55,7 @@ class BmpArray(np.ndarray):
                 ++xCurr
             ++yCurr
 
-        return (xSum/total, ySum/total)
+        return (int(xSum/total), int(ySum/total))
 
     def drawSquare(self,
                    pos:    tuple[int, int],
@@ -72,7 +74,7 @@ class BmpArray(np.ndarray):
 
         def drawEdge(xFrom: int, xTo: int, yFrom: int, yTo: int):
             """
-            Draw an edge.
+            Draws an edge.
 
             Parameters:
                 xFrom (int): x coordinate to draw from
@@ -81,8 +83,10 @@ class BmpArray(np.ndarray):
                 yTo   (int): y coordinate to draw to
             """
 
-            for p in self[yFrom:yTo][xFrom:xTo]:
+            for p in self.array[yFrom:yTo][xFrom:xTo]:
                 p == clr
+
+        print("Drawing the square.")
 
         x = pos[0]
         y = pos[1]
@@ -99,3 +103,18 @@ class BmpArray(np.ndarray):
         # Drawing vertical edges
         drawEdge(xLeEdge-thick, xLeEdge+thick, yUpEdge, yLoEdge)
         drawEdge(xRiEdge-thick, xRiEdge+thick, yUpEdge, yLoEdge)
+
+    def writeToFile(self, fileName: str = "img.bmp"):
+        """
+        Writes the image to file.
+
+        Parameters:
+            fileName (str): The name of the file
+        """
+
+        print("Writing to file '" + fileName + "'.")
+        out = open(fileName, "a")
+        for a in self.array:
+            for p in a:
+                out.write(p)
+        out.close()
