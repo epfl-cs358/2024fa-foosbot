@@ -13,16 +13,21 @@ class BmpArray():
             img (bytes): The binary file representing the BMP image
         """
 
-        print("init")
-        offset  = int(img[10])
-        width   = int(img[18])
-        height  = int(img[20])
+        offset  = int(img[10]+img[11]+img[12]+img[13])
+        width   = int(img[18]+img[19]+img[20]+img[21])
+        height  = int(img[22]+img[23]+img[24]+img[25])
         padding = 3*width % 4
 
-        self.array = np.split(
-            np.frombuffer(img, offset=offset),
-            int(height)
-        )[:][:-padding]
+        print(height)
+
+        # The code stops while running this.
+        try:
+            self.array = np.split(
+                np.frombuffer(img, offset=offset, dtype='S1'),
+                int(height)
+            )[:][:-padding]
+        except Exception as e:
+            print(e)
 
     def getBallPosition(self,
                         clr:       bytes = b'ff7f00',
