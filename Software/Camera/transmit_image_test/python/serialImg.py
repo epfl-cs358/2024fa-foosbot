@@ -18,12 +18,12 @@ class SerialImg(serial.Serial):
             tiemout  (int): The time to wait before ending the read
         """
         serial.Serial.__init__(self,
-                               port=port,
-                               baudrate=baudrate,
-                               timeout=timeout,
-                               xonxoff=False,
-                               rtscts=False,
-                               dsrdtr=True)
+                               port     = port,
+                               baudrate = baudrate,
+                               timeout  = timeout,
+                               xonxoff  = False,
+                               rtscts   = False,
+                               dsrdtr   = True)
 
     def getImg(self):
         """

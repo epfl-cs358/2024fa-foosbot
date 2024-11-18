@@ -1,5 +1,7 @@
 import numpy as np
+
 from bmp_inspector import BMP_inspector
+from bitmap        import Bitmap
 
 class BmpArray():
 
@@ -14,16 +16,13 @@ class BmpArray():
             img (bytes): The binary file representing the BMP image
         """
 
-        bmp_ins = BMP_inspector("", img, True, True)
-        padding = 3*bmp_ins.bitmap_width % 4
+        self.bmpIns = BMP_inspector("", img, True, True)
+        padding = 3*int(self.bmpIns.bitmap_width) % 4
 
         try:
-            self.array = np.frombuffer(img, offset=offset, dtype='S3')
-            print(self.array.size)
-        # The code stops while running this.
             self.array = np.split(
-                np.frombuffer(bmp_ins.pixel_array, dtype='S1'),
-                int(bmp_ins.bitmap_height)
+                np.array(self.bmpIns.pixel_array),
+                int(self.bmpIns.bitmap_height)
             )[:][:-padding]
         except Exception as e:
             print(e)
@@ -117,8 +116,8 @@ class BmpArray():
         """
 
         print("Writing to file '" + fileName + "'.")
-        out = open(fileName, "a")
-        for a in self.array:
-            for p in a:
-                out.write(p)
-        out.close()
+
+        bm = Bitmap(self.bmpIns.bitmap_width,
+                    self.bmpIns.bitmap_height,
+                    self.bmpIns.pixel_array)
+        bm.save(fileName)
