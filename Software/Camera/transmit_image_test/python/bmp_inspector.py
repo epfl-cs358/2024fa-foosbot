@@ -30,23 +30,23 @@ class BMP_inspector(object):
         and also parses the pixel array '''
 
     _dib_header_type = {
-        12: 'BITMAPCOREHEADER',
-        64: 'OS22XBITMAPHEADER',
-        40: 'BITMAPINFOHEADER',
-        52: 'BITMAPV2INFOHEADER',
-        56: 'BITMAPV3INFOHEADER',
+         12: 'BITMAPCOREHEADER',
+         64: 'OS22XBITMAPHEADER',
+         40: 'BITMAPINFOHEADER',
+         52: 'BITMAPV2INFOHEADER',
+         56: 'BITMAPV3INFOHEADER',
         108: 'BITMAPV4HEADER',
         124: 'BITMAPV5HEADER'
     }
 
     _dib_method_type = {
-        0: 'BI_RGB (none)',
-        1: 'BI_RLE8',
-        2: 'BI_RLE4',
-        3: 'BI_BITFIELDS',
-        4: 'BI_JPEG',
-        5: 'BI_PNG',
-        6: 'BI_ALPHABITFIELDS',
+         0: 'BI_RGB (none)',
+         1: 'BI_RLE8',
+         2: 'BI_RLE4',
+         3: 'BI_BITFIELDS',
+         4: 'BI_JPEG',
+         5: 'BI_PNG',
+         6: 'BI_ALPHABITFIELDS',
         11: 'BI_CMYK',
         12: 'BI_CMYKRLE8',
         13: 'BI_CMYKRLE4',
@@ -54,16 +54,16 @@ class BMP_inspector(object):
 
     def __init__(self,
                  filename,
-                 buffer=None,
-                 verbose=False,
+                 buffer  = None,
+                 verbose = False,
                  fromBuf = True):
         ''' Open file, parses information and shows some information '''
-        self.array_offset = 0
-        self.image_size = 0
+        self.array_offset   = 0
+        self.image_size     = 0
         self.bits_per_pixel = 0
-        self.bitmap_width = 0
-        self.bitmap_height = 0
-        self.verbose = verbose
+        self.bitmap_width   = 0
+        self.bitmap_height  = 0
+        self.verbose        = verbose
 
         if fromBuf:
             self.buff = buffer
@@ -104,8 +104,8 @@ class BMP_inspector(object):
             print('DIB type:', self._dib_header_type[dib_header_size])
 
         dib_header     = self.buff[14:14+dib_header_size]
-        bitmap_width   = struct.unpack('<I', dib_header[ 4: 8])[0]
-        bitmap_height  = struct.unpack('<I', dib_header[ 8:12])[0]
+        bitmap_width   = struct.unpack('<i', dib_header[ 4: 8])[0]
+        bitmap_height  = struct.unpack('<i', dib_header[ 8:12])[0]
         color_planes   = struct.unpack('<H', dib_header[12:14])[0]
         bits_per_pixel = struct.unpack('<H', dib_header[14:16])[0]
         comp_method    = struct.unpack('<I', dib_header[16:20])[0]
