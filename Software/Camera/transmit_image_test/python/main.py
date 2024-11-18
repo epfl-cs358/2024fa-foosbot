@@ -22,9 +22,12 @@ def main():
             else:
                 array = BmpArray(img)
                 pos   = array.getBallPosition()
-                print("Ball is at position: " + str(pos))
-                array.drawSquare(pos, 200, 25)
-                array.writeToFile()
+                if pos == (-1, -1):
+                    print("Ball not found.")
+                else:
+                    print("Ball is at position: " + str(pos))
+                    array.drawSquare(pos, 200, 25)
+                    array.writeToFile()
                 # TODO: Send position to Arduino UNO so that it can
                 #       understand it
     except:

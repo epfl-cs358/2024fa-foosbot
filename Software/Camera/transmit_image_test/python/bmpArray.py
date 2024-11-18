@@ -19,20 +19,19 @@ class BmpArray():
         self.bmpIns = BMP_inspector("", img, True, True)
         padding = 3*int(self.bmpIns.bitmap_width) % 4
 
-        try:
-            self.array = np.split(
-                np.array(self.bmpIns.pixel_array),
-                int(
-                    self.bmpIns.bitmap_height if
-                    self.bmpIns.bitmap_height > 0
-                    else -self.bmpIns.bitmap_height
-                )
-            )[:][:-padding]
-        except Exception as e:
-            print(e)
+        self.array = np.split(
+            np.array(self.bmpIns.pixel_array),
+            int(
+                self.bmpIns.bitmap_height if
+                self.bmpIns.bitmap_height > 0
+                else -self.bmpIns.bitmap_height
+            )
+        )[:][:-padding]
 
     def getBallPosition(self,
-                        clr:       bytes = b'ff7f00',
+                        red:       bytes = b'\xff',
+                        green:     bytes = b'\x00',
+                        blue:      bytes = b'\x7f',
                         tolerance: int   = 20):
         """
         Get the position of the center of the ball.
@@ -44,8 +43,12 @@ class BmpArray():
             The position of the center of the ball.
         """
 
+        rslt   = (-1, -1)
+        clrInt = int.from_bytes(blue+green+red, "big")
+
         print("Getting ball position.")
-        r = range(int(clr)-tolerance, int(clr)+tolerance)
+        r = range(clrInt-tolerance,
+                  clrInt+tolerance)
 
         xSum  = 0
         ySum  = 0
@@ -55,14 +58,16 @@ class BmpArray():
         for a in self.array:
             xCurr = 0
             for p in a:
-                if int(p) in r:
+                if int.from_bytes(p, "big") in r:
                     xSum += xCurr
                     ySum += yCurr
                     ++total
                 ++xCurr
             ++yCurr
 
-        return (int(xSum/total), int(ySum/total))
+        if total > 0:
+            rslt = (int(xSum/total), int(ySum/total))
+        return rslt
 
     def drawSquare(self,
                    pos:    tuple[int, int],
