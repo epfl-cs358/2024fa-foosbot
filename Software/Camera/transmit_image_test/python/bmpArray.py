@@ -1,4 +1,5 @@
 import numpy as np
+from bmp_inspector import BMP_inspector
 
 class BmpArray():
 
@@ -13,22 +14,16 @@ class BmpArray():
             img (bytes): The binary file representing the BMP image
         """
 
-        offset    = int(img[10] | img[11] | img[12] | img[13])
-        width     = int(img[18] | img[19] | img[20] | img[21])
-        height    = int(img[22] | img[23] | img[24] | img[25])
-        bitPerPix = int(img[24] | img[25])
-        padding   = 3*width % 4
-
-        print(height)
-        print(width)
+        bmp_ins = BMP_inspector("", img, True, True)
+        padding = 3*bmp_ins.bitmap_width % 4
 
         try:
             self.array = np.frombuffer(img, offset=offset, dtype='S3')
             print(self.array.size)
         # The code stops while running this.
             self.array = np.split(
-                self.array,
-                int(height)
+                np.frombuffer(bmp_ins.pixel_array, dtype='S1'),
+                int(bmp_ins.bitmap_height)
             )[:][:-padding]
         except Exception as e:
             print(e)
