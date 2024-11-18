@@ -52,13 +52,17 @@ class BMP_inspector(object):
         13: 'BI_CMYKRLE4',
     }
 
-    def __init__(self, filename, buffer, verbose=False, fromBuf = True):
+    def __init__(self,
+                 filename,
+                 buffer=None,
+                 verbose=False,
+                 fromBuf = True):
         ''' Open file, parses information and shows some information '''
-        self.array_offset = None
-        self.image_size = None
-        self.bits_per_pixel = None
-        self.bitmap_width = None
-        self.bitmap_height = None
+        self.array_offset = 0
+        self.image_size = 0
+        self.bits_per_pixel = 0
+        self.bitmap_width = 0
+        self.bitmap_height = 0
         self.verbose = verbose
 
         if fromBuf:
@@ -99,31 +103,31 @@ class BMP_inspector(object):
             print('DIB header size:', dib_header_size, 'bytes')
             print('DIB type:', self._dib_header_type[dib_header_size])
 
-        dib_header = self.buff[14:14+dib_header_size]
-        bitmap_width = struct.unpack('<I', dib_header[4:8])[0]
-        bitmap_height = struct.unpack('<I', dib_header[8:12])[0]
-        color_planes = struct.unpack('<H', dib_header[12:14])[0]
+        dib_header     = self.buff[14:14+dib_header_size]
+        bitmap_width   = struct.unpack('<I', dib_header[ 4: 8])[0]
+        bitmap_height  = struct.unpack('<I', dib_header[ 8:12])[0]
+        color_planes   = struct.unpack('<H', dib_header[12:14])[0]
         bits_per_pixel = struct.unpack('<H', dib_header[14:16])[0]
-        comp_method = struct.unpack('<I', dib_header[16:20])[0]
-        image_size = struct.unpack('<I', dib_header[20:24])[0]
+        comp_method    = struct.unpack('<I', dib_header[16:20])[0]
+        image_size     = struct.unpack('<I', dib_header[20:24])[0]
         hor_resolution = struct.unpack('<i', dib_header[24:28])[0]
         ver_resolution = struct.unpack('<i', dib_header[28:32])[0]
         # color_palette = struct.unpack('<I', dib_header[32:36])[0]
         # imp_colors_used = struct.unpack('<I', dib_header[36:40])[0]
 
-        self.image_size = image_size
+        self.image_size     = image_size
         self.bits_per_pixel = bits_per_pixel
-        self.bitmap_width = bitmap_width
-        self.bitmap_height = bitmap_height
+        self.bitmap_width   = bitmap_width
+        self.bitmap_height  = bitmap_height
 
         if self.verbose:
             print('DIB header')
-            print('  Bitmap width:', bitmap_width)
-            print('  Bitmap height:', bitmap_height)
-            print('  Color planes:', color_planes)
+            print('  Bitmap width:'  , bitmap_width)
+            print('  Bitmap height:' , bitmap_height)
+            print('  Color planes:'  , color_planes)
             print('  Bits per pixel:', bits_per_pixel)
-            print('  Compr method:', self._dib_method_type[comp_method])
-            print('  Image size:', image_size)
+            print('  Compr method:'  , self._dib_method_type[comp_method])
+            print('  Image size:'    , image_size)
             print('  Hor resolution:', hor_resolution // METER_IN_INCH, 'DPI')
             print('  Ver resolution:', ver_resolution // METER_IN_INCH, 'DPI')
 
