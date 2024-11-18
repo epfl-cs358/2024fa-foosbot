@@ -1,4 +1,5 @@
 import numpy as np
+from bmp_inspector import BMP_inspector
 
 class BmpArray():
 
