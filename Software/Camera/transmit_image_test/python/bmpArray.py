@@ -22,7 +22,11 @@ class BmpArray():
         try:
             self.array = np.split(
                 np.array(self.bmpIns.pixel_array),
-                int(self.bmpIns.bitmap_height)
+                int(
+                    self.bmpIns.bitmap_height if
+                    self.bmpIns.bitmap_height > 0
+                    else -self.bmpIns.bitmap_height
+                )
             )[:][:-padding]
         except Exception as e:
             print(e)
