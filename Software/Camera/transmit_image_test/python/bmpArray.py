@@ -13,17 +13,21 @@ class BmpArray():
             img (bytes): The binary file representing the BMP image
         """
 
-        offset  = int(img[10]+img[11]+img[12]+img[13])
-        width   = int(img[18]+img[19]+img[20]+img[21])
-        height  = int(img[22]+img[23]+img[24]+img[25])
-        padding = 3*width % 4
+        offset    = int(img[10] | img[11] | img[12] | img[13])
+        width     = int(img[18] | img[19] | img[20] | img[21])
+        height    = int(img[22] | img[23] | img[24] | img[25])
+        bitPerPix = int(img[24] | img[25])
+        padding   = 3*width % 4
 
         print(height)
+        print(width)
 
-        # The code stops while running this.
         try:
+            self.array = np.frombuffer(img, offset=offset, dtype='S3')
+            print(self.array.size)
+        # The code stops while running this.
             self.array = np.split(
-                np.frombuffer(img, offset=offset, dtype='S1'),
+                self.array,
                 int(height)
             )[:][:-padding]
         except Exception as e:
