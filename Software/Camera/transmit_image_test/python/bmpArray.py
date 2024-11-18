@@ -34,9 +34,9 @@ class BmpArray():
             print(e)
 
     def getBallPosition(self,
-                        red:       bytes = b'\xff',
-                        green:     bytes = b'\x00',
-                        blue:      bytes = b'\x7f',
+                        red:       int = int.from_bytes(b'\xff', "little"),
+                        green:     int = int.from_bytes(b'\x00', "little"),
+                        blue:      int = int.from_bytes(b'\x7f', "little"),
                         tolerance: int   = 20):
         """
         Get the position of the center of the ball.
@@ -49,26 +49,34 @@ class BmpArray():
         """
 
         rslt   = (-1, -1)
-        clrInt = int.from_bytes(blue+green+red, "big")
+        #clrInt = int.from_bytes(blue+green+red, "big")
 
         print("Getting ball position.")
-        r = range(clrInt-tolerance,
-                  clrInt+tolerance)
+        rangeRed    = range(red-tolerance, red+tolerance)
+        rangeGreen  = range(green-tolerance, green+tolerance)
+        rangeBlue   = range(blue-tolerance, blue+tolerance)
+
+        #print(rangeRed, rangeGreen, rangeBlue)
 
         xSum  = 0
         ySum  = 0
         total = 0
 
         yCurr = 0
-        for a in self.array:
+        for row in self.array:
             xCurr = 0
-            for p in a:
-                if int.from_bytes(p, "big") in r:
+            for p in row:
+                p = p.tobytes()
+                r = p[2]
+                g = p[1]
+                b = p[0]
+                print(r, g, b)
+                if r in rangeRed and g in rangeGreen and b in rangeBlue:
                     xSum += xCurr
                     ySum += yCurr
-                    ++total
-                ++xCurr
-            ++yCurr
+                    total+=1
+                xCurr+=1
+            yCurr+=1
 
         if total > 0:
             rslt = (int(xSum/total), int(ySum/total))
