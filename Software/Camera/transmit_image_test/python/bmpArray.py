@@ -34,7 +34,9 @@ class BmpArray():
             print(e)
 
     def getBallPosition(self,
-                        clr:       bytes = b'ff7f00',
+                        red:       bytes = b'\xff',
+                        green:     bytes = b'\x00',
+                        blue:      bytes = b'\x7f',
                         tolerance: int   = 20):
         """
         Get the position of the center of the ball.
@@ -46,8 +48,12 @@ class BmpArray():
             The position of the center of the ball.
         """
 
+        rslt   = (-1, -1)
+        clrInt = int.from_bytes(blue+green+red, "big")
+
         print("Getting ball position.")
-        r = range(int(clr)-tolerance, int(clr)+tolerance)
+        r = range(clrInt-tolerance,
+                  clrInt+tolerance)
 
         xSum  = 0
         ySum  = 0
@@ -57,14 +63,16 @@ class BmpArray():
         for a in self.array:
             xCurr = 0
             for p in a:
-                if int(p) in r:
+                if int.from_bytes(p, "big") in r:
                     xSum += xCurr
                     ySum += yCurr
                     ++total
                 ++xCurr
             ++yCurr
 
-        return (int(xSum/total), int(ySum/total))
+        if total > 0:
+            rslt = (int(xSum/total), int(ySum/total))
+        return rslt
 
     def drawSquare(self,
                    pos:    tuple[int, int],
