@@ -30,7 +30,7 @@ def main():
     except:
         pass
     finally:
-        print("Closing connection...\n")
+        print("\nClosing connection...\n")
         s.close()
         sys.exit(0)
 
