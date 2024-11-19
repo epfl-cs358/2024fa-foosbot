@@ -22,7 +22,8 @@ def main(fnIn=None, fnOut=None):
         print("Ball not found.")
     else:
         print("Ball is at position: " + str(pos))
-        arr.drawSquare(pos, 200, 25)
+        #arr.drawSquare(pos, 200, 25)
+        arr.drawPoint(pos, 10)
         arr.writeToFile(fnOut)
 
 if __name__ == '__main__':
