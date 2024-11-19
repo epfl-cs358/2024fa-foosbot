@@ -17,11 +17,11 @@ class BmpArray():
             img (bytes): The binary file representing the BMP image
         """
 
-        self.bmpIns = BMP_inspector("", img, True, True)
+        self.bmpIns = BMP_inspector("", img, False, True)
         padding = 3*self.bmpIns.bitmap_width % 4
         self.array = np.array(self.bmpIns.pixel_array).reshape((
-            abs(self.bmpIns.bitmap_width),
-            abs(self.bmpIns.bitmap_height)
+            abs(self.bmpIns.bitmap_height),
+            abs(self.bmpIns.bitmap_width)
         ))[:][:-padding if padding != 0 else None]
 
     def getBallPosition(self,
