@@ -1,8 +1,7 @@
-import numpy
 import numpy as np
 
 from bmp_inspector import BMP_inspector
-from bitmap        import Bitmap
+from bitmap.bitmap import Bitmap
 
 class BmpArray():
 
@@ -17,21 +16,17 @@ class BmpArray():
             img (bytes): The binary file representing the BMP image
         """
 
-        self.bmpIns = BMP_inspector("", img, False, True)
+        self.bmpIns = BMP_inspector("", img, True, True)
         padding = 3*self.bmpIns.bitmap_width % 4
-        self.array = np.split(
-            np.array(self.bmpIns.pixel_array),
-            int(
-                self.bmpIns.bitmap_height if
-                self.bmpIns.bitmap_height > 0
-                else -self.bmpIns.bitmap_height
-            )
-        )[:][:-padding if padding != 0 else None]
+        self.array = np.array(self.bmpIns.pixel_array).reshape((
+            abs(self.bmpIns.bitmap_width),
+            abs(self.bmpIns.bitmap_height)
+        ))[:][:-padding if padding != 0 else None]
 
     def getBallPosition(self,
-                        red:       int = int.from_bytes(b'\xff', "little"),
-                        green:     int = int.from_bytes(b'\x00', "little"),
-                        blue:      int = int.from_bytes(b'\x7f', "little"),
+                        red_b:     bytes = b'\xff',
+                        green_b:   bytes = b'\x00',
+                        blue_b:    bytes = b'\x7f',
                         tolerance: int   = 20):
         """
         Get the position of the center of the ball.
@@ -43,15 +38,16 @@ class BmpArray():
             The position of the center of the ball.
         """
 
-        rslt   = (-1, -1)
-        #clrInt = int.from_bytes(blue+green+red, "big")
+        red   = int.from_bytes(  red_b, "little")
+        green = int.from_bytes(green_b, "little")
+        blue  = int.from_bytes( blue_b, "little")
+
+        rslt = (-1, -1)
 
         print("Getting ball position.")
-        rangeRed    = range(red-tolerance, red+tolerance)
+        rangeRed    = range(  red-tolerance,   red+tolerance)
         rangeGreen  = range(green-tolerance, green+tolerance)
-        rangeBlue   = range(blue-tolerance, blue+tolerance)
-
-        #print(rangeRed, rangeGreen, rangeBlue)
+        rangeBlue   = range( blue-tolerance,  blue+tolerance)
 
         xSum  = 0
         ySum  = 0
@@ -61,12 +57,10 @@ class BmpArray():
         for row in self.array:
             xCurr = 0
             for p in row:
-                #print(type(p))
                 p = p.tobytes()
                 r = p[2]
                 g = p[1]
                 b = p[0]
-                #print(r, g, b)
                 if r in rangeRed and g in rangeGreen and b in rangeBlue:
                     xSum += xCurr
                     ySum += yCurr
@@ -159,6 +153,7 @@ class BmpArray():
         """
 
         print("Writing to file '" + fileName + "'.")
+
         bm = Bitmap(self.bmpIns.bitmap_width,
                     self.bmpIns.bitmap_height,
                     self.array)
