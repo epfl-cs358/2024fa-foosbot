@@ -1,7 +1,7 @@
 import numpy as np
 
 from bmp_inspector import BMP_inspector
-from bitmap        import Bitmap
+from bitmap.bitmap import Bitmap
 
 class BmpArray():
 
@@ -34,9 +34,9 @@ class BmpArray():
             print(e)
 
     def getBallPosition(self,
-                        red:       int = int.from_bytes(b'\xff', "little"),
-                        green:     int = int.from_bytes(b'\x00', "little"),
-                        blue:      int = int.from_bytes(b'\x7f', "little"),
+                        red_b:     bytes = b'\xff',
+                        green_b:   bytes = b'\x00',
+                        blue_b:    bytes = b'\x7f',
                         tolerance: int   = 20):
         """
         Get the position of the center of the ball.
@@ -48,15 +48,16 @@ class BmpArray():
             The position of the center of the ball.
         """
 
-        rslt   = (-1, -1)
-        #clrInt = int.from_bytes(blue+green+red, "big")
+        red   = int.from_bytes(  red_b, "little")
+        green = int.from_bytes(green_b, "little")
+        blue  = int.from_bytes( blue_b, "little")
+
+        rslt = (-1, -1)
 
         print("Getting ball position.")
-        rangeRed    = range(red-tolerance, red+tolerance)
+        rangeRed    = range(  red-tolerance,   red+tolerance)
         rangeGreen  = range(green-tolerance, green+tolerance)
-        rangeBlue   = range(blue-tolerance, blue+tolerance)
-
-        #print(rangeRed, rangeGreen, rangeBlue)
+        rangeBlue   = range( blue-tolerance,  blue+tolerance)
 
         xSum  = 0
         ySum  = 0
@@ -70,7 +71,6 @@ class BmpArray():
                 r = p[2]
                 g = p[1]
                 b = p[0]
-                print(r, g, b)
                 if r in rangeRed and g in rangeGreen and b in rangeBlue:
                     xSum += xCurr
                     ySum += yCurr
