@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
+
 import sys
 
-from bmp_inspector  import BMP_inspector
 from bmpArray       import BmpArray
 
 """
@@ -17,7 +18,12 @@ def main(fnIn=None, fnOut=None):
 
     img = f.read()
     arr = BmpArray(img)
-    pos = arr.getBallPosition(int.from_bytes(b'\xff', "little"), int.from_bytes(b'\xff', "little"), int.from_bytes(b'\x84', "little"), 100)
+    pos = arr.getBallPosition(
+        b'\xff',
+        b'\xff',
+        b'\x84',
+        100
+    )
     if pos == (-1, -1):
         print("Ball not found.")
     else:
@@ -27,8 +33,10 @@ def main(fnIn=None, fnOut=None):
         arr.writeToFile(fnOut)
 
 if __name__ == '__main__':
-    fnIn = "img.bmp"
+
+    fnIn  = "img.bmp"
     fnOut = "img_out.bmp"
+
     if len(sys.argv) >= 2:
         fnIn = sys.argv[1]
     if len(sys.argv) >= 3:
