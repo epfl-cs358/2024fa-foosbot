@@ -2,7 +2,8 @@ import numpy
 import numpy as np
 
 from bmp_inspector import BMP_inspector
-from bitmap.bitmap import Bitmap
+#from bitmap import Bitmap
+from matplotlib import pyplot as plt
 
 class BmpArray():
 
@@ -150,7 +151,7 @@ class BmpArray():
         xmax = max(0, min(self.bmpIns.bitmap_width, x+width))
         ymin = max(0, min(abs(self.bmpIns.bitmap_height), y-width))
         ymax = max(0, min(abs(self.bmpIns.bitmap_height), y+width))
-        c = numpy.array(clr[::-1], dtype='S3')
+        c = np.array(clr[::-1], dtype='S3')
 
         for row in self.array[ymin:ymax]:
             for p in range(xmin, xmax):
