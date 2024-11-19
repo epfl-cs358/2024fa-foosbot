@@ -1,7 +1,8 @@
 import numpy as np
 
 from bmp_inspector import BMP_inspector
-from bitmap.bitmap import Bitmap
+#from bitmap import Bitmap
+from matplotlib import pyplot as plt
 
 class BmpArray():
 
@@ -137,7 +138,7 @@ class BmpArray():
         xmax = max(0, min(self.bmpIns.bitmap_width, x+width))
         ymin = max(0, min(abs(self.bmpIns.bitmap_height), y-width))
         ymax = max(0, min(abs(self.bmpIns.bitmap_height), y+width))
-        c = numpy.array(clr[::-1], dtype='S3')
+        c = np.array(clr[::-1], dtype='S3')
 
         for row in self.array[ymin:ymax]:
             for p in range(xmin, xmax):
@@ -153,8 +154,16 @@ class BmpArray():
         """
 
         print("Writing to file '" + fileName + "'.")
+        arr = np.zeros((self.array.shape[0], self.array.shape[1], 3))
+        for x in range(self.array.shape[0]):
+            for y in range(self.array.shape[1]):
+                p = self.array[x, y]
+                arr[x, y] = np.array([p[2] / 255., p[1] / 255., p[0] / 255.])
+        print(arr.shape)
+        #plt.imshow(arr)
+        plt.imsave(fileName, arr)
 
-        bm = Bitmap(self.bmpIns.bitmap_width,
-                    self.bmpIns.bitmap_height,
-                    self.array)
-        bm.save(fileName)
+        #bm = Bitmap(self.bmpIns.bitmap_width,
+        #            self.bmpIns.bitmap_height,
+        #            self.array)
+        #bm.save(fileName)
