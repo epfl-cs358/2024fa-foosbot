@@ -41,6 +41,7 @@ class SerialImg(serial.Serial):
         try:
             while not end:
                 line = self.readline()
+                print(line)
 
                 if line[:4] == b'img:':
                     line  = line[4:]

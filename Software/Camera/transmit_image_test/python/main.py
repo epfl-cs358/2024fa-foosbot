@@ -12,7 +12,8 @@ def main():
 
     print("Starting serial reception service...\n")
     try:
-        while True:
+        # while True:
+
             img = s.getImg()
 
             if img is None:
@@ -26,7 +27,7 @@ def main():
                     print("Ball not found.")
                 else:
                     print("Ball is at position: " + str(pos))
-                    array.drawSquare(pos, 200, 25)
+                    array.drawPoint(pos, 10)
                     array.writeToFile()
                 # TODO: Send position to Arduino UNO so that it can
                 #       understand it

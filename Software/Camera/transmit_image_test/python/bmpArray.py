@@ -26,8 +26,8 @@ class BmpArray():
 
     def getBallPosition(self,
                         red_b:     bytes = b'\xff',
-                        green_b:   bytes = b'\x00',
-                        blue_b:    bytes = b'\x7f',
+                        green_b:   bytes = b'\xff',
+                        blue_b:    bytes = b'\x84',
                         tolerance: int   = 20):
         """
         Get the position of the center of the ball.
@@ -55,13 +55,17 @@ class BmpArray():
         total = 0
 
         yCurr = 0
+        self.array = self.array[:, :-1]
         for row in self.array:
             xCurr = 0
             for p in row:
                 p = p.tobytes()
+                if len(p) != 3:
+                    p = b'\x00\x00\x00'
                 r = p[2]
                 g = p[1]
                 b = p[0]
+                print(r, g, b)
                 if r in rangeRed and g in rangeGreen and b in rangeBlue:
                     xSum += xCurr
                     ySum += yCurr
@@ -73,57 +77,10 @@ class BmpArray():
             rslt = (int(xSum/total), int(ySum/total))
         return rslt
 
-    def drawSquare(self,
-                   pos:    tuple[int, int],
-                   length: int,
-                   thick:  int,
-                   clr:    bytes = b'e6b400'):
-        """
-        Draw a square around the given position.
-
-        Parameters:
-            pos    (tuple[int, int]): Position to draw the square around
-            length (int)            : Length of the square edges
-            thick  (int)            : Thickness of the square
-            clr    (bytes)          : Colour of the square
-        """
-
-        def drawEdge(xFrom: int, xTo: int, yFrom: int, yTo: int):
-            """
-            Draws an edge.
-
-            Parameters:
-                xFrom (int): x coordinate to draw from
-                xTo   (int): x coordinate to draw to
-                yFrom (int): y coordinate to draw from
-                yTo   (int): y coordinate to draw to
-            """
-
-            for p in self.array[yFrom:yTo][xFrom:xTo]:
-                p == clr
-
-        print("Drawing the square.")
-
-        x = pos[0]
-        y = pos[1]
-
-        xLeEdge = x - length
-        xRiEdge = x + length
-        yUpEdge = y - length
-        yLoEdge = y + length
-
-        # Drawing horizontal edges
-        drawEdge(yUpEdge-thick,yUpEdge+thick,xLeEdge,xRiEdge)
-        drawEdge(yLoEdge-thick,yLoEdge+thick,xLeEdge,xRiEdge)
-
-        # Drawing vertical edges
-        drawEdge(xLeEdge-thick, xLeEdge+thick, yUpEdge, yLoEdge)
-        drawEdge(xRiEdge-thick, xRiEdge+thick, yUpEdge, yLoEdge)
-
     def drawPoint(self,
-                    pos     : tuple[int, int],
-                    width  : int,
-                    clr     : bytes = b'\x01\x01\x01'):
+                    pos   : tuple[int, int],
+                    width : int,
+                    clr   : bytes = b'\x01\x01\x01'):
         """
         Draw a point of given radius at the given position.
         The point will be a filled square (not a cirle).
@@ -143,7 +100,6 @@ class BmpArray():
         for row in self.array[ymin:ymax]:
             for p in range(xmin, xmax):
                 row[p] = c
-        #self.array[xmin:xmax, ymin:ymax] = numpy.bytes_(clr[2:]+clr[1:2]+clr[0:1])
 
     def writeToFile(self, fileName: str = "img.bmp"):
         """
@@ -158,7 +114,13 @@ class BmpArray():
         for x in range(self.array.shape[0]):
             for y in range(self.array.shape[1]):
                 p = self.array[x, y]
-                arr[x, y] = np.array([p[2] / 255., p[1] / 255., p[0] / 255.])
+                if len(p) != 3:
+                    p = b'\x00\x00\x00'
+                arr[x, y] = np.array(
+                    [p[2] / 255.,
+                     p[1] / 255.,
+                     p[0] /
+                     255.])
         print(arr.shape)
         #plt.imshow(arr)
         plt.imsave(fileName, arr)

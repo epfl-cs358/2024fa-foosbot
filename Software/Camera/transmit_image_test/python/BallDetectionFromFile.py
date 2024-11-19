@@ -2,7 +2,7 @@
 
 import sys
 
-from bmpArray       import BmpArray
+from bmpArray import BmpArray
 
 """
 Used for Debugging.
@@ -28,7 +28,6 @@ def main(fnIn=None, fnOut=None):
         print("Ball not found.")
     else:
         print("Ball is at position: " + str(pos))
-        #arr.drawSquare(pos, 200, 25)
         arr.drawPoint(pos, 10)
         arr.writeToFile(fnOut)
 
