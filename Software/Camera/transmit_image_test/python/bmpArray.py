@@ -18,14 +18,10 @@ class BmpArray():
 
         self.bmpIns = BMP_inspector("", img, True, True)
         padding = 3*self.bmpIns.bitmap_width % 4
-        self.array = np.split(
-            np.array(self.bmpIns.pixel_array),
-            int(
-                self.bmpIns.bitmap_height if
-                self.bmpIns.bitmap_height > 0
-                else -self.bmpIns.bitmap_height
-            )
-        )[:][:-padding if padding != 0 else None]
+        self.array = np.array(self.bmpIns.pixel_array).reshape((
+            abs(self.bmpIns.bitmap_width),
+            abs(self.bmpIns.bitmap_height)
+        ))[:][:-padding if padding != 0 else None]
 
     def getBallPosition(self,
                         red_b:     bytes = b'\xff',
@@ -135,5 +131,5 @@ class BmpArray():
 
         bm = Bitmap(self.bmpIns.bitmap_width,
                     self.bmpIns.bitmap_height,
-                    self.bmpIns.pixel_array)
+                    self.array)
         bm.save(fileName)
