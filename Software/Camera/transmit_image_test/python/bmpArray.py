@@ -141,5 +141,5 @@ class BmpArray():
 
         bm = Bitmap(self.bmpIns.bitmap_width,
                     self.bmpIns.bitmap_height,
-                    self.bmpIns.pixel_array)
+                    self.array)
         bm.save(fileName)
