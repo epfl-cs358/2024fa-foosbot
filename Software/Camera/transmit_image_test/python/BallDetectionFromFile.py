@@ -35,7 +35,7 @@ def main(fnIn=None, fnOut=None):
 if __name__ == '__main__':
 
     fnIn  = "img.bmp"
-    fnOut = "img_out.bmp"
+    fnOut = "img_out.png"
 
     if len(sys.argv) >= 2:
         fnIn = sys.argv[1]
