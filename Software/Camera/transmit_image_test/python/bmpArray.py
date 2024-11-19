@@ -1,3 +1,4 @@
+import numpy
 import numpy as np
 
 from bmp_inspector import BMP_inspector
@@ -60,11 +61,12 @@ class BmpArray():
         for row in self.array:
             xCurr = 0
             for p in row:
+                #print(type(p))
                 p = p.tobytes()
                 r = p[2]
                 g = p[1]
                 b = p[0]
-                print(r, g, b)
+                #print(r, g, b)
                 if r in rangeRed and g in rangeGreen and b in rangeBlue:
                     xSum += xCurr
                     ySum += yCurr
@@ -123,6 +125,31 @@ class BmpArray():
         drawEdge(xLeEdge-thick, xLeEdge+thick, yUpEdge, yLoEdge)
         drawEdge(xRiEdge-thick, xRiEdge+thick, yUpEdge, yLoEdge)
 
+    def drawPoint(self,
+                    pos     : tuple[int, int],
+                    width  : int,
+                    clr     : bytes = b'\x01\x01\x01'):
+        """
+        Draw a point of given radius at the given position.
+        The point will be a filled square (not a cirle).
+
+        Parameters:
+            pos    (tuple[int, int]): Position of the point
+            width  (int)            : Width of the filled square in pixel.
+            clr    (bytes)          : Color of the square. Needs to be 3 Bytes in r,g,b order
+        """
+        x, y = pos
+        xmin = max(0, min(self.bmpIns.bitmap_width, x-width))
+        xmax = max(0, min(self.bmpIns.bitmap_width, x+width))
+        ymin = max(0, min(abs(self.bmpIns.bitmap_height), y-width))
+        ymax = max(0, min(abs(self.bmpIns.bitmap_height), y+width))
+        c = numpy.array(clr[::-1], dtype='S3')
+
+        for row in self.array[ymin:ymax]:
+            for p in range(xmin, xmax):
+                row[p] = c
+        #self.array[xmin:xmax, ymin:ymax] = numpy.bytes_(clr[2:]+clr[1:2]+clr[0:1])
+
     def writeToFile(self, fileName: str = "img.bmp"):
         """
         Writes the image to file.
@@ -132,8 +159,7 @@ class BmpArray():
         """
 
         print("Writing to file '" + fileName + "'.")
-
         bm = Bitmap(self.bmpIns.bitmap_width,
                     self.bmpIns.bitmap_height,
-                    self.bmpIns.pixel_array)
+                    self.array)
         bm.save(fileName)
