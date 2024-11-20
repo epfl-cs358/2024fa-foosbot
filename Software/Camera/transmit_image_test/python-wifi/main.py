@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import sys
 import urllib.request
 import cv2
 import numpy as np
@@ -14,6 +13,7 @@ def main():
     cv2.namedWindow("Detection", cv2.WINDOW_AUTOSIZE)
 
     url = 'http://192.168.7.15'
+    # #ae5757 is also a good fit
     clr = [136, 152, 235] # BGR
     tlr = 50
 
