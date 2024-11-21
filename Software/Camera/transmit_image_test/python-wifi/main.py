@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
 import sys
-import urllib.request
+import serial
 import cv2
+import urllib.request as urllr
 import numpy as np
+
+MSG_START = ':'
+MSG_SEP   = ';'
+MSG_END   = '\r\n'
 
 def main():
     """TODO: Docstring for main.
@@ -11,22 +16,39 @@ def main():
 
     """
 
-    url = 'http://192.168.7.15'
+    # For colour detection
     # #ae5757 is also a good fit
-    clr = [136, 152, 235] # BGR
-    tlr = 50
+    # clr = [136, 152, 235] # BGR
+    # tlr = 50
+    # clr_range = [
+    #     (clr[0]-tlr, clr[1]-tlr, clr[2]-tlr),
+    #     (clr[0]+tlr, clr[1]+tlr, clr[2]+tlr)
+    # ]
 
-    clr_range = [
-        (clr[0]-tlr, clr[1]-tlr, clr[2]-tlr),
-        (clr[0]+tlr, clr[1]+tlr, clr[2]+tlr)
-    ]
+    # For getting data
+    url = 'http://192.168.7.15'
 
     user_in = input("Stream address ['" + url + "']:")
     url     = url if not user_in else user_in
 
-    while True:
-        with urllib.request.urlopen(url + '/bmp') as response:
-            buf  = np.array(bytearray(response.read()), dtype=np.uint8)
+    sent = urllr.urlopen(url + '/bmp')
+    print("URL opened.")
+
+    # For sending data
+    port = '/dev/ttyUSB0'
+
+    user_in = input("Device ['" + port + "']:")
+
+    ser = serial.Serial(
+        port = port if not user_in else user_in
+    )
+
+    ser.open()
+    print("Serial opened.")
+
+    try:
+        while True:
+            buf  = np.array(bytearray(sent.read()), dtype=np.uint8)
             img  = cv2.imdecode(buf, -1)
 
             grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -52,11 +74,16 @@ def main():
             # out = cv2.bitwise_and(img, img, mask=mask)
             # cv2.imshow("img", np.hstack([img, out]))
 
-            try:
-                cv2.imshow("Output", img)
-                cv2.waitKey(1)
-            except:
-                sys.exit(0)
+            pos      = (circles[0, 0][0], circles[0, 0][1])
+            timestmp = 0 # TODO
+
+            ser.write(MSG_START + str(pos) + MSG_SEP + str(timestmp) + MSG_END)
+
+            cv2.imshow("Output", img)
+            cv2.waitKey(1)
+    except:
+        ser.close()
+        sys.exit(0)
 
 
 if __name__ == "__main__":
