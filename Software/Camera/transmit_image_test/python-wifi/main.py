@@ -41,6 +41,7 @@ def main(url = 'http://192.168.7.15', urlMan=False, debug=False):
         url     = url if not user_in else user_in
 
     # Open connection
+    print(url)
     sent = urllr.urlopen(url + '/bmp')
     print("URL opened.")
 
@@ -118,7 +119,7 @@ if __name__ == "__main__":
     debug = False
     if len(sys.argv) > 1:
         inp = sys.argv[1]
-        url = inp if 'http://' in sys.argv else "http://" + sys.argv[1]
+        url = inp if 'http://' in sys.argv[1] else "http://" + sys.argv[1]
     else:
         urlManual = True
     if len(sys.argv) > 1 and (sys.argv[1] in ['-d', '-debug'] or sys.argv[2] in ['-d', '-debug']):
