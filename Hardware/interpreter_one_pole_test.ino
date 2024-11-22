@@ -11,7 +11,14 @@ long TravelY;
 
 const float stepsPerRevolution = 3200.0; 
 const float degreesPerStep = 360.0 / stepsPerRevolution; 
-int acceleration = 5;    
+int acceleration = 5;   
+
+//BEGIN value
+//puts to the beginning position the pole on the Y axis 
+void setBeginning(){
+  moveSide(350);
+
+}
 // MOVE <value>
 // <0 values to go far from the side motor
 // >0 values to come close to the side motor 
@@ -58,14 +65,14 @@ void rotateByAngle(float angle) {
   Serial.println(angle);
 }
 
-//INITIAL X 
+//INITIALX 
 void rotaryInitialPositionRotation(){
   stepperY.moveTo(0);                    // Move to the absolute position
   stepperY.runToPosition();                        // Execute the move
   Serial.print("Returned to initial X position ");
 }
 
-void executeCommand(String command) {
+void executeInterpreter(String command) {
   char cmd[20];
   int value;
   sscanf(command.c_str(), "%s %d", cmd, &value);
@@ -78,6 +85,8 @@ void executeCommand(String command) {
     returnToInitialPositionSide();
   } else if(strcmp(cmd, "INITIALX")== 0){
     rotaryInitialPositionRotation();
+  }else if(strcmp(cmd, "BEGIN")==0){
+    setBeginning();
   } else {
     Serial.println("Invalid Command!");
   }
@@ -111,7 +120,7 @@ void loop() {
   if (Serial.available() > 0) {
     String command = Serial.readStringUntil('\n'); // Read command from serial
     command.trim();                                // Remove whitespace
-    executeCommand(command);                      // Execute parsed command
+    executeInterpreter(command);                      // Execute parsed command
   }
   
 }
