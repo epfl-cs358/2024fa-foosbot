@@ -11,7 +11,7 @@ MSG_SEP   = ';'
 MSG_END   = '\r\n'
 
 def main(url = 'http://192.168.7.15', urlMan=False, debug=False):
-    """TODO: Docstring for main.
+    """
     This is the main function that does Computer Vision.
     It connects to the '/bmp' page of the given url, reads incoming images from it and processes them.
     Specifically it converts them to a grayscale image, blurs them and searches for circles of approximately the right size.
@@ -40,11 +40,6 @@ def main(url = 'http://192.168.7.15', urlMan=False, debug=False):
         user_in = input("Stream address ['" + url + "']:")
         url     = url if not user_in else user_in
 
-    # Open connection
-    print(url)
-    sent = urllr.urlopen(url + '/bmp')
-    print("URL opened.")
-
     # For sending data
     if not debug:
         port = '/dev/ttyUSB0'
@@ -64,8 +59,12 @@ def main(url = 'http://192.168.7.15', urlMan=False, debug=False):
     # Main Loop for image processing
     try:
         while True:
-            buf  = np.array(bytearray(sent.read()), dtype=np.uint8)
-            if buf is not None:
+            sent = urllr.urlopen(url + "/bmp")
+            buf = np.array(bytearray(sent.read()), dtype=np.uint8)
+            if buf.size == 0:
+                pass
+            else:
+                print(buf)
                 img  = cv2.imdecode(buf, -1)
 
                 grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -77,6 +76,8 @@ def main(url = 'http://192.168.7.15', urlMan=False, debug=False):
                                            param1=100, param2=30,
                                            minRadius=1, maxRadius=100)
 
+                pos = (-1, -1)
+
                 if circles is not None:
                     circles = np.uint16(np.around(circles))
                     for i in circles[0, :]:
@@ -85,6 +86,7 @@ def main(url = 'http://192.168.7.15', urlMan=False, debug=False):
                         cv2.circle(img, center, 1, (0, 100, 100), 3)
                         # circle outline
                         radius = i[2]
+                        print("Radius: " + str(radius))
                         cv2.circle(img, center, radius, (255, 0, 0), 3)
 
                 # mask = cv2.inRange(img, clr_range[0], clr_range[1])
@@ -102,10 +104,10 @@ def main(url = 'http://192.168.7.15', urlMan=False, debug=False):
                 cv2.imshow("Output", img)
                 cv2.waitKey(1)
     except Exception as e:
-        print(e)
         if not debug:
             ser.close()
-        sys.exit(0)
+        raise e
+        #sys.exit(0)
 
 
 if __name__ == "__main__":
