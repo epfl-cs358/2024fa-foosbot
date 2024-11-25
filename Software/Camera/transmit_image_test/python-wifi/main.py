@@ -10,10 +10,18 @@ MSG_START = ':'
 MSG_SEP   = ';'
 MSG_END   = '\r\n'
 
-def main():
-    """TODO: Docstring for main.
-    :returns: TODO
+def main(url = 'http://192.168.7.15', urlMan=False, debug=False):
+    """
+    Connects to the livestream of the given URL, gets the image of the `/bmp`
+    URI, detects the ball and sends over serial the position of the ball.
+    Displays the ball detection on screen.
 
+    :param url: The url that provides images in bmp format on page `/bmp`
+    :type url: str
+    :param urlMan: Asks the user to input a url manually
+    :type urlMan: bool
+    :param debug: Disables serial ports (Use if serial port is disconnected)
+    :type debug: bool
     """
 
     # For colour detection
@@ -26,65 +34,94 @@ def main():
     # ]
 
     # For getting data
-    url = 'http://192.168.7.15'
-
-    user_in = input("Stream address ['" + url + "']:")
-    url     = url if not user_in else user_in
-
-    sent = urllr.urlopen(url + '/bmp')
-    print("URL opened.")
+    if urlMan:
+        user_in = input("Stream address ['" + url + "']:")
+        url     = url if not user_in else user_in
 
     # For sending data
-    port = '/dev/ttyUSB0'
+    if not debug:
+        port = '/dev/ttyUSB0'
 
-    user_in = input("Device ['" + port + "']:")
+        user_in = input("Device ['" + port + "']:")
 
-    ser = serial.Serial(
-        port = port if not user_in else user_in
-    )
+        ser = serial.Serial(
+            port = port if not user_in else user_in
+        )
 
-    ser.open()
-    print("Serial opened.")
+        ser.open()
+        print("Serial opened.")
 
+    # Create a window for Displaying images in real-time
+    cv2.namedWindow("Output")
+
+    # Main Loop for image processing
     try:
         while True:
-            buf  = np.array(bytearray(sent.read()), dtype=np.uint8)
-            img  = cv2.imdecode(buf, -1)
+            sent = urllr.urlopen(url + "/bmp")
+            buf = np.array(bytearray(sent.read()), dtype=np.uint8)
+            if buf.size == 0:
+                pass
+            else:
+                print(buf)
+                img  = cv2.imdecode(buf, -1)
 
-            grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            grey = cv2.medianBlur(grey, 5)
+                grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                grey = cv2.medianBlur(grey, 5)
 
-            rows = grey.shape[0]
+                rows = grey.shape[0]
 
-            circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
-                                       param1=100, param2=30,
-                                       minRadius=1, maxRadius=100)
+                circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
+                                           param1=100, param2=30,
+                                           minRadius=1, maxRadius=100)
 
-            if circles is not None:
-                circles = np.uint16(np.around(circles))
-                for i in circles[0, :]:
-                    center = (i[0], i[1])
-                    # circle center
-                    cv2.circle(img, center, 1, (0, 100, 100), 3)
-                    # circle outline
-                    radius = i[2]
-                    cv2.circle(img, center, radius, (255, 0, 0), 3)
+                pos = (-1, -1)
 
-            # mask = cv2.inRange(img, clr_range[0], clr_range[1])
-            # out = cv2.bitwise_and(img, img, mask=mask)
-            # cv2.imshow("img", np.hstack([img, out]))
+                if circles is not None:
+                    circles = np.uint16(np.around(circles))
+                    for i in circles[0, :]:
+                        center = (i[0], i[1])
+                        # circle center
+                        cv2.circle(img, center, 1, (0, 100, 100), 3)
+                        # circle outline
+                        radius = i[2]
+                        print("Radius: " + str(radius))
+                        cv2.circle(img, center, radius, (255, 0, 0), 3)
 
-            pos      = (circles[0, 0][0], circles[0, 0][1])
-            timestmp = 0 # TODO
+                # mask = cv2.inRange(img, clr_range[0], clr_range[1])
+                # out = cv2.bitwise_and(img, img, mask=mask)
+                # cv2.imshow("img", np.hstack([img, out]))
 
-            ser.write(MSG_START + str(pos) + MSG_SEP + str(timestmp) + MSG_END)
+                    pos      = (circles[0, 0][0], circles[0, 0][1])
+                timestmp = 0 # TODO
 
-            cv2.imshow("Output", img)
-            cv2.waitKey(1)
-    except:
-        ser.close()
-        sys.exit(0)
+                if debug:
+                    print(pos)
+                else:
+                    ser.write(MSG_START + str(pos) + MSG_SEP + str(timestmp) + MSG_END)
+
+                cv2.imshow("Output", img)
+                cv2.waitKey(1)
+    except Exception as e:
+        if not debug:
+            ser.close()
+        raise e
+        #sys.exit(0)
 
 
 if __name__ == "__main__":
-    main()
+    """
+    Argument Parser when called from command line.
+    Allowed Format:
+        <cmd> [<ipaddress>] [-d | -debug]     (If no arguments are given, the user is asked for the url later)
+    """
+    url = 'http://192.168.7.15'
+    urlManual = False
+    debug = False
+    if len(sys.argv) > 1:
+        inp = sys.argv[1]
+        url = inp if 'http://' in sys.argv[1] else "http://" + sys.argv[1]
+    else:
+        urlManual = True
+    if len(sys.argv) > 1 and (sys.argv[1] in ['-d', '-debug'] or sys.argv[2] in ['-d', '-debug']):
+        debug = True
+    main(url, urlManual, debug)
