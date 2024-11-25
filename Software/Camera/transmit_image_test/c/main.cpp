@@ -16,7 +16,7 @@ using namespace cv;
 #define ERR_SER_OPEN  -3
 #define ERR_MISC      -4
 
-#define DEF_URL  "http://192.168.7.15/bmp"
+#define DEF_URL  "http://192.168.52.15/bmp"
 #define DEF_PORT "/dev/ttyUSB0"
 
 #define MSG_START ':'
@@ -30,39 +30,35 @@ typedef uint8_t Byte;
 char def_url[] = DEF_URL;
 
 // Opening serial port
-int serial_port = open(DEF_PORT, O_RDWR);
+//int serial_port = open(DEF_PORT, O_RDWR);
 
 typedef struct memory_s {
 	Byte *memory;
 	size_t   size;
 } memory;
 
-CURL    *curl_handle;
-CURLcode res;
-
 // TODO: Find a better way than having it as a global variable without clashing
-//       with the SGINT handler
+//       with the SGINT/SIGABRT handler
 // Initialise memory chunk for getting image
-memory chunk;
 
 static size_t write_memory(void *content, size_t size,
 		                   size_t nmemb, void *userp)
 {
 	size_t realsize = size * nmemb;
-	memory *chunk = (memory*)userp; // TODO: Not very safe
+	memory *c = (memory*)userp; // TODO: Not very safe
 
 	// Reallocate the chunk with the size of the image received
-	Byte *ptr = (Byte*)realloc(chunk->memory, realsize);
+	Byte *ptr = (Byte*)realloc(c->memory, realsize);
 	if (not ptr) return ERR_NO_MEMORY;
-	chunk->memory = ptr;
+	c->memory = ptr;
 
-	memcpy(&(chunk->memory), content, realsize);
-	chunk->size = realsize;
+	memcpy(&(c->memory), content, realsize);
+	c->size = realsize;
 
 	return realsize;
 }
 
-int init_curl(char url[] = def_url)
+int init_curl(memory* chunk, CURL* curl_handle, char url[] = def_url)
 {
 	curl_handle = curl_easy_init();
 	if (curl_handle) {
@@ -71,7 +67,7 @@ int init_curl(char url[] = def_url)
 		// Set the callback function to pass the data to
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_memory);
 		// Pass the memory chunk to the callback function
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)&chunk);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)chunk);
 		// Some servers do not like requests without user-agent field, so we add
 		// one
 		curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
@@ -84,75 +80,81 @@ int init_curl(char url[] = def_url)
 
 void cleanup()
 {
-	curl_easy_cleanup(curl_handle);
-	free(chunk.memory);
-	curl_global_cleanup();
-    close(serial_port);
+	//curl_easy_cleanup(curl_handle);
+	// free(chunk.memory);
+	//curl_global_cleanup();
+    //close(serial_port);
 }
 
-void sgint_handler(int signal) { cleanup(); }
+void sig_handler(int signal) { cleanup(); }
 
 int main(int argc, char *argv[])
 {
+    memory chunk;
 	// It will be resized in `init_curl()`
-	chunk.memory = (Byte*)calloc(1, sizeof(char));
+	chunk.memory = (Byte*)calloc(1, sizeof(Byte));
 	// No data yet
 	chunk.size   = 0;
 
-    if (serial_port < 0) {
-        printf("Error %i from open: %s\n", errno, strerror(errno));
-        return ERR_SER_OPEN;
-    }
+    //if (serial_port < 0) {
+    //    printf("Error %i from open: %s\n", errno, strerror(errno));
+    //    return ERR_SER_OPEN;
+    //}
 
     // Access termios struct in order to configure serial port
     struct termios tty;
 
     // Write existing configuration of the serial port to tty and set our own
     // configuration
-    if (tcgetattr(serial_port, &tty) != 0) {
-        printf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
-        return ERR_MISC;
-    }
-    tty.c_cflag &= ~PARENB; // Clear parity bit
-    tty.c_cflag &= ~CSTOPB; // Clear stop field, only one stop bit used in
-                            // communication (most common)
-    tty.c_cflag &= ~CSIZE; // Clear all the size bits, then use one of the
-                           // statements below
-    tty.c_cflag |= CS8; // 8 bits per byte (most common)
-    tty.c_cflag &= ~CRTSCTS; // Disable RTS/CTS hardware flow control
-    tty.c_cflag |= CREAD | CLOCAL; // Turn on READ & ignore ctrl lines
-    tty.c_lflag &= ~ICANON; // Disable canonical mode
-    tty.c_lflag &= ~ECHO; // Disable echo
-    tty.c_lflag &= ~ECHOE; // Disable erasure
-    tty.c_lflag &= ~ECHONL; // Disable new-line echo
-    tty.c_lflag &= ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
-    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
-    // Disable any special handling of received bytes
-    tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);
-
-    tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
-    tty.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
-
-    tty.c_cc[VTIME] = 0; // read() does not block (we don't read anyway)
-    tty.c_cc[VMIN] =  0;
+//     if (tcgetattr(serial_port, &tty) != 0) {
+//         printf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
+//         return ERR_MISC;
+//     }
+//     tty.c_cflag &= ~PARENB; // Clear parity bit
+//     tty.c_cflag &= ~CSTOPB; // Clear stop field, only one stop bit used in
+//                             // communication (most common)
+//     tty.c_cflag &= ~CSIZE; // Clear all the size bits, then use one of the
+//                            // statements below
+//     tty.c_cflag |= CS8; // 8 bits per byte (most common)
+//     tty.c_cflag &= ~CRTSCTS; // Disable RTS/CTS hardware flow control
+//     tty.c_cflag |= CREAD | CLOCAL; // Turn on READ & ignore ctrl lines
+//     tty.c_lflag &= ~ICANON; // Disable canonical mode
+//     tty.c_lflag &= ~ECHO; // Disable echo
+//     tty.c_lflag &= ~ECHOE; // Disable erasure
+//     tty.c_lflag &= ~ECHONL; // Disable new-line echo
+//     tty.c_lflag &= ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
+//     tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
+//     // Disable any special handling of received bytes
+//     tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL);
+// 
+//     tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
+//     tty.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
+// 
+//     tty.c_cc[VTIME] = 0; // read() does not block (we don't read anyway)
+//     tty.c_cc[VMIN] =  0;
 
     // Set in/out baud rate
-    cfsetispeed(&tty, B0);    // Input :    0
-    cfsetospeed(&tty, B9600); // Output: 9600
+    //cfsetispeed(&tty, B0);    // Input :    0
+    //cfsetospeed(&tty, B9600); // Output: 9600
 
     // Save tty settings
-    if (tcsetattr(serial_port, TCSANOW, &tty)) {
-        printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
-        return ERR_MISC;
-    }
+    //if (tcsetattr(serial_port, TCSANOW, &tty)) {
+    //    printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
+    //    return ERR_MISC;
+    //}
 
-    signal(SIGINT, sgint_handler);
-
-    int init = init_curl();
-    if (init)
-      return init;
+    signal(SIGINT , sig_handler);
+    signal(SIGABRT, sig_handler);
 
     while (true) {
+      CURL    *curl_handle;
+      CURLcode res;
+
+	  curl_easy_cleanup(curl_handle);
+      int init = init_curl(&chunk, curl_handle);
+      if (init)
+        return init;
+
       res = curl_easy_perform(curl_handle);
 
       if (res != CURLE_OK) {
@@ -206,13 +208,15 @@ int main(int argc, char *argv[])
                 time_stmp_char,
                 MSG_END
             };
-            write(serial_port, msg, sizeof(msg));
+            //write(serial_port, msg, sizeof(msg));
           }
 
           imshow("Detected circles", img);
           waitKey();
         }
       }
+      curl_easy_cleanup(curl_handle);
+      curl_global_cleanup();
 	}
 
 	return 0;
