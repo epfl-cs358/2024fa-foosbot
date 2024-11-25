@@ -1,4 +1,5 @@
 .ccls-cache
+Software/Camera/transmit_image_test/python/__pycache__
 Software/Camera/transmit_image_test/python/pyrightconfig.json
 *.DS_Store
 *.idea*
@@ -6,3 +7,4 @@ Software/Camera/transmit_image_test/python/img.jpg
 Software/Camera/transmit_image_test/python/__pycache__/serialImg.cpython-312.pyc
 Software/Camera/transmit_image_test/python/__pycache__
 Software/Camera/transmit_image_test/python-cable/__pycache__
+Software/Camera/transmit_image_test/c/shell.nix

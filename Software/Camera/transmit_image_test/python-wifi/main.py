@@ -12,18 +12,16 @@ MSG_END   = '\r\n'
 
 def main(url = 'http://192.168.7.15', urlMan=False, debug=False):
     """
-    This is the main function that does Computer Vision.
-    It connects to the '/bmp' page of the given url, reads incoming images from it and processes them.
-    Specifically it converts them to a grayscale image, blurs them and searches for circles of approximately the right size.
-    The Resulting image is then displayed in a Window called 'Output' and the postion is sent over the defined Serial Port.
-    :param url: The url that provides images in bmp format on page '/bmp'
+    Connects to the livestream of the given URL, gets the image of the `/bmp`
+    URI, detects the ball and sends over serial the position of the ball.
+    Displays the ball detection on screen.
+
+    :param url: The url that provides images in bmp format on page `/bmp`
     :type url: str
     :param urlMan: Asks the user to input a url manually
     :type urlMan: bool
-    :param debug: Disables write to serial ports (Use if serial port is disconnected)
+    :param debug: Disables serial ports (Use if serial port is disconnected)
     :type debug: bool
-    :returns: TODO
-
     """
 
     # For colour detection
