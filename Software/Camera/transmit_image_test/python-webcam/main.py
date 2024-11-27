@@ -4,22 +4,11 @@ import sys
 import serial
 import cv2
 from multiprocessing import Pool
-import urllib.request as urllr
 import numpy as np
 
 MSG_START = ':'
 MSG_SEP   = ';'
 MSG_END   = '\r\n'
-
-def get_img():
-    """
-    Gets the image from the URL.
-    :returns: BMP image.
-
-    """
-    sent = urllr.urlopen(url + "/cam-hi.jpg")
-    buf  = np.array(bytearray(sent.read()), dtype=np.uint8)
-    return buf
 
 def process_img(buf: np.ndarray):
     """
@@ -65,16 +54,12 @@ def process_img(buf: np.ndarray):
         timestmp = 0 # TODO
         return (pos, timestmp, img)
 
-def main(url = 'http://192.168.52.15', urlMan=False, debug=False):
+def main(debug=False):
     """
     Connects to the livestream of the given URL, gets the image of the `/bmp`
     URI, detects the ball and sends over serial the position of the ball.
     Displays the ball detection on screen.
 
-    :param url: The url that provides images in bmp format on page `/bmp`
-    :type url: str
-    :param urlMan: Asks the user to input a url manually
-    :type urlMan: bool
     :param debug: Disables serial ports (Use if serial port is disconnected)
     :type debug: bool
     """
@@ -89,9 +74,11 @@ def main(url = 'http://192.168.52.15', urlMan=False, debug=False):
     # ]
 
     # For getting data
-    if urlMan:
-        user_in = input("Stream address ['" + url + "']:")
-        url     = url if not user_in else user_in
+    # Open the default camera
+    cap = cv2.VideoCapture(0)
+
+    frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
+    frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     # For sending data
     if not debug:
@@ -106,18 +93,12 @@ def main(url = 'http://192.168.52.15', urlMan=False, debug=False):
         ser.open()
         print("Serial opened.")
 
-    pool = Pool()
-
     # Main Loop for image processing
     try:
         while True:
-            # buf = pool.apply_async(get_img, [])
-            # (pos, timestmp, img) = pool.apply_async(process_img, [buf])
 
-
-            sent = urllr.urlopen(url + "/cam-hi.jpg")
-            buf  = np.array(bytearray(sent.read()), dtype=np.uint8)
-            img  = cv2.imdecode(buf, -1)
+            ret, frame = cap.read()
+            pos, timeStmp, img = process_img(frame)
 
             # if debug:
             #     print(pos)
@@ -130,6 +111,8 @@ def main(url = 'http://192.168.52.15', urlMan=False, debug=False):
     except Exception as e:
         if not debug:
             ser.close()
+        cap.release()
+        cv2.destroyAllWindows()
         raise e
         #sys.exit(0)
 
@@ -138,16 +121,9 @@ if __name__ == "__main__":
     """
     Argument Parser when called from command line.
     Allowed Format:
-        <cmd> [<ipaddress>] [-d | -debug]     (If no arguments are given, the user is asked for the url later)
+        <cmd> [-d | -debug]     (If no arguments are given, the user is asked for the url later)
     """
-    url = 'http://192.168.7.15'
-    urlManual = False
     debug = False
-    if len(sys.argv) > 1:
-        inp = sys.argv[1]
-        url = inp if 'http://' in sys.argv[1] else "http://" + sys.argv[1]
-    else:
-        urlManual = True
     if len(sys.argv) > 1 and (sys.argv[1] in ['-d', '-debug'] or sys.argv[2] in ['-d', '-debug']):
         debug = True
-    main(url, urlManual, debug)
+    main(debug)
