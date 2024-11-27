@@ -3,7 +3,6 @@
 import sys
 import serial
 import cv2
-from multiprocessing import Pool
 import numpy as np
 
 MSG_START = ':'
@@ -15,7 +14,7 @@ def process_img(img):
     Processes the image for ball detection.
 
     :buf: The buffer containing the image.
-    :returns: The position of the ball and the time stamp.
+    :returns: The position of the ball.
 
     """
     grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -37,7 +36,7 @@ def process_img(img):
             cv2.circle(img, center, 1, (0, 100, 100), 3)
             # circle outline
             radius = i[2]
-            print("Radius: " + str(radius))
+            # print("Radius: " + str(radius))
             cv2.circle(img, center, radius, (255, 0, 0), 3)
 
     # mask = cv2.inRange(img, clr_range[0], clr_range[1])
@@ -45,8 +44,7 @@ def process_img(img):
     # cv2.imshow("img", np.hstack([img, out]))
 
         pos = (circles[0, 0][0], circles[0, 0][1])
-    timestmp = 0 # TODO
-    return (pos, timestmp, img)
+    return pos
 
 def main(debug=False):
     """
@@ -73,6 +71,8 @@ def main(debug=False):
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    print(f"Width: %d\n", frameWidth)
+    print(f"Height: %d\n", frameHeight)
 
     # For sending data
     if not debug:
@@ -87,12 +87,15 @@ def main(debug=False):
         ser.open()
         print("Serial opened.")
 
+    # Setting i to the minimum possible value
+    int i = -sys.maxsize - 1
     # Main Loop for image processing
     try:
         while True:
 
             ret, frame = cap.read()
-            pos, timeStmp, img = process_img(frame)
+            timeStmp = i + 2**32; # Converting i to unsigned
+            pos = process_img(frame)
 
             # if debug:
             #     print(pos)
@@ -102,6 +105,8 @@ def main(debug=False):
 
             cv2.imshow("Output", frame)
             cv2.waitKey(1)
+
+            i += 1
     except Exception as e:
         if not debug:
             ser.close()
