@@ -25,7 +25,7 @@ def process_img(img):
 
     circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                param1=100, param2=30,
-                               minRadius=1, maxRadius=25)
+                               minRadius=1, maxRadius=30)
 
     pos = (-1, -1)
 
@@ -72,7 +72,7 @@ def main(noSerOut, useQR, detailed):
 
     # For getting data
     # Open the default camera
-    cap = cv2.VideoCapture(2)
+    cap = cv2.VideoCapture(0)
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -100,13 +100,21 @@ def main(noSerOut, useQR, detailed):
         dst_points = np.float32([
             [0, 0],  # Upper-left corner
             [frameWidth - 1, 0],  # Upper-right corner
-            [frameWidth - 1, frameHeight - 1],  # Lower-right corner
-            [0, frameHeight - 1]  # Lower-left corner
+            [0, frameHeight - 1],  # Lower-left corner
+            [frameWidth - 1, frameHeight - 1]  # Lower-right corner
         ])
 
         last_known_positions = {1: None, 2: None, 3: None, 4: None}
         aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 
+        if detailed:
+            cv2.namedWindow("Marker Detection", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("Marker Detection", int(frameWidth / 2), int(frameHeight / 2))
+            cv2.namedWindow("Transformed Frame", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("Transformed Frame", int(frameWidth / 2), int(frameHeight / 2))
+
+    cv2.namedWindow("Output", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("Output", int(frameWidth / 2), int(frameHeight / 2))
 
     # Main Loop for image processing
     try:
@@ -117,17 +125,18 @@ def main(noSerOut, useQR, detailed):
             if useQR:
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 corners, ids, _ = aruco.detectMarkers(gray, aruco_dict)
-                if detailed:
-                    aruco.drawDetectedMarkers(gray, corners, ids)
-                    cv2.imshow("Marker Detection", gray)
-                    cv2.waitKey(1)
+                #if detailed:
+                    #markers = np.copy(frame)
+                    #aruco.drawDetectedMarkers(markers, corners, ids)
+                    #cv2.imshow("Marker Detection", markers)
+                    #cv2.waitKey(1)
                 if ids is not None:
                     for id_array, corner in zip(ids, corners):
                         id = id_array[0]
                         if id in last_known_positions:
                             last_known_positions[id] = corner[0][0]
 
-                if all(last_known_positions[id] is not None for id in last_known_positions):
+                if all(last_known_positions[id] is not None for id in last_known_positions.keys()):
                     src_points = np.float32([
                         last_known_positions[1],
                         last_known_positions[2],
@@ -136,9 +145,10 @@ def main(noSerOut, useQR, detailed):
                     ])
                     transformation_matrix = cv2.getPerspectiveTransform(src_points, dst_points)
                     transformed_frame = cv2.warpPerspective(frame, transformation_matrix, (frameWidth, frameHeight))
-                    frame = transformed_frame
+                    if np.array(transformed_frame).size != 0:
+                        frame = transformed_frame
                     if detailed:
-                        cv2.imshow("Transformed Frame", transformed_frame)
+                        #cv2.imshow("Transformed Frame", frame)
                         cv2.waitKey(1)
 
             timeStmp = i + 2**32; # Converting i to unsigned
@@ -153,7 +163,6 @@ def main(noSerOut, useQR, detailed):
             cv2.imshow("Output", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            cv2.waitKey(1)
 
             i += 1
     except Exception as e:
