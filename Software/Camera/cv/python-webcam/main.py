@@ -10,15 +10,12 @@ MSG_START = ':'
 MSG_SEP   = ';'
 MSG_END   = '\r\n'
 
-width = 0
-height = 0
-
 def process_img(img):
     """
     Processes the image for ball detection.
 
     :img: The image to be processed.
-    :returns: The position of the ball and the time stamp.
+    :returns: The position of the ball.
 
     """
     grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -40,7 +37,7 @@ def process_img(img):
             cv2.circle(img, center, 1, (0, 100, 100), 3)
             # circle outline
             radius = i[2]
-            print("Radius: " + str(radius))
+            # print("Radius: " + str(radius))
             cv2.circle(img, center, radius, (255, 0, 0), 3)
 
     # mask = cv2.inRange(img, clr_range[0], clr_range[1])
@@ -48,8 +45,7 @@ def process_img(img):
     # cv2.imshow("img", np.hstack([img, out]))
 
         pos = (circles[0, 0][0], circles[0, 0][1])
-    timestmp = 0 # TODO
-    return (pos, timestmp, img)
+    return pos
 
 def main(noSerOut, useQR, detailed):
     """
@@ -76,11 +72,16 @@ def main(noSerOut, useQR, detailed):
 
     # For getting data
     # Open the default camera
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    print(f"Width: %d\n", frameWidth)
+    print(f"Height: %d\n", frameHeight)
 
+    # Setting i to the minimum possible value
+    i = -sys.maxsize - 1
+    
     # For sending data
     if not noSerOut:
         port = '/dev/ttyUSB0'
@@ -95,13 +96,12 @@ def main(noSerOut, useQR, detailed):
         print("Serial opened.")
 
     if useQR:
-        global width, height
         # Define destination points (corners of the image)
         dst_points = np.float32([
             [0, 0],  # Upper-left corner
-            [width - 1, 0],  # Upper-right corner
-            [width - 1, height - 1],  # Lower-right corner
-            [0, height - 1]  # Lower-left corner
+            [frameWidth - 1, 0],  # Upper-right corner
+            [frameWidth - 1, frameHeight - 1],  # Lower-right corner
+            [0, frameHeight - 1]  # Lower-left corner
         ])
 
         last_known_positions = {1: None, 2: None, 3: None, 4: None}
@@ -115,7 +115,6 @@ def main(noSerOut, useQR, detailed):
             ret, frame = cap.read()
 
             if useQR:
-                height, width = frame.shape[:2]
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 corners, ids, _ = aruco.detectMarkers(gray, aruco_dict)
                 if detailed:
@@ -136,12 +135,14 @@ def main(noSerOut, useQR, detailed):
                         last_known_positions[4]
                     ])
                     transformation_matrix = cv2.getPerspectiveTransform(src_points, dst_points)
-                    transformed_frame = cv2.warpPerspective(frame, transformation_matrix, (width, height))
+                    transformed_frame = cv2.warpPerspective(frame, transformation_matrix, (frameWidth, frameHeight))
+                    frame = transformed_frame
                     if detailed:
                         cv2.imshow("Transformed Frame", transformed_frame)
                         cv2.waitKey(1)
 
-            pos, timeStmp, img = process_img(frame)
+            timeStmp = i + 2**32; # Converting i to unsigned
+            pos = process_img(frame)
 
             # if debug:
             #     print(pos)
@@ -152,6 +153,9 @@ def main(noSerOut, useQR, detailed):
             cv2.imshow("Output", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+            cv2.waitKey(1)
+
+            i += 1
     except Exception as e:
         if not noSerOut:
             ser.close()
