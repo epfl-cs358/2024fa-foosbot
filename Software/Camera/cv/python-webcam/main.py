@@ -3,18 +3,21 @@
 import sys
 import serial
 import cv2
-from multiprocessing import Pool
 import numpy as np
+from cv2 import aruco
 
 MSG_START = ':'
 MSG_SEP   = ';'
 MSG_END   = '\r\n'
 
+width = 0
+height = 0
+
 def process_img(img):
     """
     Processes the image for ball detection.
 
-    :buf: The buffer containing the image.
+    :img: The image to be processed.
     :returns: The position of the ball and the time stamp.
 
     """
@@ -48,14 +51,18 @@ def process_img(img):
     timestmp = 0 # TODO
     return (pos, timestmp, img)
 
-def main(debug=False):
+def main(noSerOut, useQR, detailed):
     """
     Connects to the livestream of the given URL, gets the image of the `/bmp`
     URI, detects the ball and sends over serial the position of the ball.
     Displays the ball detection on screen.
 
-    :param debug: Disables serial ports (Use if serial port is disconnected)
-    :type debug: bool
+    :param noSerOut: Disables serial output (Use if serial port is disconnected)
+    :type noSerOut: bool
+    :param useQR: If this is set to True, this function will first detect QR markers and transform the image such that it only contains the playing area, before doing ball detection.
+    :type useQR: bool
+    :param detailed: If this is set to True, this function will open multiple windows showing different stages of the image processing
+    :type detailed: bool
     """
 
     # For colour detection
@@ -69,13 +76,13 @@ def main(debug=False):
 
     # For getting data
     # Open the default camera
-    cap = cv2.VideoCapture(2)
+    cap = cv2.VideoCapture(0)
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     # For sending data
-    if not debug:
+    if not noSerOut:
         port = '/dev/ttyUSB0'
 
         user_in = input("Device ['" + port + "']:")
@@ -87,11 +94,53 @@ def main(debug=False):
         ser.open()
         print("Serial opened.")
 
+    if useQR:
+        global width, height
+        # Define destination points (corners of the image)
+        dst_points = np.float32([
+            [0, 0],  # Upper-left corner
+            [width - 1, 0],  # Upper-right corner
+            [width - 1, height - 1],  # Lower-right corner
+            [0, height - 1]  # Lower-left corner
+        ])
+
+        last_known_positions = {1: None, 2: None, 3: None, 4: None}
+        aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+
+
     # Main Loop for image processing
     try:
         while True:
 
             ret, frame = cap.read()
+
+            if useQR:
+                height, width = frame.shape[:2]
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                corners, ids, _ = aruco.detectMarkers(gray, aruco_dict)
+                if detailed:
+                    aruco.drawDetectedMarkers(gray, corners, ids)
+                    cv2.imshow("Marker Detection", gray)
+                    cv2.waitKey(1)
+                if ids is not None:
+                    for id_array, corner in zip(ids, corners):
+                        id = id_array[0]
+                        if id in last_known_positions:
+                            last_known_positions[id] = corner[0][0]
+
+                if all(last_known_positions[id] is not None for id in last_known_positions):
+                    src_points = np.float32([
+                        last_known_positions[1],
+                        last_known_positions[2],
+                        last_known_positions[3],
+                        last_known_positions[4]
+                    ])
+                    transformation_matrix = cv2.getPerspectiveTransform(src_points, dst_points)
+                    transformed_frame = cv2.warpPerspective(frame, transformation_matrix, (width, height))
+                    if detailed:
+                        cv2.imshow("Transformed Frame", transformed_frame)
+                        cv2.waitKey(1)
+
             pos, timeStmp, img = process_img(frame)
 
             # if debug:
@@ -101,9 +150,10 @@ def main(debug=False):
             #         ser.write(MSG_START + str(pos) + MSG_SEP + str(timestmp) + MSG_END)
 
             cv2.imshow("Output", frame)
-            cv2.waitKey(1)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
     except Exception as e:
-        if not debug:
+        if not noSerOut:
             ser.close()
         cap.release()
         cv2.destroyAllWindows()
@@ -114,9 +164,21 @@ if __name__ == "__main__":
     """
     Argument Parser when called from command line.
     Allowed Format:
-        <cmd> [-d | -debug]     (If no arguments are given, the user is asked for the url later)
+        <cmd> [-noSerOut] [-useQR] [-detail]
+            Flags :
+            - [-noSerOut]   : Disables Serial output
+            - [-useQR]      : Enables use of QR Markers for image transformation
+            - [-detail]     : If this option is present, the program will open multiple windows 
+                                with views at different stages of the image processing
     """
-    debug = False
-    if len(sys.argv) > 1 and (sys.argv[1] in ['-d', '-debug'] or sys.argv[2] in ['-d', '-debug']):
-        debug = True
-    main(debug)
+    noSerOut = False
+    useQR = False
+    detailed = False
+    for arg in sys.argv:
+        if arg == '-noSerOut':
+            noSerOut = True
+        if arg == '-useQR':
+            useQR = True
+        if arg == '-detail':
+            detailed = True
+    main(noSerOut, useQR, detailed)
