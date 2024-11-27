@@ -10,7 +10,7 @@ MSG_START = ':'
 MSG_SEP   = ';'
 MSG_END   = '\r\n'
 
-def process_img(buf: np.ndarray):
+def process_img(img):
     """
     Processes the image for ball detection.
 
@@ -18,41 +18,35 @@ def process_img(buf: np.ndarray):
     :returns: The position of the ball and the time stamp.
 
     """
-    if buf.size == 0:
-        return (-1, (-1, -1), -1)
-    else:
-        print(buf)
-        img  = cv2.imdecode(buf, -1)
+    grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    grey = cv2.medianBlur(grey, 5)
 
-        grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        grey = cv2.medianBlur(grey, 5)
+    rows = grey.shape[0]
 
-        rows = grey.shape[0]
+    circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
+                               param1=100, param2=30,
+                               minRadius=1, maxRadius=25)
 
-        circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
-                                   param1=100, param2=30,
-                                   minRadius=1, maxRadius=100)
+    pos = (-1, -1)
 
-        pos = (-1, -1)
+    if circles is not None:
+        circles = np.uint16(np.around(circles))
+        for i in circles[0, :]:
+            center = (i[0], i[1])
+            # circle center
+            cv2.circle(img, center, 1, (0, 100, 100), 3)
+            # circle outline
+            radius = i[2]
+            print("Radius: " + str(radius))
+            cv2.circle(img, center, radius, (255, 0, 0), 3)
 
-        if circles is not None:
-            circles = np.uint16(np.around(circles))
-            for i in circles[0, :]:
-                center = (i[0], i[1])
-                # circle center
-                cv2.circle(img, center, 1, (0, 100, 100), 3)
-                # circle outline
-                radius = i[2]
-                print("Radius: " + str(radius))
-                cv2.circle(img, center, radius, (255, 0, 0), 3)
+    # mask = cv2.inRange(img, clr_range[0], clr_range[1])
+    # out = cv2.bitwise_and(img, img, mask=mask)
+    # cv2.imshow("img", np.hstack([img, out]))
 
-        # mask = cv2.inRange(img, clr_range[0], clr_range[1])
-        # out = cv2.bitwise_and(img, img, mask=mask)
-        # cv2.imshow("img", np.hstack([img, out]))
-
-            pos = (circles[0, 0][0], circles[0, 0][1])
-        timestmp = 0 # TODO
-        return (pos, timestmp, img)
+        pos = (circles[0, 0][0], circles[0, 0][1])
+    timestmp = 0 # TODO
+    return (pos, timestmp, img)
 
 def main(debug=False):
     """
@@ -75,7 +69,7 @@ def main(debug=False):
 
     # For getting data
     # Open the default camera
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -106,7 +100,7 @@ def main(debug=False):
             #     if pos[0] != -1 and pos[1] != -1:
             #         ser.write(MSG_START + str(pos) + MSG_SEP + str(timestmp) + MSG_END)
 
-            cv2.imshow("Output", img)
+            cv2.imshow("Output", frame)
             cv2.waitKey(1)
     except Exception as e:
         if not debug:
@@ -114,7 +108,6 @@ def main(debug=False):
         cap.release()
         cv2.destroyAllWindows()
         raise e
-        #sys.exit(0)
 
 
 if __name__ == "__main__":
