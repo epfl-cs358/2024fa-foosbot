@@ -3,17 +3,19 @@
 import sys
 import serial
 import cv2
+import math
 import numpy as np
 
 MSG_START = ':'
 MSG_SEP   = ';'
 MSG_END   = '\r\n'
 
-def process_img(img):
+def get_ball_pos(img, clrRange):
     """
     Processes the image for ball detection.
 
     :buf: The buffer containing the image.
+    :clr_range: The colour range to detect the ball.
     :returns: The position of the ball.
 
     """
@@ -31,19 +33,38 @@ def process_img(img):
     if circles is not None:
         circles = np.uint16(np.around(circles))
         for i in circles[0, :]:
+            # Circle center
             center = (i[0], i[1])
-            # circle center
             cv2.circle(img, center, 1, (0, 100, 100), 3)
-            # circle outline
+            # Circle outline
             radius = i[2]
-            # print("Radius: " + str(radius))
-            cv2.circle(img, center, radius, (255, 0, 0), 3)
+            # Inner square length divided by two
+            length = math.floor(math.sqrt(2) * radius / 2)
+            sums = np.array(cv2.sumElems(
+                img[i[0]-length:i[0]+length, i[1]-length:i[1]+length]
+            ))
+            for i in range(sums.size):
+                if sums[i] > 255:
+                    sums[i] = 255
+            mean = sums / (length*2)**2
+            # Draw inner square
+            # cv2.rectangle(img,
+            #               (i[0]-length, i[1]-length),
+            #               (i[0]+length, i[1]+length),
+            #               (255, 0, 0), 3)
+            print(clrRange)
+            print(mean)
 
-    # mask = cv2.inRange(img, clr_range[0], clr_range[1])
-    # out = cv2.bitwise_and(img, img, mask=mask)
-    # cv2.imshow("img", np.hstack([img, out]))
+            if (mean[0] in clrRange[0] and
+                mean[1] in clrRange[1] and
+                mean[2] in clrRange[2]):
+                print("Found: ", mean)
+                pos = center
+                # print("Radius: " + str(radius))
+                cv2.circle(img, center, radius, (255, 0, 0), 3)
 
         pos = (circles[0, 0][0], circles[0, 0][1])
+
     return pos
 
 def main(debug=False):
@@ -57,13 +78,19 @@ def main(debug=False):
     """
 
     # For colour detection
-    # #ae5757 is also a good fit
-    # clr = [136, 152, 235] # BGR
-    # tlr = 50
-    # clr_range = [
-    #     (clr[0]-tlr, clr[1]-tlr, clr[2]-tlr),
-    #     (clr[0]+tlr, clr[1]+tlr, clr[2]+tlr)
-    # ]
+    # Might be good fits (RGB):
+    #  - #ae5757
+    #  - #ff7f41
+    #  - #eb9888
+    clr = np.array([65, 127, 255]) # BGR
+    tlr = 50
+    clrLo = clr - tlr
+    clrHi = clr + tlr
+    clrRange = [
+        range(clrLo[0], clrHi[0]),
+        range(clrLo[1], clrHi[1]),
+        range(clrLo[2], clrHi[2])
+    ]
 
     # For getting data
     # Open the default camera
@@ -71,8 +98,8 @@ def main(debug=False):
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    print(f"Width: %d\n", frameWidth)
-    print(f"Height: %d\n", frameHeight)
+    print("Width: ", frameWidth)
+    print("Height: ", frameHeight)
 
     # For sending data
     if not debug:
@@ -88,14 +115,14 @@ def main(debug=False):
         print("Serial opened.")
 
     # Setting i to the minimum possible value
-    int i = -sys.maxsize - 1
+    i = -sys.maxsize - 1
     # Main Loop for image processing
     try:
         while True:
 
             ret, frame = cap.read()
             timeStmp = i + 2**32; # Converting i to unsigned
-            pos = process_img(frame)
+            pos = get_ball_pos(frame, clrRange)
 
             # if debug:
             #     print(pos)
@@ -107,6 +134,12 @@ def main(debug=False):
             cv2.waitKey(1)
 
             i += 1
+    except KeyboardInterrupt:
+        print("\nTerminating...")
+        if not debug:
+            ser.close()
+        cap.release()
+        cv2.destroyAllWindows()
     except Exception as e:
         if not debug:
             ser.close()
