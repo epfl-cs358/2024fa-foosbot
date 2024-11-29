@@ -12,17 +12,19 @@ MSG_END   = '\r\n'
 
 def process_img(img):
     """
-    Processes the image for ball detection.
+    Processes the image and detect the ball.
 
     :img: The image to be processed.
+    :type img: np.ndarray
     :returns: The position of the ball.
-
     """
+    # Pre-Processing : convert to grayscale image and apply blur
     grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     grey = cv2.medianBlur(grey, 5)
 
     rows = grey.shape[0]
 
+    # Detects circles
     circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                param1=100, param2=30,
                                minRadius=1, maxRadius=30)
@@ -31,6 +33,7 @@ def process_img(img):
 
     if circles is not None:
         circles = np.uint16(np.around(circles))
+        # Draws Circles and centers
         for i in circles[0, :]:
             center = (i[0], i[1])
             # circle center
@@ -43,14 +46,13 @@ def process_img(img):
     # mask = cv2.inRange(img, clr_range[0], clr_range[1])
     # out = cv2.bitwise_and(img, img, mask=mask)
     # cv2.imshow("img", np.hstack([img, out]))
-
+        # Center Position of the first circle
         pos = (circles[0, 0][0], circles[0, 0][1])
     return pos
 
 def main(noSerOut, useQR, detailed):
     """
-    Connects to the livestream of the given URL, gets the image of the `/bmp`
-    URI, detects the ball and sends over serial the position of the ball.
+    Gets the live image of the camera, transforms it such that it only contains the playing field, detects the ball and sends the position of the ball over a serial output to the Arduino.
     Displays the ball detection on screen.
 
     :param noSerOut: Disables serial output (Use if serial port is disconnected)
@@ -80,18 +82,18 @@ def main(noSerOut, useQR, detailed):
     print(f"Height: %d\n", frameHeight)
 
     # Setting i to the minimum possible value
-    i = -sys.maxsize - 1
+    time = -sys.maxsize - 1
     
-    # For sending data
+    # Defines a serial port for the output via user input
     if not noSerOut:
         port = '/dev/ttyUSB0'
 
         user_in = input("Device ['" + port + "']:")
 
+        # Creates a Serial Port object with the port from the user input or the default value otherwise
         ser = serial.Serial(
             port = port if not user_in else user_in
         )
-
         ser.open()
         print("Serial opened.")
 
@@ -104,7 +106,10 @@ def main(noSerOut, useQR, detailed):
             [frameWidth - 1, frameHeight - 1]  # Lower-right corner
         ])
 
+        # Define Dictionary for keeping the last known positions of the markers
         last_known_positions = {1: None, 2: None, 3: None, 4: None}
+
+        # We use the markers at indexes 1, 2, 3, 4 of this pre-defined dictionary to mark the playing area
         aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 
         if detailed:
@@ -119,24 +124,29 @@ def main(noSerOut, useQR, detailed):
     # Main Loop for image processing
     try:
         while True:
-
+            # Get an image from the camera
             ret, frame = cap.read()
 
             if useQR:
+                # Detect markers in image
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 corners, ids, _ = aruco.detectMarkers(gray, aruco_dict)
-                #if detailed:
-                    #markers = np.copy(frame)
-                    #aruco.drawDetectedMarkers(markers, corners, ids)
-                    #cv2.imshow("Marker Detection", markers)
-                    #cv2.waitKey(1)
-                if ids is not None:
-                    for id_array, corner in zip(ids, corners):
-                        id = id_array[0]
-                        if id in last_known_positions:
-                            last_known_positions[id] = corner[0][0]
 
-                if all(last_known_positions[id] is not None for id in last_known_positions.keys()):
+                if detailed:
+                    markers = np.copy(frame)
+                    aruco.drawDetectedMarkers(markers, corners, ids)
+                    #cv2.imshow("Marker Detection", markers)
+                    cv2.waitKey(1)
+
+                # Updates the dictionary of last known positions if the right markers were detected
+                if ids is not None:
+                    for indices, corner in zip(ids, corners):
+                        index = indices[0]
+                        if index in last_known_positions:
+                            last_known_positions[index] = corner[0][0]
+
+                # Transforms the image if all 4 markers were detected (at some point)
+                if all(last_known_positions[i] is not None for i in last_known_positions.keys()):
                     src_points = np.float32([
                         last_known_positions[1],
                         last_known_positions[2],
@@ -151,20 +161,17 @@ def main(noSerOut, useQR, detailed):
                         #cv2.imshow("Transformed Frame", frame)
                         cv2.waitKey(1)
 
-            timeStmp = i + 2**32; # Converting i to unsigned
+            timeStmp = time + 2**32; # Converting time to unsigned
             pos = process_img(frame)
 
-            # if debug:
-            #     print(pos)
-            # else:
-            #     if pos[0] != -1 and pos[1] != -1:
-            #         ser.write(MSG_START + str(pos) + MSG_SEP + str(timestmp) + MSG_END)
+            # Sends the position to the Serial Port
+            if not noSerOut and (pos[0] != -1 and pos[1] != -1):
+                ser.write(MSG_START + str(pos) + MSG_SEP + str(timeStmp) + MSG_END)
 
             cv2.imshow("Output", frame)
+            time += 1
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-
-            i += 1
     except Exception as e:
         if not noSerOut:
             ser.close()
