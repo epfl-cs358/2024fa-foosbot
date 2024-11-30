@@ -43,13 +43,9 @@ def get_ball_pos(img, clrRange):
             radius = i[2]
             # Inner square length divided by two
             length = math.floor(math.sqrt(2) * radius / 2)
-            sums = np.array(cv2.sumElems(
+            mean = cv2.mean(
                 img[i[0]-length:i[0]+length, i[1]-length:i[1]+length]
-            ))
-            for i in range(sums.size):
-                if sums[i] > 255:
-                    sums[i] = 255
-            mean = sums / (length*2)**2
+            )
             # Draw inner square
             # cv2.rectangle(img,
             #               (i[0]-length, i[1]-length),
@@ -57,16 +53,16 @@ def get_ball_pos(img, clrRange):
             #               (255, 0, 0), 3)
             print(clrRange)
             print(mean)
+            print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
 
-            if (mean[0] in clrRange[0] and
-                mean[1] in clrRange[1] and
-                mean[2] in clrRange[2]):
+            if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
+                clrRange[1][0] <= mean[1] <= clrRange[1][1] and
+                clrRange[2][0] <= mean[2] <= clrRange[2][1]):
                 print("Found: ", mean)
                 pos = center
-                # print("Radius: " + str(radius))
                 cv2.circle(img, center, radius, (255, 0, 0), 3)
 
-        pos = (circles[0, 0][0], circles[0, 0][1])
+                pos = (circles[0, 0][0], circles[0, 0][1])
 
     return pos
 
@@ -92,19 +88,27 @@ def main(noSerOut, useQR, detailed):
     #  - #ae5757
     #  - #ff7f41
     #  - #eb9888
-    clr = np.array([65, 127, 255]) # BGR
-    tlr = 50
-    clrLo = clr - tlr
-    clrHi = clr + tlr
+    clr = [65, 127, 255] # BGR
+    tlr = 100
+    clrLo = [
+        clr[0] - tlr,
+        clr[1] - tlr,
+        clr[2] - tlr
+    ]
+    clrHi = [
+        clr[0] + tlr,
+        clr[1] + tlr,
+        clr[2] + tlr
+    ]
     clrRange = [
-        range(clrLo[0], clrHi[0]),
-        range(clrLo[1], clrHi[1]),
-        range(clrLo[2], clrHi[2])
+        (clrLo[0], clrHi[0]),
+        (clrLo[1], clrHi[1]),
+        (clrLo[2], clrHi[2])
     ]
 
     # For getting data
     # Open the default camera
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -207,7 +211,7 @@ def main(noSerOut, useQR, detailed):
                         cv2.waitKey(1)
 
             timeStmp = time + 2**32; # Converting time to unsigned
-            pos = process_img(frame)
+            pos = get_ball_pos(frame, clrRange)
 
             # Sends the position to the Serial Port
             if not noSerOut and (pos[0] != -1 and pos[1] != -1):
@@ -219,6 +223,12 @@ def main(noSerOut, useQR, detailed):
             time += 1
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+    except KeyboardInterrupt:
+        if not noSerOut:
+            ser.close()
+        cap.release()
+        cv2.destroyAllWindows()
+        print("\nTerminating...")
     except Exception as e:
         if not noSerOut:
             ser.close()
@@ -231,22 +241,36 @@ if __name__ == "__main__":
     """
     Argument Parser when called from command line.
     Allowed Format:
-        <cmd> [-noSerOut] [-useQR] [-detail]
+        <cmd> [--noSerOut] [--useQR] [--detail]
             Flags :
-            - [-noSerOut]   : Disables Serial output
-            - [-useQR]      : Enables use of QR Markers for image transformation
-            - [-detail]     : If this option is present, the program will open
-                              multiple windows with views at different stages of
-                              the image processing
+            - [--noSerOut]   : Disables Serial output
+            - [--useQR]      : Enables use of QR Markers for image transformation
+            - [--detail]     : If this option is present, the program will open
+                               multiple windows with views at different stages of
+                               the image processing
     """
     noSerOut = False
-    useQR = False
+    useQR    = False
     detailed = False
     for arg in sys.argv:
-        if arg == '-noSerOut':
+        if arg == '--noSerOut' or arg == '-n':
             noSerOut = True
-        if arg == '-useQR':
+            main(noSerOut, useQR, detailed)
+        if arg == '--useQR' or arg == '-u':
             useQR = True
-        if arg == '-detail':
+            main(noSerOut, useQR, detailed)
+        if arg == '--detail' or arg == '-d':
             detailed = True
-    main(noSerOut, useQR, detailed)
+            main(noSerOut, useQR, detailed)
+        if arg == '--help' or arg == '-h':
+            print("""
+Argument Parser when called from command line.
+Allowed Format:
+    <cmd> [--noSerOut] [--useQR] [--detail]
+        Flags :
+        - [--noSerOut]   : Disables Serial output
+        - [--useQR]      : Enables use of QR Markers for image transformation
+        - [--detail]     : If this option is present, the program will open
+                           multiple windows with views at different stages of
+                           the image processing
+                  """)
