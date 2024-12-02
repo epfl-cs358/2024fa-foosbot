@@ -15,10 +15,14 @@ def get_ball_pos(img, clrRange):
     """
     Processes the image and detect the ball.
 
-    :img: The image to be processed.
-    :type img: np.ndarray
+    :img:           The image to be processed.
+    :type img:      np.ndarray
+    :clrRange:      The colour range of detection.
+    :type clrRange: list
     :returns: The position of the ball.
     """
+    pos = (-1, -1)
+
     # Pre-Processing : convert to grayscale image and apply blur
     grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     grey = cv2.medianBlur(grey, 5)
@@ -29,8 +33,6 @@ def get_ball_pos(img, clrRange):
     circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                param1=100, param2=30,
                                minRadius=1, maxRadius=30)
-
-    pos = (-1, -1)
 
     if circles is not None:
         circles = np.uint16(np.around(circles))
@@ -66,6 +68,68 @@ def get_ball_pos(img, clrRange):
 
     return pos
 
+def get_players_pos(img, ctrClrRange, glClrRange):
+    """
+    Gets the player's positions and rotations.
+
+    :img:           The image to be processed.
+    :type img:      np.ndarray
+    :clrRange:      The colour range of detection.
+    :type clrRange: list
+    :returns:       The position of the centre player and of the goalee.
+    """
+    pos = ((-1, -1), (-1, -1))
+
+    # Colour detection with inRange()
+    imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    imgInRangeCtr = cv2.inRange(
+        imgHSV,
+        (ctrClrRange[0][0], ctrClrRange[1][0], ctrClrRange[2][0]),
+        (ctrClrRange[0][1], ctrClrRange[1][1], ctrClrRange[2][1])
+    )
+    imgInRangeGl = cv2.inRange(
+        imgHSV,
+        (glClrRange[0][0], glClrRange[1][0], glClrRange[2][0]),
+        (glClrRange[0][1], glClrRange[1][1], glClrRange[2][1])
+    )
+    # Find the result of colour detection
+    nonZeroLocCtr = cv2.findnonZero(imgInRangeCtr)
+    nonZeroLocGl  = cv2.findNonZero(imgInRangeGl )
+    # Average it all
+    pos[0] = nonZeroLocCtr.mean()
+    pos[1] = nonZeroLocGl .mean()
+
+    return pos
+
+def packClr(clr, tlr):
+    """
+    Packs the given colour into a three channel array that defines the range of
+    thr three given channel with the given tolerance.
+
+    :clr:      Colour to pack.
+    :type clr: list
+    :tlr:      Tolerance to give to the range.
+    :type tlr: int
+    :returns:  An array that defines the range of colour accepted.
+
+    """
+    clrLo = [
+        clr[0] - tlr,
+        clr[1] - tlr,
+        clr[2] - tlr
+    ]
+    clrHi = [
+        clr[0] + tlr,
+        clr[1] + tlr,
+        clr[2] + tlr
+    ]
+    clrRange = [
+        (clrLo[0], clrHi[0]),
+        (clrLo[1], clrHi[1]),
+        (clrLo[2], clrHi[2])
+    ]
+    return clrRange
+
 def main(noSerOut, useQR, detailed):
     """
     Gets the live image of the camera, transforms it such that it only contains
@@ -84,27 +148,26 @@ def main(noSerOut, useQR, detailed):
     """
 
     # For colour detection
+
+    # Ball (BGR)
     # Might be good fits (RGB):
     #  - #ae5757
     #  - #ff7f41
     #  - #eb9888
-    clr = [65, 127, 255] # BGR
-    tlr = 100
-    clrLo = [
-        clr[0] - tlr,
-        clr[1] - tlr,
-        clr[2] - tlr
-    ]
-    clrHi = [
-        clr[0] + tlr,
-        clr[1] + tlr,
-        clr[2] + tlr
-    ]
-    clrRange = [
-        (clrLo[0], clrHi[0]),
-        (clrLo[1], clrHi[1]),
-        (clrLo[2], clrHi[2])
-    ]
+    ballClrRange = packClr(
+        [65, 127, 255], # BGR
+        100
+    )
+
+    # Players (HSV)
+    ctrPlyrClrRange = packClr(
+        [240, 100, 100], # HSV
+        50
+    )
+    glPlyrClrRange = packClr(
+        [0, 100, 100], # HSV
+        50
+    )
 
     # For getting data
     # Open the default camera
@@ -211,15 +274,30 @@ def main(noSerOut, useQR, detailed):
                         cv2.waitKey(1)
 
             timeStmp = time + 2**32; # Converting time to unsigned
-            pos = get_ball_pos(frame, clrRange)
+
+            # Getting ball position
+            ballDetect = frame.copy()
+            ballX, ballY = get_ball_pos(ballDetect, ballClrRange)
+
+            # Getting players' positions
+            (ctrX, ctrY), (glX, glY) = get_players_pos(
+                frame,
+                ctrPlyrClrRange,
+                glPlyrClrRange
+            )
 
             # Sends the position to the Serial Port
-            if not noSerOut and (pos[0] != -1 and pos[1] != -1):
-                ser.write(MSG_START + str(pos)      +
+            if not noSerOut and (ballX != -1 and ballY != -1):
+                ser.write(MSG_START + str(ballX) +
+                          MSG_SEP   + str(ballY) +
+                          MSG_SEP   + str(ctrX)  +
+                          MSG_SEP   + str(ctrY)  +
+                          MSG_SEP   + str(glX)   +
+                          MSG_SEP   + str(glY)   +
                           MSG_SEP   + str(timeStmp) +
                           MSG_END)
 
-            cv2.imshow("Output", frame)
+            cv2.imshow("Output", ballDetect)
             time += 1
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
