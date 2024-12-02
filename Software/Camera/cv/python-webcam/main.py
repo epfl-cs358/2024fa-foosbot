@@ -9,7 +9,7 @@ from cv2 import aruco
 
 MSG_START = ':'
 MSG_SEP   = ';'
-MSG_END   = '\r\n'
+MSG_END   = '\n'
 
 def get_ball_pos(img, clrRange):
     """
