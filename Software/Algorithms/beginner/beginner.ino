@@ -3,17 +3,23 @@
 
 
 //constants 
-#define controlSpeedThreshold 5
-#define controlPositionThresholdX 20
-#define controlPositionThresholdY 20
-#define rod0_Y 100                    //position of the goalkeeper rod
-#define rod1_Y 300                    //position of the attack rod
-#define speedThreshold 15
-#define fieldLength 1000
-#define offsetGoalie 15 
+#define controlSpeedThreshold 10
+#define controlPositionThresholdX 15
+#define controlPositionThresholdY 15
+#define rod0_Y 81,5                   //position of the goalkeeper rod
+#define rod1_Y 232                    //position of the attack rod
+#define speedThreshold 25
+#define fieldWidth   680
+#define fieldHeight  605
+#define cameraWidth  640
+#define cameraHeight 605 
+#define offsetGoalie 20 
 #define crossFireOffset 15
-#define minGoal 200 
-#define maxGoal 400
+#define minGoal 250 
+#define maxGoal 430
+
+double scaleX = fieldWidth/ cameraWidth;    //ratio of cv coordinates into the field dimension 
+double scaleY = fieldHeight/ cameraHeight
 
 typedef struct {
     double x;          // x-coordinate of posB
@@ -74,8 +80,8 @@ void calculateBallTrajectory(){
   }
 
   //update variables
-  previousX = ballData.x;
-  previousY = ballData.y;
+  previousX = ballData.x * scaleX; //map camera coordinates to field coordinates
+  previousY = ballData.y * scaleY;
   previousTime = ballData.timestamp;
 
 }
@@ -162,7 +168,7 @@ void takeDefensePosition(){
   translateAndUpdatePlayers(rodTranslation);
     
   //offset gardian depending on the half of the field the ball comes from 
-  if(ballData.x <= fieldLength/2){
+  if(ballData.x <= fieldWidth/2){
     motorMovement[0] = rodTranslation - offsetGoalie;  //offset the goalkeeper to the left of the attacker
     MOVE(motorMovement[0])
     playerPosition[0][0] += rodTranslation - offsetGoalie;
