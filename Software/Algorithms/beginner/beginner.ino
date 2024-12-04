@@ -6,7 +6,7 @@
 #define controlSpeedThreshold 10
 #define controlPositionThresholdX 15
 #define controlPositionThresholdY 15
-#define rod0_Y 81,5                   //position of the goalkeeper rod
+#define rod0_Y 81.5                   //position of the goalkeeper rod
 #define rod1_Y 232                    //position of the attack rod
 #define speedThreshold 25
 #define fieldWidth   680
@@ -20,6 +20,19 @@
 
 double scaleX = fieldWidth/ cameraWidth;    //ratio of cv coordinates into the field dimension 
 double scaleY = fieldHeight/ cameraHeight
+
+//inputs of the cv
+typedef struct{
+  double x; 
+  double y; 
+  double timestamp;
+} FrameData;
+
+FrameData currentFrame = {-1,-1,-1}; 
+FrameData previousFrame = {-1,-1,-1};
+
+bool firstFrameReceived = false;
+bool secondFrameReceived = false; 
 
 typedef struct {
     double x;          // x-coordinate of posB
@@ -37,13 +50,34 @@ double motorMovement[4]; // 0: Goalkeeper X, 1: Goalkeeper angle, 2: Attack rod 
 double playerPosition[4][2]; // Player positions: [x, angle]
 
 //retrieve ball data
-void getBallData(){
+bool getBallData(){
 
-  if (Serial.available() > 0) {
+  //process all lines in the buffer 
+  while (Serial.available() > 0){
+
     //String fromatted as ":x;y;timestamp"
     String data = Serial.readStringUntil('\n');
-    sscanf(data.c_str(), ":%lf;%lf;%lf", &ballData.x, &ballData.y, &ballData.timestamp);
+    double newX, newY, newTimestamp;
+    if(sscanf(data.c_str(), ":%lf;%lf;%lf", &newX, &newY, &newTimestamp) == 3){
+
+      //update frame data 
+      previousFrame = currentFrame;
+      currentFrame.x = newX * scaleX;  //map camera coordinates to field coordinates
+      currentFrame.y = newY * scaleY;
+      currentFrame.timestamp = newTimestamp;
+    
+      // Update frame reception 
+      if (!firstFrameReceived) {
+        firstFrameReceived = true; // The first frame has been received
+      } 
+    }
   }
+
+  ballData.x = currentFrame.x; 
+  ballData.y = currentFrame.y;
+  ballData.timestamp = currentFrame.timestamp;
+
+  return firstFrameReceived;
 
 }
 
@@ -54,7 +88,7 @@ void calculateBallTrajectory(){
   static double previousY = 0;
   static double previousTime = 0; //ms 
 
-  if (previousTime > 0){
+  if (currentFrame.timestamp > -1){
     double deltaTime = ballData.timestamp - previousTime; 
 
     if (deltaTime > 0){
@@ -75,13 +109,13 @@ void calculateBallTrajectory(){
   }
   else{
     ballData.a = 0; //first time function is called
-    ballData.b = ballData.y;
+    ballData.b = currentFrame.y;
     ballData.speed = 0;
   }
 
   //update variables
-  previousX = ballData.x * scaleX; //map camera coordinates to field coordinates
-  previousY = ballData.y * scaleY;
+  previousX = ballData.x;
+  previousY = ballData.y;
   previousTime = ballData.timestamp;
 
 }
@@ -275,9 +309,10 @@ void setup() {
 void loop() {
 
     // Retrieve ball data from computer vision system
-    getBallData();
+    if(!getBallData()){
+      return;
+    }
 
-    // Calculate ball trajectory and decide on position
     calculateBallTrajectory();
 
     // Defensive or offensive positioning based on ball control
