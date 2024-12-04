@@ -1,0 +1,4 @@
+[debug] [scala] Classpath dependencies List()
+[debug] [scala] Dependencies from configurations List()
+[debug] Bloop wrote the configuration of project 'scala' to '/home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala/.bloop/scala.json'
+[success] Generated .bloop/scala.json
