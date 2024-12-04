@@ -17,9 +17,12 @@
 #define crossFireOffset 15
 #define minGoal 250 
 #define maxGoal 430
+#define motorUnits 350
+#define physicalRangeMM 70
 
 double scaleX = fieldWidth/ cameraWidth;    //ratio of cv coordinates into the field dimension 
-double scaleY = fieldHeight/ cameraHeight
+double scaleY = fieldHeight/ cameraHeight;
+double motorScalingFactor = motorUnits / physicalRangeMM ;
 
 //inputs of the cv
 typedef struct{
@@ -175,8 +178,8 @@ void rotateAndUpdatePlayers(double y){
 
 //helper function
 void translateAndUpdatePlayers(double x){
-  motorMovement[2] = x; 
-  MOVE(x);
+  motorMovement[2] = x * motorScalingFactor; 
+  MOVE(motorMovement[2]);
   for (int i = 1; i < 4; i++){      
       playerPosition[i][0] += x;
   }
@@ -207,7 +210,7 @@ void takeDefensePosition(){
     MOVE(motorMovement[0])
     playerPosition[0][0] += rodTranslation - offsetGoalie;
   }else{
-    motorMovement[0] = rodTranslation + offsetGoalie;
+    motorMovement[0] = (rodTranslation + offsetGoalie) * motorScalingFactor;
     MOVE(motorMovement[0])                            //offset the goalkeeper to the right of the attacker
     playerPosition[0][0] += rodTranslation + offsetGoalie;
   }
@@ -259,7 +262,7 @@ void liftAttackerAndShoot(double x){
 
   motorMovement[3] -= 10; //lift player up to the front 
   ROTATE(motorMovement[3]); 
-  motorMovement[2] -= x;  //offset player
+  motorMovement[2] -= x * motorScalingFactor;  //offset player
   MOVE(motorMovement[2]);
   hitBallFront();         //hit ball
 
@@ -270,7 +273,7 @@ void liftAttackerAndPush(double x){
   
   motorMovement[3] += 30;  //lift player up to the back
   ROTATE(motorMovement[3]);
-  motorMovement[2] += x;   //offset player 
+  motorMovement[2] += x * motorScalingFactor;   //offset player 
   MOVE(motorMovement[2]);
   motorMovement[3] -= 30;  //push the ball 
   ROTATE(motorMovement[3]);
