@@ -4,6 +4,7 @@ import sys
 import serial
 import cv2
 import math
+import statistics
 import numpy as np
 from cv2 import aruco
 
@@ -62,7 +63,7 @@ def get_ball_pos(img, clrRange):
                 clrRange[2][0] <= mean[2] <= clrRange[2][1]):
                 print("Found: ", mean)
                 pos = center
-                cv2.circle(img, center, radius, (255, 0, 0), 3)
+                cv2.circle(img, center, radius, (0, 255, 0), 3)
 
                 pos = (circles[0, 0][0], circles[0, 0][1])
 
@@ -78,28 +79,53 @@ def get_players_pos(img, ctrClrRange, glClrRange):
     :type clrRange: list
     :returns:       The position of the centre player and of the goalee.
     """
-    pos = ((-1, -1), (-1, -1))
+    pos = [[-1, -1], [-1, -1]]
 
     # Colour detection with inRange()
     imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     imgInRangeCtr = cv2.inRange(
         imgHSV,
-        (ctrClrRange[0][0], ctrClrRange[1][0], ctrClrRange[2][0]),
-        (ctrClrRange[0][1], ctrClrRange[1][1], ctrClrRange[2][1])
+        np.array([100, 150, 0]),
+        np.array([140, 255, 255])
     )
-    imgInRangeGl = cv2.inRange(
+    imgInRangeGl1 = cv2.inRange(
         imgHSV,
-        (glClrRange[0][0], glClrRange[1][0], glClrRange[2][0]),
-        (glClrRange[0][1], glClrRange[1][1], glClrRange[2][1])
+        np.array([0, 120, 70]),
+        np.array([10, 255, 255])
+    )
+    imgInRangeGl2 = cv2.inRange(
+        imgHSV,
+        np.array([170, 120, 70]),
+        np.array([180, 255, 255])
     )
     # Find the result of colour detection
-    nonZeroLocCtr = cv2.findnonZero(imgInRangeCtr)
-    nonZeroLocGl  = cv2.findNonZero(imgInRangeGl )
+    nonZeroLocCtr = np.squeeze(np.array(cv2.findNonZero(imgInRangeCtr)))
+    nonZeroLocGl1 = np.squeeze(np.array(cv2.findNonZero(imgInRangeGl1)))
+    nonZeroLocGl2 = np.squeeze(np.array(cv2.findNonZero(imgInRangeGl2)))
+    if nonZeroLocGl1 != None and nonZeroLocGl2 != None:
+        nonZeroLocGl = np.concatenate(
+            (nonZeroLocGl1, nonZeroLocGl2)
+        )
+    else:
+        nonZeroLocGl = None
     # Average it all
-    pos[0] = nonZeroLocCtr.mean()
-    pos[1] = nonZeroLocGl .mean()
+    if nonZeroLocCtr is not None:
+        pos[0][0] = int(statistics.fmean(nonZeroLocCtr[:][0]))
+        pos[0][1] = int(statistics.fmean(nonZeroLocCtr[:][1]))
+        imgInRangeCtr = cv2.circle(
+            img, (pos[0][0], pos[0][1]), 15, (255, 0, 0), 5
+        )
+    if nonZeroLocGl  is not None:
+        pos[1][0] = int(statistics.fmean(nonZeroLocGl [:][0]))
+        pos[1][1] = int(statistics.fmean(nonZeroLocGl [:][1]))
+        imgInRangeGl1 = cv2.circle(
+            img, (pos[1][0], pos[1][1]), 15, (0, 0, 255), 5
+        )
+        imgInRangeGl2 = cv2.circle(
+            img, (pos[1][0], pos[1][1]), 15, (0, 0, 255), 5
+        )
 
-    return pos
+    return pos, imgInRangeCtr, imgInRangeGl1, imgInRangeGl2
 
 def packClr(clr, tlr):
     """
@@ -161,11 +187,11 @@ def main(noSerOut, useQR, detailed):
 
     # Players (HSV)
     ctrPlyrClrRange = packClr(
-        [240, 100, 100], # HSV
+        [240, 100, 100], # Blue HSV
         50
     )
     glPlyrClrRange = packClr(
-        [0, 100, 100], # HSV
+        [0, 100, 100], # Red HSV
         50
     )
 
@@ -223,8 +249,8 @@ def main(noSerOut, useQR, detailed):
                              int(frameWidth / 2),
                              int(frameHeight / 2))
 
-    cv2.namedWindow("Output", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Output", int(frameWidth / 2), int(frameHeight / 2))
+    # cv2.namedWindow("Output", cv2.WINDOW_NORMAL)
+    # cv2.resizeWindow("Output", int(frameWidth / 2), int(frameHeight / 2))
 
     # Main Loop for image processing
     try:
@@ -280,7 +306,8 @@ def main(noSerOut, useQR, detailed):
             ballX, ballY = get_ball_pos(ballDetect, ballClrRange)
 
             # Getting players' positions
-            (ctrX, ctrY), (glX, glY) = get_players_pos(
+            ((ctrX, ctrY),
+             ( glX,  glY)), plyrCtr, plyrGl1, plyrGl2 = get_players_pos(
                 frame,
                 ctrPlyrClrRange,
                 glPlyrClrRange
@@ -297,16 +324,24 @@ def main(noSerOut, useQR, detailed):
                           MSG_SEP   + str(timeStmp) +
                           MSG_END)
 
-            cv2.imshow("Output", ballDetect)
+            cv2.namedWindow("Ball", cv2.WINDOW_NORMAL)
+            cv2.imshow("Ball", ballDetect)
+            cv2.namedWindow("Centre Players", cv2.WINDOW_NORMAL)
+            cv2.imshow("Centre Players", plyrCtr)
+            cv2.namedWindow("Goalee Player 1", cv2.WINDOW_NORMAL)
+            cv2.imshow("Goalee Player 1", plyrGl1)
+            cv2.namedWindow("Goalee Player 2", cv2.WINDOW_NORMAL)
+            cv2.imshow("Goalee Player 2", plyrGl2)
             time += 1
             if cv2.waitKey(1) & 0xFF == ord('q'):
+                print("\n")
                 break
     except KeyboardInterrupt:
         if not noSerOut:
             ser.close()
         cap.release()
         cv2.destroyAllWindows()
-        print("\nTerminating...")
+        print("\nTerminating...\n")
     except Exception as e:
         if not noSerOut:
             ser.close()
