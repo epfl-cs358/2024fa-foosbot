@@ -134,8 +134,6 @@ def main(noSerOut, useQR, detailed):
             ser.open()
         print("Serial opened.")
 
-    # Setting i to the minimum possible value
-    i = -sys.maxsize - 1
     if useQR:
         # Define destination points (corners of the image)
         dst_points = np.float32([
@@ -212,14 +210,16 @@ def main(noSerOut, useQR, detailed):
                         #cv2.imshow("Transformed Frame", frame)
                         cv2.waitKey(1)
 
-            timeStmp = time + 2**32; # Converting time to unsigned
+            timeStmp = time;
             pos = get_ball_pos(frame, clrRange)
 
             # Sends the position to the Serial Port
             if not noSerOut and (pos[0] != -1 and pos[1] != -1):
-                ser.write(str.encode(MSG_START + str(pos)      +
-                          MSG_SEP   + str(timeStmp) +
-                          MSG_END))
+                ser.write((
+                    MSG_START + str(pos[0])   +
+                    MSG_SEP   + str(pos[1])   +
+                    MSG_SEP   + str(timeStmp) +
+                    MSG_END).encode())
 
             cv2.imshow("Output", frame)
             time += 1

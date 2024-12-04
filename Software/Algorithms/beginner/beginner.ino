@@ -317,4 +317,13 @@ void loop() {
     if(!getBallData()){
       return;
     }
+
+    calculateBallTrajectory();
+
+    // Defensive or offensive positioning based on ball control
+    if (!isBallControlled()) {
+        takeDefensePosition();
+    } else {
+        takeAttackPosition();
+    }
 }
