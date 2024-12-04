@@ -1,0 +1,21 @@
+[0m[[0m[0mdebug[0m] [0m[0mPackaging /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/target/scala-2.13/scala_akka-serial_2.13-0.1.0-SNAPSHOT.jar ...[0m
+[0m[[0m[0mdebug[0m] [0m[0mInput file mappings:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	serial[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/target/scala-2.13/classes/serial[0m
+[0m[[0m[0mdebug[0m] [0m[0m	serial/Terminal$Wrote.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/target/scala-2.13/classes/serial/Terminal$Wrote.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	serial/Terminal$$anonfun$receive$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/target/scala-2.13/classes/serial/Terminal$$anonfun$receive$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	serial/Terminal.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/target/scala-2.13/classes/serial/Terminal.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	serial/Main.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/target/scala-2.13/classes/serial/Main.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	serial/Terminal$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/target/scala-2.13/classes/serial/Terminal$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	serial/Terminal$$anonfun$opened$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/target/scala-2.13/classes/serial/Terminal$$anonfun$opened$1.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	serial/Main$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/target/scala-2.13/classes/serial/Main$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	serial/Terminal$Wrote$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /home/tough/Documents/EPFL/BA5/MIT/Group Project/2024fa-foosbot/Software/Camera/transmit_image_test/scala_akka-serial/target/scala-2.13/classes/serial/Terminal$Wrote$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0mDone packaging.[0m
