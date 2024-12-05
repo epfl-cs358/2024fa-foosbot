@@ -18,8 +18,8 @@
 #define minGoal 250
 #define maxGoal 430
 
-double scaleX = fieldWidth/ cameraWidth;    //ratio of cv coordinates into the field dimension
-double scaleY = fieldHeight/ cameraHeight;
+int scaleX = fieldWidth/ cameraWidth;    //ratio of cv coordinates into the field dimension
+int scaleY = fieldHeight/ cameraHeight;
 
 //inputs of the cv
 typedef struct {
@@ -38,16 +38,16 @@ typedef struct {
     int x;          // x-coordinate of posB
     int y;          // y-coordinate of posB
     int timestamp;  // when the frame arrived
-    double a;          // Slope of the line
-    double b;          // Intercept of the line
-    double speed;      // Calculated speed
+    int a;          // Slope of the line
+    int b;          // Intercept of the line
+    int speed;      // Calculated speed
 } Infos;
 
 Infos ballData;
 
 //Movement commands for players
-double motorMovement[4]; // 0: Goalkeeper X, 1: Goalkeeper angle, 2: Attack rod X, 3: Attack rod angle
-double playerPosition[4][2]; // Player positions: [x, angle]
+int motorMovement[4]; // 0: Goalkeeper X, 1: Goalkeeper angle, 2: Attack rod X, 3: Attack rod angle
+int playerPosition[4][2]; // Player positions: [x, angle]
 
 //retrieve ball data
 bool getBallData(){
@@ -71,6 +71,14 @@ bool getBallData(){
         Serial.print("t: ");
         Serial.println(previousFrame.timestamp);
 
+        Serial.print("Current Frame:\n");
+        Serial.print("x: ");
+        Serial.println(currentFrame.x);
+        Serial.print("y: ");
+        Serial.println(currentFrame.y);
+        Serial.print("t: ");
+        Serial.println(currentFrame.timestamp);
+
         if (!firstFrameReceived) {
             firstFrameReceived = true;
         }
@@ -79,6 +87,40 @@ bool getBallData(){
     return firstFrameReceived;
 }
 
+//get ball.a, ball.b, ball.speed
+void calculateBallTrajectory(){
+
+  if (ballData.timestamp > -1){
+    int deltaTime = ballData.timestamp - previousFrame.timestamp;
+
+    if (deltaTime > 0){
+
+      //complete linear equation ax + b
+      if(ballData.x != previousFrame.x){
+        ballData.a = (ballData.y - previousFrame.y) / (ballData.x - previousFrame.x); // a = y2-y1/ x2-x1
+        ballData.b = ballData.y - ballData.a * ballData.x; // b = y2 - a * x2
+      }
+      else{
+        ballData.a = 0;
+        ballData.b = ballData.x; //Vertical line stays at x position
+      }
+
+    //calculate speed
+    ballData.speed = sqrt(pow((ballData.x - previousFrame.x), 2) + pow((ballData.y - previousFrame.y), 2)) / deltaTime; // v = d/t
+    }
+  }
+  else{
+    ballData.a     = 0; //first time function is called
+    ballData.b     = ballData.y;
+    ballData.speed = 0;
+  }
+
+  Serial.print("Speed: \n");
+  Serial.print("a: ");
+  Serial.println(ballData.a);
+  Serial.print("b: ");
+  Serial.println(ballData.b);
+}
 
 void setup() {
 
@@ -96,12 +138,5 @@ void loop() {
     ballData.y         = currentFrame.y;
     ballData.timestamp = currentFrame.timestamp;
 
-    Serial.print("Ball Data:\n");
-    Serial.print("x: ");
-    Serial.println(ballData.x);
-    Serial.print("y: ");
-    Serial.println(ballData.y);
-    Serial.print("t: ");
-    Serial.println(ballData.timestamp);
-
+    calculateBallTrajectory();
 }
