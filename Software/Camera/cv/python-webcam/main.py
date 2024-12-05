@@ -109,7 +109,7 @@ def main(noSerOut, useQR, detailed):
 
     # For getting data
     # Open the default camera
-    cap = cv2.VideoCapture(2)
+    cap = cv2.VideoCapture(0)
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))

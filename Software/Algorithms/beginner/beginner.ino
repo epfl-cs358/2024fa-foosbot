@@ -2,7 +2,7 @@
 #include <math.h>
 
 
-//constants 
+//constants
 #define controlSpeedThreshold 10
 #define controlPositionThresholdX 15
 #define controlPositionThresholdY 15
@@ -15,32 +15,32 @@
 #define cameraHeight 480 
 #define offsetGoalie 20 
 #define crossFireOffset 15
-#define minGoal 250 
+#define minGoal 250
 #define maxGoal 430
 #define motorUnits 350
 #define physicalRangeMM 70
 
-double scaleX = fieldWidth/ cameraWidth;    //ratio of cv coordinates into the field dimension 
+double scaleX = fieldWidth/ cameraWidth;    //ratio of cv coordinates into the field dimension
 double scaleY = fieldHeight/ cameraHeight;
 double motorScalingFactor = motorUnits / physicalRangeMM ;
 
 //inputs of the cv
 typedef struct {
-  double x; 
-  double y; 
+  double x;
+  double y;
   double timestamp;
 } FrameData;
 
-FrameData currentFrame = {-1,-1,-1}; 
+FrameData currentFrame = {-1,-1,-1};
 FrameData previousFrame = {-1,-1,-1};
 
 bool firstFrameReceived = false;
-bool secondFrameReceived = false; 
+bool secondFrameReceived = false;
 
 typedef struct {
     double x;          // x-coordinate of posB
     double y;          // y-coordinate of posB
-    double timestamp;  // when the frame arrived 
+    double timestamp;  // when the frame arrived
     double a;          // Slope of the line
     double b;          // Intercept of the line
     double speed;      // Calculated speed
@@ -55,7 +55,7 @@ double playerPosition[4][2]; // Player positions: [x, angle]
 //retrieve ball data
 bool getBallData(){
 
-  //process all lines in the buffer 
+  //process all lines in the buffer
   while (Serial.available() > 0){
 
     //String fromatted as ":x;y;timestamp"
@@ -66,20 +66,20 @@ bool getBallData(){
       Serial.print(newX);
       Serial.print(newY);
       Serial.print(newTimestamp);
-      //update frame data 
+      //update frame data
       previousFrame = currentFrame;
       currentFrame.x = newX * scaleX;  //map camera coordinates to field coordinates
       currentFrame.y = newY * scaleY;
       currentFrame.timestamp = newTimestamp;
-    
-      // Update frame reception 
+
+      // Update frame reception
       if (!firstFrameReceived) {
         firstFrameReceived = true; // The first frame has been received
-      } 
+      }
     }
   }
 
-  ballData.x = currentFrame.x; 
+  ballData.x = currentFrame.x;
   ballData.y = currentFrame.y;
   ballData.timestamp = currentFrame.timestamp;
 
@@ -92,21 +92,21 @@ void calculateBallTrajectory(){
 
   static double previousX = 0;
   static double previousY = 0;
-  static double previousTime = 0; //ms 
+  static double previousTime = 0; //ms
 
   if (currentFrame.timestamp > -1){
-    double deltaTime = ballData.timestamp - previousTime; 
+    double deltaTime = ballData.timestamp - previousTime;
 
     if (deltaTime > 0){
-      
-      //complete linear equation ax + b 
+
+      //complete linear equation ax + b
       if(ballData.x != previousX){
         ballData.a = (ballData.y - previousY) / (ballData.x - previousX); // a = y2-y1/ x2-x1
         ballData.b = ballData.y - ballData.a * ballData.x; // b = y2 - a * x2
       }
       else{
-        ballData.a = 0; 
-        ballData.b = ballData.x; //Vertical line stays at x position 
+        ballData.a = 0;
+        ballData.b = ballData.x; //Vertical line stays at x position
       }
 
     //calculate speed
@@ -132,9 +132,9 @@ int getClosestAttackPlayerIndex(double x, double y){
   int closestIndex = -1;
   double minDistance = 1e5;
 
-  //Calulate the euclidian distance to the ball for each player 
+  //Calulate the euclidian distance to the ball for each player
   for (int i = 1; i < 4; i++) { //only attack players (index 1, 2, 3)
-    double playerX = playerPosition[i][0]; 
+    double playerX = playerPosition[i][0];
     double playerY = rod1_Y;
 
     // Calculate the Euclidean distance to the ball
@@ -146,7 +146,7 @@ int getClosestAttackPlayerIndex(double x, double y){
       closestIndex = i;
     }
   }
-  
+
   return closestIndex;
 
 }
@@ -156,11 +156,11 @@ bool isBallControlled(){
   int closestAttackerToBall = getClosestAttackPlayerIndex(ballData.x, ballData.y);
 
   //check if ball is controlled by the goalkeeper
-  bool isNearRod0 = (abs(ballData.x - playerPosition[0][0]) <= controlPositionThresholdX) && 
+  bool isNearRod0 = (abs(ballData.x - playerPosition[0][0]) <= controlPositionThresholdX) &&
                       (abs(ballData.y - rod0_Y) <= controlPositionThresholdY);
 
   //check if ball is controlled by a player of the attack rod
-  bool isNearRod1 = (abs(ballData.x - playerPosition[closestAttackerToBall][0]) <= controlPositionThresholdX) && 
+  bool isNearRod1 = (abs(ballData.x - playerPosition[closestAttackerToBall][0]) <= controlPositionThresholdX) &&
                       (abs(ballData.y - rod1_Y) <= controlPositionThresholdY);
 
   //check that the ball is slow enough
@@ -172,18 +172,18 @@ bool isBallControlled(){
 
 //helper function
 void rotateAndUpdatePlayers(double y){
-  motorMovement[3] = y; 
+  motorMovement[3] = y;
   ROTATE(y);
-  for (int i = 1; i < 4; i++){      
+  for (int i = 1; i < 4; i++){
       playerPosition[i][1] = y;
   }
 }
 
 //helper function
 void translateAndUpdatePlayers(double x){
-  motorMovement[2] = x * motorScalingFactor; 
+  motorMovement[2] = x * motorScalingFactor;
   MOVE(motorMovement[2]);
-  for (int i = 1; i < 4; i++){      
+  for (int i = 1; i < 4; i++){
       playerPosition[i][0] += x;
   }
 }
@@ -204,10 +204,10 @@ void takeDefensePosition(){
     rotateAndUpdatePlayers(-30);
   }
 
-  //move rod to intercept ball 
+  //move rod to intercept ball
   translateAndUpdatePlayers(rodTranslation);
-    
-  //offset gardian depending on the half of the field the ball comes from 
+
+  //offset gardian depending on the half of the field the ball comes from
   if(ballData.x <= fieldWidth/2){
     motorMovement[0] = rodTranslation - offsetGoalie;  //offset the goalkeeper to the left of the attacker
     MOVE(motorMovement[0])
@@ -220,7 +220,7 @@ void takeDefensePosition(){
 
 }
 
-//helper function 
+//helper function
 void alignMiddlePlayerWithGoalkeeper(){
 
   double alignement = playerPosition[0][0] - playerPosition[2][0];
@@ -231,9 +231,9 @@ void alignMiddlePlayerWithGoalkeeper(){
 
 }
 
-//helper function 
+//helper function
 void passBallToMiddlePlayer(){
-  
+
   while(rod0_Y + controlPositionThresholdY / 2){
     motorMovement[1] -= 5;
     ROTATE(-5);
@@ -242,7 +242,7 @@ void passBallToMiddlePlayer(){
 
 }
 
-//helper function 
+//helper function
 void hitBallFront(){
 
   motorMovement[3] = -360;
@@ -251,7 +251,7 @@ void hitBallFront(){
 
 }
 
-//helper function 
+//helper function
 void hitBallBack(){
 
   motorMovement[3] = -60;
@@ -260,25 +260,25 @@ void hitBallBack(){
 
 }
 
-//helper function 
+//helper function
 void liftAttackerAndShoot(double x){
 
-  motorMovement[3] -= 10; //lift player up to the front 
-  ROTATE(motorMovement[3]); 
+  motorMovement[3] -= 10; //lift player up to the front
+  ROTATE(motorMovement[3]);
   motorMovement[2] -= x * motorScalingFactor;  //offset player
   MOVE(motorMovement[2]);
   hitBallFront();         //hit ball
 
 }
 
-//helper function 
+//helper function
 void liftAttackerAndPush(double x){
-  
+
   motorMovement[3] += 30;  //lift player up to the back
   ROTATE(motorMovement[3]);
-  motorMovement[2] += x * motorScalingFactor;   //offset player 
+  motorMovement[2] += x * motorScalingFactor;   //offset player
   MOVE(motorMovement[2]);
-  motorMovement[3] -= 30;  //push the ball 
+  motorMovement[3] -= 30;  //push the ball
   ROTATE(motorMovement[3]);
   INITALY;
 
@@ -286,7 +286,7 @@ void liftAttackerAndPush(double x){
 
 void takeAttackPosition(){
 
-  //if the goalkeeper has the ball pass it to the attack 
+  //if the goalkeeper has the ball pass it to the attack
   if(ballData.y <= rod0_Y + controlPositionThresholdY/2){
     alignMiddlePlayerWithBall();
     passBallToMiddlePlayer();
@@ -302,12 +302,12 @@ void takeAttackPosition(){
       (motorMovement[3] < 0 )? liftAttackerAndShoot(-crossFireOffset) : liftLeftAttackerAndPush(-crossFireOffset);
     }
   }
-  
+
 }
 
 void setup() {
 
-  Serial.begin(9600); //create communication with cv 
+  Serial.begin(9600); //create communication with cv
 
 }
 
