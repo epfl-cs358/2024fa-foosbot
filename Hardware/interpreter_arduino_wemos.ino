@@ -4,7 +4,7 @@
 #define Y_DIR 6
 #define Y_STP 3
 #define X_DIR 7
-#define X_STP 4
+#define X_STP 5
 // 1000 units is for the full range side to side
 const float stepsPerMM = 400.0; // Adjust based on your setup ==> nb of steps required to move 1mm
 SoftwareSerial wemosSerial1(-1, 10);  // single player pole rotary
