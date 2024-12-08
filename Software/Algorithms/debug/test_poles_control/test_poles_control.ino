@@ -1,3 +1,4 @@
+Ella, [08.12.2024 19:58]
 // Inspired by https://gist.github.com/edgar-bonet/607b387260388be77e96
 #include <stdio.h>
 #include <math.h>
@@ -21,12 +22,47 @@
 //#define fieldXToMM physicalRangeMM / fieldWidth
 #define fieldXToMotorUnits motorUnits / fieldWidth  // Ratio used to convert from field X coordinate to the units required by the motors
 
-#define BEGIN(p)          // Move to an extreme and reset rotation
-#define MOVE(p, v)        // Move towards motor by +v
-#define ROTATE(p, angle)  // Rotate by angle
-#define INITIALX(p)       // Reset Position
-#define INITIALY(p)       // Reset Rotation
+#define BEGIN()          // Move to an extreme and reset rotation
+#define MOVE(pos)        // Move towards motor by +v
+#define ROTATE(angle)  // Rotate by angle
+#define INITIALX()       // Reset Position
+#define INITIALY()       // Reset Rotation
 
+// Moves the pole according to the given target & current X coordinates.
+// Note that this function takes arguments in field coordinates (used by the algorithm).
+void moveField(int poleId, int target_x, int* curr_x) {
+  int diff = target_x - *curr_x;
+  *curr_x += diff; // MIGHT NEED TO CLAMP / CHECK WHETHER IN RANGE
+  if (poleId == 0){
+    MOVE1(fieldXToMotorUnits * diff);
+  }
+  else if (poleId == 1){
+    MOVE2(fieldXToMotorUnits * diff);
+  }
+  else{
+    println("please enter valid poleId, 0 or 1");
+  }
+}
+
+// Moves the pole back to the middle (initial X coordinate)
+// and updates the current X coordinate
+void centerPole(int poleId, int* curr_x) {
+  INITIALX();                                 //Not sure how the interpreter was defined in this case 
+  *curr_x = fieldWidth / 2;
+}
+
+//chose based on pole ID which pole to move
+void rotate(int poleId, int angle){
+  if (poleId == 0){
+    ROTATE1(angle);
+  }
+  else if (poleId == 1){
+    ROTATE2(angle);
+  }
+  else{
+    println("please enter valid poleId, 0 or 1");
+  }
+}
 
 void setup() {
   Serial.begin(9600);
@@ -34,48 +70,48 @@ void setup() {
 
 void loop() {
 
+  //poleID == 0 moves goalkeeper, poleID == 1 moves attack 
   int poleId = 0; // Change this to decide what motor to control
   delay(2000);
 
   // INITIAL STEPS
 
-  // Set the Pole to the start position (in the middle of the field)
-  BEGIN(motorId);
+
+  BEGIN();
   int curr_x_algo = fieldWidth / 2;
   delay(2000);
   // TEST ROTATION
-  INITIALY(motorId); // Should bring rotation
+  INITIALY(); // Should bring rotation
   delay(1000);
 
   // SIMPLE ROTATIONS
-  ROTATE(motorId, -30); // Should move back (shooting position)
+  rotate(poleId, 30); // Should move back (shooting position)
   delay(1000);
-  ROTATE(motorId, 30); // Should get back to initial rotation
+  rotate(poleId, -30); // Should get back to initial rotation
   delay(1000);
-  ROTATE(motorId, 30); // Gets into position for receiving a pass
+  rotate(poleId, -30); // Gets into position for receiving a pass
   delay(1000);
-  INITIALY(motorId);
+  INITIALY();
   delay(1000);
 
   // Do a full Revolution
-  ROTATE(motorId, 360); // In one direction
+  rotate(poleId, 360); // In one direction
   delay(2000);
-  ROTATE(motorId, -360); // In the other direction
+  rotate(poleId, -360);  // In the other direction
   delay(2000);
-
+ 
   // Simulate a shot
-  ROTATE(motorId, -30); // Should move back (shooting position)
+  rotate(poleId, 30); // Should move back (shooting position)
   delay(1000);
-  ROTATE(motorId, 60); // Should go from -30° to +30°
+  rotate(poleId, -60); // Should go from 30° to .-30°
   delay(1000);
-  INITIALY(motorId);
+  INITIALY();
 
 
   // LINEAR MOTION
 
   // Example of conversion from camera coordinates to field coordinates
-  int target_x_cam = cameraHeight;
-  int target_x_algo = (scaleX * target_x_cam);
+  int target_x_algo = (scaleX * cameraWidth);
 
   // Move to the extreme on the side towards the motor
   moveField(poleId, target_x_algo, &curr_x_algo);
@@ -88,19 +124,4 @@ void loop() {
   // Move back to the middle (& update current_pos)
   centerPole(poleId, &curr_x_algo);
   delay(2000);
-}
-
-// Moves the pole according to the given target & current X coordinates.
-// Note that this function takes arguments in field coordinates (used by the algorithm).
-void moveField(int pole, int target_x, int* curr_x) {
-  int diff = target_x - *curr_x;
-  *curr_x += diff; // MIGHT NEED TO CLAMP / CHECK WHETHER IN RANGE
-  MOVE(pole, fieldXToMotorUnits * diff);
-}
-
-// Moves the pole back to the middle (initial X coordinate)
-// and updates the current X coordinate
-void centerPole(int pole, int* curr_x) {
-  INITIALX(pole);
-  *curr_x = fieldWidth / 2;
 }
