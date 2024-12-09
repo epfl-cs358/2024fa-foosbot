@@ -54,9 +54,9 @@ bool getBallData(){
 
     if (Serial.available() > 0) {
         Serial.readStringUntil(':');
-        int x         = Serial.readStringUntil(';' ).toInt();
-        int y         = Serial.readStringUntil(';' ).toInt();
-        int timestamp = Serial.readStringUntil('\n').toInt();
+        int x         = Serial.readStringUntil(';').toInt();
+        int y         = Serial.readStringUntil(';').toInt();
+        int timestamp = millis();
 
         previousFrame = currentFrame;
         currentFrame.x         = x;
@@ -116,6 +116,7 @@ void calculateBallTrajectory(){
   }
 
   Serial.print("Speed: \n");
+  Serial.println(ballData.speed);
   Serial.print("a: ");
   Serial.println(ballData.a);
   Serial.print("b: ");
