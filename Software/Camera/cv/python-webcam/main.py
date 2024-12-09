@@ -143,7 +143,7 @@ def main(noSerOut, useQR, detailed):
             ser.open()
         print("Serial opened.")
 
-    if useQR:
+    if not noQR:
         # Define destination points (corners of the image)
         dst_points = np.float32([
             [0, 0],  # Upper-left corner
@@ -158,7 +158,6 @@ def main(noSerOut, useQR, detailed):
         # We use the markers at indexes 1, 2, 3, 4 of this pre-defined
         # dictionary to mark the playing area
         aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-
         if verbose or showMarkers:
             cv2.namedWindow("Marker Detection", cv2.WINDOW_NORMAL)
             cv2.resizeWindow("Marker Detection",
@@ -232,7 +231,8 @@ def main(noSerOut, useQR, detailed):
                     MSG_SEP   + str(pos[1])   +
                     MSG_END).encode())
 
-            cv2.imshow("Output", frame)
+            if verbose or showOut:
+                cv2.imshow("Output", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     except KeyboardInterrupt:
