@@ -139,7 +139,8 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
         ser = serial.Serial(
             port = port if not user_in else user_in
         )
-        ser.open()
+        if ser.isOpen() == False:
+            ser.open()
         print("Serial opened.")
 
     if useQR:
