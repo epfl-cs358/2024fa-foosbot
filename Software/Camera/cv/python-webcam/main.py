@@ -38,7 +38,6 @@ def get_ball_pos(img, clrRange):
         for i in circles[0, :]:
             # Circle center
             center = (i[0], i[1])
-            cv2.circle(img, center, 1, (0, 100, 100), 3)
             # Circle outline
             radius = i[2]
             # Inner square length divided by two
@@ -55,14 +54,15 @@ def get_ball_pos(img, clrRange):
             print(mean)
             print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
 
-            #if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
-            #    clrRange[1][0] <= mean[1] <= clrRange[1][1] and
-            #    clrRange[2][0] <= mean[2] <= clrRange[2][1]):
-            print("Found: ", mean)
-            pos = center
-            cv2.circle(img, center, radius, (255, 0, 0), 3)
+            if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
+                clrRange[1][0] <= mean[1] <= clrRange[1][1] and
+                clrRange[2][0] <= mean[2] <= clrRange[2][1]):
+                print("Found: ", mean)
+                pos = center
+                cv2.circle(img, center, radius, (255, 0, 0), 3)
 
-            pos = (circles[0, 0][0], circles[0, 0][1])
+                pos = (circles[0, 0][0], circles[0, 0][1])
+            cv2.circle(img, center, 1, (0, 100, 100), 3)
 
     return pos
 
@@ -89,8 +89,10 @@ def main(noSerOut, useQR, detailed):
     #  - #ff7f41
     #  - #eb9888
     #  - #eb5230
-    clr = [48, 82, 235] # BGR
-    tlr = 100
+    #  - #ffa894
+    #  - #70282a
+    clr = [42, 40, 112] # BGR
+    tlr = 75
     clrLo = [
         clr[0] - tlr,
         clr[1] - tlr,
@@ -109,15 +111,12 @@ def main(noSerOut, useQR, detailed):
 
     # For getting data
     # Open the default camera
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     print("Width: ", frameWidth)
     print("Height: ", frameHeight)
-
-    # Setting i to the minimum possible value
-    time = -sys.maxsize - 1
 
     # Defines a serial port for the output via user input
     if not noSerOut:
@@ -210,7 +209,6 @@ def main(noSerOut, useQR, detailed):
                         #cv2.imshow("Transformed Frame", frame)
                         cv2.waitKey(1)
 
-            timeStmp = time;
             pos = get_ball_pos(frame, clrRange)
 
             # Sends the position to the Serial Port
@@ -218,11 +216,9 @@ def main(noSerOut, useQR, detailed):
                 ser.write((
                     MSG_START + str(pos[0])   +
                     MSG_SEP   + str(pos[1])   +
-                    MSG_SEP   + str(timeStmp) +
                     MSG_END).encode())
 
             cv2.imshow("Output", frame)
-            time += 1
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     except KeyboardInterrupt:
