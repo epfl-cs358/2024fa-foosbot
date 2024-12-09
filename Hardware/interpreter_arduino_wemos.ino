@@ -4,11 +4,11 @@
 #define Y_DIR 6
 #define Y_STP 3
 #define X_DIR 7
-#define X_STP 5
+#define X_STP 4
 // 1000 units is for the full range side to side
 const float stepsPerMM = 400.0; // Adjust based on your setup ==> nb of steps required to move 1mm
-SoftwareSerial wemosSerial1(-1, 10);  // single player pole rotary
-SoftwareSerial wemosSerial2(-1, A0);  // double player pole rotary
+SoftwareSerial wemosSerial1(-1, 2);  // single player pole rotary
+SoftwareSerial wemosSerial2(-1, 2);  // double player pole rotary
 
 // AccelStepper set up this is for the side to side of rod 1 (goalie)
 AccelStepper stepperY(1,Y_STP, Y_DIR);
@@ -65,16 +65,16 @@ void setBeginning(){
 // original 17 cm movement range
 void moveSide(AccelStepper &stepper,int sensor1, int sensor2,  int value){
   int y =  stepper.currentPosition(); 
-  stepper.move(value);             // Set the final position 
+  stepper.move(value);          // Set the final position 
   //for coordinate value thats been going far from the side motor >0, controlled by the pin 11
   if(value>0){
-    while (stepper.distanceToGo() != 0 && digitalRead(sensor1) == LOW ) {
+    while (stepper.distanceToGo() != 0 ) {
       stepper.run();                  // Continuously move toward the target
     }
     stepper.stop();
   }
   else {
-    while (stepper.distanceToGo() != 0 && digitalRead(sensor2) == LOW) {
+    while (stepper.distanceToGo() != 0 ) {
       stepper.run();                  // Continuously move toward the target
     }
     stepper.stop();
@@ -114,11 +114,11 @@ void executeInterpreter(String command) {
   if (strcmp(cmd, "MOVE1") == 0) {
     moveSide(stepperY, 11,12, value);
   }else if(strcmp(cmd, "MOVE2")==0){
-    moveSide(stepperX,2, 13, value);
+    moveSide(stepperX,2, 0,value);
   } else if (strcmp(cmd, "ROTATE1") == 0) {
     rotateByAngle(wemosSerial1,(float)value); // Rotate by angle single player pole
   }else if(strcmp(cmd, "ROTATE2") == 0){
-    rotateByAngle(wemosSerial2,(float)value); // Rotate by angle double player pole
+    rotateByAngle(wemosSerial1,(float)value); // Rotate by angle double player pole
   } else if (strcmp(cmd, "INITIALX") == 0) {
     returnToInitialPositionSide();
   } else if(strcmp(cmd, "INITIALY")== 0){
