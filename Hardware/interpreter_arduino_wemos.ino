@@ -7,8 +7,9 @@
 #define X_STP 4
 // 1000 units is for the full range side to side
 const float stepsPerMM = 400.0; // Adjust based on your setup ==> nb of steps required to move 1mm
-SoftwareSerial wemosSerial1(-1, 2);  // single player pole rotary
-SoftwareSerial wemosSerial2(-1, 2);  // double player pole rotary
+SoftwareSerial wemosSerial1(-1, 10);  // single player pole rotary
+ // double player pole rotary
+SoftwareSerial wemosSerial2(-1, 9);  // single player pole rotary
 
 // AccelStepper set up this is for the side to side of rod 1 (goalie)
 AccelStepper stepperY(1,Y_STP, Y_DIR);
@@ -29,7 +30,7 @@ void setBeginning(){
   moveSide(stepperY,11,12,full_distance); // Move in the positive direction
   moveSide(stepperX,2,13, full_distance);
   rotateByAngle(wemosSerial1,0 ); 
-  rotateByAngle(wemosSerial2,0); 
+
   
 
   // If sensor on pin 12 was triggered, go back to the middle
@@ -118,12 +119,11 @@ void executeInterpreter(String command) {
   } else if (strcmp(cmd, "ROTATE1") == 0) {
     rotateByAngle(wemosSerial1,(float)value); // Rotate by angle single player pole
   }else if(strcmp(cmd, "ROTATE2") == 0){
-    rotateByAngle(wemosSerial1,(float)value); // Rotate by angle double player pole
+    rotateByAngle(wemosSerial2,(float)value); // Rotate by angle double player pole
   } else if (strcmp(cmd, "INITIALX") == 0) {
     returnToInitialPositionSide();
   } else if(strcmp(cmd, "INITIALY")== 0){
     rotateByAngle(wemosSerial1, 0);
-    rotateByAngle(wemosSerial2, 0);
   }else if(strcmp(cmd, "BEGIN")==0){
     setBeginning();
   } else {
@@ -136,7 +136,6 @@ void setup()
 {
   Serial.begin(9600); 
   wemosSerial1.begin(9600);
-  wemosSerial2.begin(9600);
   stepperY.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
   stepperY.setAcceleration(5000.0); //set acceleration of the stepper 
   stepperX.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
