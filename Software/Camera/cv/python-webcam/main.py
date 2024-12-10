@@ -247,7 +247,7 @@ def main(noSerOut=False, noQR=False, verbose=False, adaptCoords=True, windowScal
             if adaptCoords and (verbose or showOrigin):
                     img = frame
                     if lastOrigin is not None:
-                        cv2.circle(img, (int(lastOrigin[0]), int(lastOrigin[1])), 1, (0, 0, 255), 3)
+                        cv2.circle(img, (int(lastOrigin[0]), int(lastOrigin[1])), 5, (0, 0, 255), 3)
                     cv2.imshow("Origin", img)
 
             # Sends the position to the Serial Port
@@ -304,7 +304,7 @@ if __name__ == "__main__":
     wOut = True
     wMark = False
     wTransf = False
-    wOrigin = False
+    wOrig = False
     helpMode = False
     adaptCoords = True
     for arg in sys.argv:
