@@ -54,14 +54,15 @@ def get_ball_pos(img, clrRange):
             print(mean)
             print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
 
-            if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
-                clrRange[1][0] <= mean[1] <= clrRange[1][1] and
-                clrRange[2][0] <= mean[2] <= clrRange[2][1]):
-                print("Found: ", mean)
-                pos = center
-                cv2.circle(img, center, radius, (255, 0, 0), 3)
+            # if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
+            #     clrRange[1][0] <= mean[1] <= clrRange[1][1] and
+            #     clrRange[2][0] <= mean[2] <= clrRange[2][1]):
+            print("Found: ", mean)
+            pos = center
+            cv2.circle(img, center, radius, (255, 0, 0), 3)
 
-                pos = (circles[0, 0][0], circles[0, 0][1])
+            pos = (circles[0, 0][0], circles[0, 0][1])
+
             cv2.circle(img, center, 1, (0, 100, 100), 3)
 
     return pos
@@ -101,8 +102,9 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
     #  - #eb5230
     #  - #ffa894
     #  - #70282a
-    clr = [42, 40, 112] # BGR
-    tlr = 75
+    #  - #7d342f
+    clr = [47, 52, 125] # BGR
+    tlr = 100
     clrLo = [
         clr[0] - tlr,
         clr[1] - tlr,
@@ -143,7 +145,7 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
             ser.open()
         print("Serial opened.")
 
-    if useQR:
+    if not noQR:
         # Define destination points (corners of the image)
         dst_points = np.float32([
             [0, 0],  # Upper-left corner
