@@ -12,8 +12,8 @@
 #define fieldWidth   680
 #define fieldHeight  605
 #define cameraWidth  640
-#define cameraHeight 605
-#define offsetGoalie 20
+#define cameraHeight 480 
+#define offsetGoalie 20 
 #define crossFireOffset 15
 #define minGoal 250
 #define maxGoal 430
