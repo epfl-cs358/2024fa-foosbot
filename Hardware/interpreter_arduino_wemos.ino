@@ -3,18 +3,18 @@
 #define EN 8
 #define Y_DIR 6
 #define Y_STP 3
-#define X_DIR 7
-#define X_STP 4
+#define Z_DIR 7
+#define Z_STP 4
 // 1000 units is for the full range side to side
 const float stepsPerMM = 400.0; // Adjust based on your setup ==> nb of steps required to move 1mm
 SoftwareSerial wemosSerial1(-1, 10);  // single player pole rotary
  // double player pole rotary
-SoftwareSerial wemosSerial2(-1, 9);  // single player pole rotary
+SoftwareSerial wemosSerial2(-1, 11);  // single player pole rotary
 
 // AccelStepper set up this is for the side to side of rod 1 (goalie)
 AccelStepper stepperY(1,Y_STP, Y_DIR);
 // other side to side road
-AccelStepper stepperX(1,X_STP, X_DIR);
+AccelStepper stepperX(1,Z_STP, Z_DIR);
 
 long TravelY;
 
