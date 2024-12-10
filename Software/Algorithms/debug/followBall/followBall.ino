@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-
+#include "CustomStepperControl.h"
 
 //constants
 #define controlSpeedThreshold 10
@@ -59,6 +59,7 @@ typedef struct {
 } Infos;
 
 Infos ballData;
+CustomStepperControl customStepper(6, 3, 7, 4, 8, 11, 12, 2, 13);
 
 //Movement commands for players
 int motorMovement[4]; // 0: Goalkeeper X, 1: Goalkeeper angle, 2: Attack rod X, 3: Attack rod angle
@@ -89,36 +90,22 @@ bool getBallData(){
 void moveField(int target_x, int* curr_x) {
   int diff = target_x - *curr_x;
   *curr_x += diff; // MIGHT NEED TO CLAMP // CHECK WHETHER IN RANGE
-  executeInterpreter(MOVE1(fieldXToMotorUnits * diff));
+  customStepper.executeInterpreter(MOVE1(fieldXToMotorUnits * diff));
+}
  
 
 
 void setup() {
   
-  Serial.begin(9600); //create communication with cv
-  wemosSerial1.begin(9600);
-  wemosSerial2.begin(9600);
-  stepperY.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
-  stepperY.setAcceleration(5000.0); //set acceleration of the stepper 
-  stepperX.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
-  stepperX.setAcceleration(5000.0); //set acceleration of the stepper 
-  pinMode(EN, OUTPUT); 
-  digitalWrite(EN, LOW); // Enable motor driver
-  //stepperY.setCurrentPosition(0);  // initialize the current position im at to be 0 
-
-  //sensors for the pole 1  single player
-  pinMode(11, INPUT); // sensor far from the  sideway motor, responsible for the pos unit move control 
-  pinMode(12, INPUT); // sensor close to the sideway motor, responsible for the pos unit move control  
-  // sensor for the pole 2 double player
-  pinMode(2, INPUT); // TODO not set up yet
-  pinMode(13, INPUT);
+  customStepper.setupSteppers();
+  customStepper.setBeginning();
   curr_x_algo = fieldWidth / 2;
 
 }
 
 void loop() {
   
-  executeInterpreter(BEGIN());  
+  customStepper.executeInterpreter(BEGIN());  
 
   if (!getBallData()) {
       return;
