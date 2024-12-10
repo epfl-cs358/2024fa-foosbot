@@ -61,7 +61,6 @@ def get_ball_pos(img, clrRange):
             pos = center
             cv2.circle(img, center, radius, (255, 0, 0), 3)
 
-                pos = (circles[0, 0][0], circles[0, 0][1])
             cv2.circle(img, center, 1, (0, 100, 100), 3)
 
     return pos
@@ -101,8 +100,9 @@ def main(noSerOut, useQR, detailed):
     #  - #eb5230
     #  - #ffa894
     #  - #70282a
-    clr = [42, 40, 112] # BGR
-    tlr = 75
+    #  - #7d342f
+    clr = [47, 52, 125] # BGR
+    tlr = 100
     clrLo = [
         clr[0] - tlr,
         clr[1] - tlr,
@@ -143,7 +143,7 @@ def main(noSerOut, useQR, detailed):
             ser.open()
         print("Serial opened.")
 
-    if useQR:
+    if not noQR:
         # Define destination points (corners of the image)
         dst_points = np.float32([
             [0, 0],  # Upper-left corner
