@@ -2,7 +2,6 @@
 #include <math.h>
 #include "CustomStepperControl.h"
 
-//constants
 #define controlSpeedThreshold 10
 #define controlPositionThresholdX 15
 #define controlPositionThresholdY 15
@@ -11,21 +10,20 @@
 #define speedThreshold 25
 #define fieldWidth   680
 #define fieldHeight  605
-#define cameraWidth  1280
-#define cameraHeight 960
+#define cameraWidth  640
+#define cameraHeight 605
 #define offsetGoalie 20
 #define crossFireOffset 15
 #define minGoal 250
 #define maxGoal 430
 
-#define scaleX ((float)fieldWidth / cameraWidth)      //ratio of cv coordinates into the field dimension
+#define scaleX ((float)fieldWidth / cameraWidth)       //ratio of cv coordinates into the field dimension
 #define scaleY ((float)fieldHeight/ cameraHeight)
-//#define motorUnits 1100                        // Unit of interpreter coordinates
-//#define physicalRangeMM 220                    // physical distance in mm corresponding to motor units
+#define motorUnits 1100                        // Unit of interpreter coordinates
+#define physicalRangeMM 220                    // physical distance in mm corresponding to motor units
 //#define motorUnitsPerMM motorUnits / physicalRangeMM 
 //#define fieldXToMM physicalRangeMM / fieldWidth
-#define fieldXToMotorUnits 5
-//((float)motorUnits / fieldWidth) // Ratio used to convert from field X coordinate to the units required by the motors
+#define fieldXToMotorUnits motorUnits / fieldWidth  // Ratio used to convert from field X coordinate to the units required by the motors
 
 // Define your interpreter-compatible commands as strings
 #define BEGIN()          "BEGIN"                             // Move to an extreme and reset rotation
@@ -34,7 +32,7 @@
 #define ROTATE1(angle)  ("ROTATE1 " + String(angle))          // Rotate by angle
 #define ROTATE2(angle)  ("ROTATE2 " + String(angle))   
 #define INITIALX()       "INITIALX"                          // Reset Position
-#define INITIALY()       "INITIALY"                          // Reset Rotation
+#define INITIALY()       "INITIALY" 
 
 //inputs of the cv
 typedef struct {
@@ -48,7 +46,7 @@ FrameData previousFrame = {-1,-1,-1};
 
 bool firstFrameReceived = false;
 bool secondFrameReceived = false;
-//int curr_x_algo = 0;
+int curr_x_algo = 0;
 
 typedef struct {
     int x;          // x-coordinate of posB
@@ -61,7 +59,6 @@ typedef struct {
 
 Infos ballData;
 CustomStepperControl customStepper(6, 3, 7, 4, 8, 11, 12, 2, 13);
-int cur_pos = fieldWidth/2 * scaleX;
 
 //Movement commands for players
 int motorMovement[4]; // 0: Goalkeeper X, 1: Goalkeeper angle, 2: Attack rod X, 3: Attack rod angle
@@ -90,78 +87,23 @@ bool getBallData(){
     return firstFrameReceived;
 }
 
-void moveField(int target_pos, int* cur_pos){
-  int diff = ((target_pos - *cur_pos));
-  *cur_pos += diff;
-  customStepper.executeInterpreter(MOVE1(diff * fieldXToMotorUnits));
-
-}
-// void moveField(int target_x, int* curr_x) {
-//   int diff = target_x - *curr_x;
-//   *curr_x += diff; // MIGHT NEED TO CLAMP // CHECK WHETHER IN RANGE
-//   customStepper.executeInterpreter(MOVE1(fieldXToMotorUnits * diff));
-//}
- 
-
 
 void setup() {
-  
+  // put your setup code here, to run once:
   customStepper.setupSteppers();
+  customStepper.executeInterpreter(MOVE1(-100));
+  getBallData();
+  ballData.x         = currentFrame.x;
+  ballData.y         = currentFrame.y;
+  ballData.timestamp = currentFrame.timestamp;
+  Serial.println(ballData.x);
+  Serial.println(ballData.y);
+  Serial.println(ballData.timestamp);
+
 
 }
 
 void loop() {
+  // put your main code here, to run repeatedly:
 
-  if (!getBallData()){
-     return;
-  }
-
-  ballData.x         = currentFrame.x * scaleX;  
-  ballData.y         = currentFrame.y * scaleY;
-  Serial.println(ballData.x);
-  Serial.println(ballData.y);
-  int target_pos = ballData.x;
-  moveField(target_pos, &cur_pos);
-  delay(50);
-  // Serial.println(cur_pos);
-  // Serial.println(target_pos);
-  // int diff1 = target_pos - cur_pos;
-  // int diffMotor1 = diff1 *fieldXToMotorUnits;
-  // int diff2 = cur_pos - target_pos;
-  // int diffMotor2 = diff2 *fieldXToMotorUnits;
-  // Serial.println(fieldXToMotorUnits);
-  // Serial.println(diff1);
-  // Serial.println(diffMotor1);
-  // Serial.println(diff2);
-  // Serial.println(diffMotor2);
-  // customStepper.executeInterpreter(MOVE1(diffMotor1));
-  // customStepper.executeInterpreter(MOVE1(diffMotor2));
 }
-
-
-
-
-
-
-
-
-// void loop() {
-  
-//  //customStepper.executeInterpreter(BEGIN());  
-
-//   if (!getBallData()) {
-//       return;
-//   }
-
-//   ballData.x         = currentFrame.x;
-//   ballData.y         = currentFrame.y;
-//   ballData.timestamp = currentFrame.timestamp;
-
-//   int diff = ((ballData.x * scaleX) - curr_x_algo) * fieldXToMotorUnits;
-//   customStepper.executeInterpreter(MOVE1())
-//   int target_x_algo = (scaleX * ballData.x);
-//   moveField(target_x_algo, &curr_x_algo);
-//   delay(4000);
-  
-
-// }
