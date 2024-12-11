@@ -28,7 +28,7 @@ def get_ball_pos(img, clrRange):
     # Detects circles
     circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                param1=100, param2=30,
-                               minRadius=1, maxRadius=30)
+                               minRadius=25, maxRadius=31)
 
     pos = (-1, -1)
 
@@ -50,9 +50,9 @@ def get_ball_pos(img, clrRange):
             #               (i[0]-length, i[1]-length),
             #               (i[0]+length, i[1]+length),
             #               (255, 0, 0), 3)
-            print(clrRange)
-            print(mean)
-            print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
+            # print(clrRange)
+            # print(mean)
+            # print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
 
             #if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
             #    clrRange[1][0] <= mean[1] <= clrRange[1][1] and

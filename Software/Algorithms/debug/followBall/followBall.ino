@@ -1,12 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-#include "interpreter.h"
-
-#define EN 8
-#define Y_DIR 6
-#define Y_STP 3
-#define X_DIR 7
-#define X_STP 4
+#include "CustomStepperControl.h"
 
 //constants
 #define controlSpeedThreshold 10
@@ -17,27 +11,28 @@
 #define speedThreshold 25
 #define fieldWidth   680
 #define fieldHeight  605
-#define cameraWidth  640
-#define cameraHeight 605
+#define cameraWidth  1280
+#define cameraHeight 960
 #define offsetGoalie 20
 #define crossFireOffset 15
 #define minGoal 250
 #define maxGoal 430
 
-#define scaleX ((float)fieldWidth / cameraWidth)       //ratio of cv coordinates into the field dimension
+#define scaleX ((float)fieldWidth / cameraWidth)      //ratio of cv coordinates into the field dimension
 #define scaleY ((float)fieldHeight/ cameraHeight)
-#define motorUnits 1100                        // Unit of interpreter coordinates
-#define physicalRangeMM 220                    // physical distance in mm corresponding to motor units
-//#define motorUnitsPerMM motorUnits / physicalRangeMM
+//#define motorUnits 1100                        // Unit of interpreter coordinates
+//#define physicalRangeMM 220                    // physical distance in mm corresponding to motor units
+//#define motorUnitsPerMM motorUnits / physicalRangeMM 
 //#define fieldXToMM physicalRangeMM / fieldWidth
-#define fieldXToMotorUnits motorUnits / fieldWidth  // Ratio used to convert from field X coordinate to the units required by the motors
+#define fieldXToMotorUnits 5
+//((float)motorUnits / fieldWidth) // Ratio used to convert from field X coordinate to the units required by the motors
 
 // Define your interpreter-compatible commands as strings
 #define BEGIN()          "BEGIN"                             // Move to an extreme and reset rotation
 #define MOVE1(pos)      ("MOVE1 " + String(pos))              // Move towards motor by +v
-#define MOVE2(pos)      ("MOVE2 " + String(pos))
+#define MOVE2(pos)      ("MOVE2 " + String(pos))   
 #define ROTATE1(angle)  ("ROTATE1 " + String(angle))          // Rotate by angle
-#define ROTATE2(angle)  ("ROTATE2 " + String(angle))
+#define ROTATE2(angle)  ("ROTATE2 " + String(angle))   
 #define INITIALX()       "INITIALX"                          // Reset Position
 #define INITIALY()       "INITIALY"                          // Reset Rotation
 
@@ -68,7 +63,7 @@ FrameData previousFrame = {-1,-1,-1};
 
 bool firstFrameReceived = false;
 bool secondFrameReceived = false;
-int curr_x_algo = 0;
+//int curr_x_algo = 0;
 
 typedef struct {
     int x;          // x-coordinate of posB
@@ -80,6 +75,8 @@ typedef struct {
 } Infos;
 
 Infos ballData;
+CustomStepperControl customStepper(6, 3, 7, 4, 8, 11, 12, 2, 13);
+int cur_pos = fieldWidth/2 * scaleX;
 
 //Movement commands for players
 int motorMovement[4]; // 0: Goalkeeper X, 1: Goalkeeper angle, 2: Attack rod X, 3: Attack rod angle
@@ -141,13 +138,31 @@ void loop() {
 
   //interpret.executeInterpreter(BEGIN());
 
-  if (!getBallData()) {
-      return;
+  if (!getBallData()){
+     return;
   }
 
-  ballData.x         = currentFrame.x;
-  ballData.y         = currentFrame.y;
-  ballData.timestamp = currentFrame.timestamp;
+  ballData.x         = currentFrame.x * scaleX;  
+  ballData.y         = currentFrame.y * scaleY;
+  Serial.println(ballData.x);
+  Serial.println(ballData.y);
+  int target_pos = ballData.x;
+  moveField(target_pos, &cur_pos);
+  delay(50);
+  // Serial.println(cur_pos);
+  // Serial.println(target_pos);
+  // int diff1 = target_pos - cur_pos;
+  // int diffMotor1 = diff1 *fieldXToMotorUnits;
+  // int diff2 = cur_pos - target_pos;
+  // int diffMotor2 = diff2 *fieldXToMotorUnits;
+  // Serial.println(fieldXToMotorUnits);
+  // Serial.println(diff1);
+  // Serial.println(diffMotor1);
+  // Serial.println(diff2);
+  // Serial.println(diffMotor2);
+  // customStepper.executeInterpreter(MOVE1(diffMotor1));
+  // customStepper.executeInterpreter(MOVE1(diffMotor2));
+}
 
   int target_x_algo = (scaleX * ballData.x);
   moveField(curr_x_algo, target_x_algo);
