@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <math.h>
+#include "interpreter.h"
 
+#define EN 8
+#define Y_DIR 6
+#define Y_STP 3
+#define X_DIR 7
+#define X_STP 4
 
 //constants
 #define controlSpeedThreshold 10
@@ -22,18 +28,33 @@
 #define scaleY ((float)fieldHeight/ cameraHeight)
 #define motorUnits 1100                        // Unit of interpreter coordinates
 #define physicalRangeMM 220                    // physical distance in mm corresponding to motor units
-//#define motorUnitsPerMM motorUnits / physicalRangeMM 
+//#define motorUnitsPerMM motorUnits / physicalRangeMM
 //#define fieldXToMM physicalRangeMM / fieldWidth
 #define fieldXToMotorUnits motorUnits / fieldWidth  // Ratio used to convert from field X coordinate to the units required by the motors
 
 // Define your interpreter-compatible commands as strings
 #define BEGIN()          "BEGIN"                             // Move to an extreme and reset rotation
-#define MOVE1(pos)      ("MOVE1" + String(pos))              // Move towards motor by +v
-#define MOVE2(pos)      ("MOVE2" + String(pos))   
-#define ROTATE1(angle)  ("ROTATE1" + String(angle))          // Rotate by angle
-#define ROTATE2(angle)  ("ROTATE2" + String(angle))   
+#define MOVE1(pos)      ("MOVE1 " + String(pos))              // Move towards motor by +v
+#define MOVE2(pos)      ("MOVE2 " + String(pos))
+#define ROTATE1(angle)  ("ROTATE1 " + String(angle))          // Rotate by angle
+#define ROTATE2(angle)  ("ROTATE2 " + String(angle))
 #define INITIALX()       "INITIALX"                          // Reset Position
 #define INITIALY()       "INITIALY"                          // Reset Rotation
+
+#define STEPS_PER_WM   400.0
+#define STEPS_PER_REV 3200.0
+#define ACCELERATION     5
+
+Interpreter interpret(
+  STEPS_PER_WM,
+  &SoftwareSerial(-1, 10),
+  &SoftwareSerial(-1, 2),
+  &AccelStepper(1, Y_STP, Y_DIR),
+  &AccelStepper(1, X_STP, X_DIR),
+  STEPS_PER_REV,
+  360.0 / STEPS_PER_REV,
+  ACCELERATION
+);
 
 //inputs of the cv
 typedef struct {
@@ -66,7 +87,6 @@ int playerPosition[4][2]; // Player positions: [x, angle]
 
 //retrieve ball data
 bool getBallData(){
-
     if (Serial.available() > 0) {
         Serial.readStringUntil(':');
         int x         = Serial.readStringUntil(';' ).toInt();
@@ -89,36 +109,37 @@ bool getBallData(){
 void moveField(int target_x, int* curr_x) {
   int diff = target_x - *curr_x;
   *curr_x += diff; // MIGHT NEED TO CLAMP // CHECK WHETHER IN RANGE
-  executeInterpreter(MOVE1(fieldXToMotorUnits * diff));
- 
-
+  interpret.executeInterpreter(MOVE1(fieldXToMotorUnits * diff));
+}
 
 void setup() {
-  
   Serial.begin(9600); //create communication with cv
-  wemosSerial1.begin(9600);
-  wemosSerial2.begin(9600);
-  stepperY.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
-  stepperY.setAcceleration(5000.0); //set acceleration of the stepper 
-  stepperX.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
-  stepperX.setAcceleration(5000.0); //set acceleration of the stepper 
-  pinMode(EN, OUTPUT); 
-  digitalWrite(EN, LOW); // Enable motor driver
-  //stepperY.setCurrentPosition(0);  // initialize the current position im at to be 0 
 
-  //sensors for the pole 1  single player
-  pinMode(11, INPUT); // sensor far from the  sideway motor, responsible for the pos unit move control 
-  pinMode(12, INPUT); // sensor close to the sideway motor, responsible for the pos unit move control  
-  // sensor for the pole 2 double player
+  pinMode(EN, OUTPUT);
+  digitalWrite(EN, LOW); // Enable motor driver
+
+  // Sensors for the pole 1  single player
+  // sensor far from the  sideway motor, responsible for the pos unit move
+  // control
+  pinMode(11, INPUT);
+  // sensor close to the sideway motor, responsible for the pos unit move
+  // control
+  pinMode(12, INPUT);
+
+  // Sensor for the pole 2 double player
   pinMode(2, INPUT); // TODO not set up yet
   pinMode(13, INPUT);
+
   curr_x_algo = fieldWidth / 2;
 
+  Serial.println("Setting up");
+
+  interpret.executeInterpreter(MOVE1(100));
 }
 
 void loop() {
-  
-  executeInterpreter(BEGIN());  
+
+  //interpret.executeInterpreter(BEGIN());
 
   if (!getBallData()) {
       return;
@@ -131,6 +152,4 @@ void loop() {
   int target_x_algo = (scaleX * ballData.x);
   moveField(curr_x_algo, target_x_algo);
   delay(4000);
-  
-
 }
