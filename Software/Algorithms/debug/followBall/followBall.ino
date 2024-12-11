@@ -36,21 +36,6 @@
 #define INITIALX()       "INITIALX"                          // Reset Position
 #define INITIALY()       "INITIALY"                          // Reset Rotation
 
-#define STEPS_PER_WM   400.0
-#define STEPS_PER_REV 3200.0
-#define ACCELERATION     5
-
-Interpreter interpret(
-  STEPS_PER_WM,
-  &SoftwareSerial(-1, 10),
-  &SoftwareSerial(-1, 2),
-  &AccelStepper(1, Y_STP, Y_DIR),
-  &AccelStepper(1, X_STP, X_DIR),
-  STEPS_PER_REV,
-  360.0 / STEPS_PER_REV,
-  ACCELERATION
-);
-
 //inputs of the cv
 typedef struct {
   int x;
@@ -84,6 +69,8 @@ int playerPosition[4][2]; // Player positions: [x, angle]
 
 //retrieve ball data
 bool getBallData(){
+
+    Serial.println("hey");
     if (Serial.available() > 0) {
         Serial.readStringUntil(':');
         int x         = Serial.readStringUntil(';' ).toInt();
@@ -103,40 +90,27 @@ bool getBallData(){
     return firstFrameReceived;
 }
 
-void moveField(int target_x, int* curr_x) {
-  int diff = target_x - *curr_x;
-  *curr_x += diff; // MIGHT NEED TO CLAMP // CHECK WHETHER IN RANGE
-  interpret.executeInterpreter(MOVE1(fieldXToMotorUnits * diff));
+void moveField(int target_pos, int* cur_pos){
+  int diff = ((target_pos - *cur_pos));
+  *cur_pos += diff;
+  customStepper.executeInterpreter(MOVE1(diff * fieldXToMotorUnits));
+
 }
+// void moveField(int target_x, int* curr_x) {
+//   int diff = target_x - *curr_x;
+//   *curr_x += diff; // MIGHT NEED TO CLAMP // CHECK WHETHER IN RANGE
+//   customStepper.executeInterpreter(MOVE1(fieldXToMotorUnits * diff));
+//}
+ 
+
 
 void setup() {
-  Serial.begin(9600); //create communication with cv
+  
+  customStepper.setupSteppers();
 
-  pinMode(EN, OUTPUT);
-  digitalWrite(EN, LOW); // Enable motor driver
-
-  // Sensors for the pole 1  single player
-  // sensor far from the  sideway motor, responsible for the pos unit move
-  // control
-  pinMode(11, INPUT);
-  // sensor close to the sideway motor, responsible for the pos unit move
-  // control
-  pinMode(12, INPUT);
-
-  // Sensor for the pole 2 double player
-  pinMode(2, INPUT); // TODO not set up yet
-  pinMode(13, INPUT);
-
-  curr_x_algo = fieldWidth / 2;
-
-  Serial.println("Setting up");
-
-  interpret.executeInterpreter(MOVE1(100));
 }
 
 void loop() {
-
-  //interpret.executeInterpreter(BEGIN());
 
   if (!getBallData()){
      return;
@@ -164,7 +138,30 @@ void loop() {
   // customStepper.executeInterpreter(MOVE1(diffMotor2));
 }
 
-  int target_x_algo = (scaleX * ballData.x);
-  moveField(curr_x_algo, target_x_algo);
-  delay(4000);
-}
+
+
+
+
+
+
+
+// void loop() {
+  
+//  //customStepper.executeInterpreter(BEGIN());  
+
+//   if (!getBallData()) {
+//       return;
+//   }
+
+//   ballData.x         = currentFrame.x;
+//   ballData.y         = currentFrame.y;
+//   ballData.timestamp = currentFrame.timestamp;
+
+//   int diff = ((ballData.x * scaleX) - curr_x_algo) * fieldXToMotorUnits;
+//   customStepper.executeInterpreter(MOVE1())
+//   int target_x_algo = (scaleX * ballData.x);
+//   moveField(target_x_algo, &curr_x_algo);
+//   delay(4000);
+  
+
+// }

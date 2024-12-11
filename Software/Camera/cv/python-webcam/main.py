@@ -54,12 +54,14 @@ def get_ball_pos(img, clrRange):
             # print(mean)
             # print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
 
-            #if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
-            #    clrRange[1][0] <= mean[1] <= clrRange[1][1] and
-            #    clrRange[2][0] <= mean[2] <= clrRange[2][1]):
+            # if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
+            #     clrRange[1][0] <= mean[1] <= clrRange[1][1] and
+            #     clrRange[2][0] <= mean[2] <= clrRange[2][1]):
             print("Found: ", mean)
             pos = center
             cv2.circle(img, center, radius, (255, 0, 0), 3)
+
+            cv2.circle(img, center, 1, (0, 100, 100), 3)
 
             cv2.circle(img, center, 1, (0, 100, 100), 3)
 
