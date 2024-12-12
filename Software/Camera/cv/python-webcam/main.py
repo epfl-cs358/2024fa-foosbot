@@ -13,12 +13,13 @@ MSG_END   = '\n'
 
 def get_ball_pos(img, clrRange):
     """
-    Processes the image and detect the ball.
+    Detects the ball.
 
     :img: The image to be processed.
     :type img: np.ndarray
     :returns: The position of the ball.
     """
+
     # Pre-Processing : convert to grayscale image and apply blur
     grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     grey = cv2.medianBlur(grey, 5)
@@ -45,14 +46,9 @@ def get_ball_pos(img, clrRange):
             mean = cv2.mean(
                 img[i[0]-length:i[0]+length, i[1]-length:i[1]+length]
             )
-            # Draw inner square
-            # cv2.rectangle(img,
-            #               (i[0]-length, i[1]-length),
-            #               (i[0]+length, i[1]+length),
-            #               (255, 0, 0), 3)
-            # print(clrRange)
-            # print(mean)
-            # print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
+            print(clrRange)
+            print(mean)
+            print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
 
             # if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
             #     clrRange[1][0] <= mean[1] <= clrRange[1][1] and
@@ -67,28 +63,37 @@ def get_ball_pos(img, clrRange):
 
     return pos
 
-def main(noSerOut=False, noQR=False, verbose=False, adaptCoords=True, windowScale=1, windows=None):
+def main(noSerOut=False,
+         noQR=False,
+         verbose=False,
+         windowScale=1,
+         windows=None):
     """
     Gets the live image of the camera, transforms it such that it only contains
     the playing field, detects the ball and sends the position of the ball over
     a serial output to the Arduino. Displays the ball detection on screen.
 
     :param noSerOut: Disables serial output (Use if serial port is disconnected)
-    :type noSerOut: bool
+    :type noSerOut:  bool
+
     :param noQR: If this is set to False, this function will first detect QR
-                  markers and transform the image such that it only contains the
-                  playing area, before doing ball detection.
-    :type noQR: bool
+                 markers and transform the image such that it only contains the
+                 playing area, before doing ball detection.
+    :type noQR:  bool
+
     :param verbose: If this is set to True, this function will open multiple
-                     windows showing different stages of the image processing
-    :type verbose: bool
+                    windows showing different stages of the image processing
+    :type verbose:  bool
+
     :param windowScale: Defines scaling of the displayed windows compared to
                         original capture height and width
-    :type windowScale: int
+    :type windowScale:  int
+
     :param windows: Defines which windows are being displayed. Should have
                     one entry for each possible window
-    :type windows: list(bool)
+    :type windows:  list(bool)
     """
+
     # For managing displayed windows
     if windows is None:
         windows = [True, False, False, False]
@@ -127,7 +132,7 @@ def main(noSerOut=False, noQR=False, verbose=False, adaptCoords=True, windowScal
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    print("Width: ", frameWidth)
+    print("Width: " , frameWidth )
     print("Height: ", frameHeight)
 
     # Defines a serial port for the output via user input
@@ -170,7 +175,7 @@ def main(noSerOut=False, noQR=False, verbose=False, adaptCoords=True, windowScal
         ])
 
         # Define Dictionary for keeping the last known positions of the markers
-        last_known_positions = {1: None, 2: None, 3: None, 4: None}
+        corner = None
 
         if verbose or showTransformed:
             cv2.namedWindow("Transformed Frame", cv2.WINDOW_NORMAL)
@@ -188,7 +193,7 @@ def main(noSerOut=False, noQR=False, verbose=False, adaptCoords=True, windowScal
     try:
         while True:
             # Get an image from the camera
-            ret, frame = cap.read()
+            _, frame = cap.read()
 
             if (not noQR) or adaptCoords:
                 # Detect markers in image
@@ -300,6 +305,7 @@ if __name__ == "__main__":
                                                   1/factor * (original width) x 1/factor * (original height)
     """
     windowScale = 1
+
     noSerOut = False
     noQR = True
     verbose = False
