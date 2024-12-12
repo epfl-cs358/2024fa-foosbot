@@ -60,7 +60,7 @@ typedef struct {
 } Infos;
 
 Infos ballData;
-CustomStepperControl customStepper(6, 3, 7, 4, 8, 11, 12, 2, 13);
+CustomStepperControl customStepper(6, 3, 7, 4, 8, 9, 12, 2, 5);
 int cur_pos = fieldWidth/2 * scaleX;
 
 //Movement commands for players
@@ -93,7 +93,7 @@ bool getBallData(){
 void moveField(int target_pos, int* cur_pos){
   int diff = ((target_pos - *cur_pos));
   *cur_pos += diff;
-  customStepper.executeInterpreter(MOVE1(diff * fieldXToMotorUnits));
+  customStepper.executeInterpreter(MOVE2(diff * fieldXToMotorUnits));
 
 }
 // void moveField(int target_x, int* curr_x) {

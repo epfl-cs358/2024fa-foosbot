@@ -5,7 +5,7 @@ CustomStepperControl::CustomStepperControl(int yDir, int yStep, int xDir, int xS
   : stepperY(1, yStep, yDir), 
     stepperX(1, xStep, xDir), 
     wemosSerial1(-1, 10), 
-    wemosSerial2(-1, 5) 
+    wemosSerial2(-1, 11) 
 {
   Y_DIR = yDir;
   Y_STP = yStep;
@@ -21,33 +21,46 @@ CustomStepperControl::CustomStepperControl(int yDir, int yStep, int xDir, int xS
 void CustomStepperControl::setBeginning() {
   Serial.println("setBeginning() called.");
   int full_distance = 1000;
-  moveSide(stepperY, sensor1Y, sensor2Y, full_distance);
-  moveSide(stepperX, sensor1X, sensor2X, full_distance);
+  moveSide(stepperX, sensor1Y, sensor2Y, full_distance); //check again if stepperX or stepperY
+  moveSide(stepperY, sensor1X, sensor2X, full_distance);
+    // for both stops when the sensor is triggered 
+  int middlePosition = -full_distance/2 ;
+
   rotateByAngle(wemosSerial1, 0); 
   rotateByAngle(wemosSerial2, 0); 
 
-  if (digitalRead(sensor2Y) == LOW) {
-    int middlePosition = full_distance / 2;
-    moveSide(stepperY, sensor1Y, sensor2Y, -500);
-    stepperY.setCurrentPosition(middlePosition);
-  }
+  moveSide(stepperY,sensor1Y, sensor2Y, middlePosition);
+  stepperY.setCurrentPosition(middlePosition); // now this is 0 position
 
-  if (digitalRead(sensor2X) == LOW) {
-    int middlePosition = full_distance / 2;
-    moveSide(stepperX, sensor1X, sensor2X, -500);
-    stepperX.setCurrentPosition(middlePosition);
-  }
-
-  stepperY.setCurrentPosition(0);
+  moveSide(stepperX,sensor1X, sensor2X,middlePosition);
+  stepperX.setCurrentPosition(middlePosition); // now this is 0 position
 }
 
+// MOVE <value>
+// <0 values to go far from the side motor
+// >0 values to come close to the side motor 
+// for 7cm mov range of player, 350 unit is good
+// original 22 cm 
 void CustomStepperControl::moveSide(AccelStepper &stepper, int sensor1, int sensor2, int value) {
-  stepper.move(value);
-  while (stepper.distanceToGo() != 0) {
-    stepper.run();
+  //int y =  stepper.currentPosition(); 
+  stepper.move(value);          // Set the final position 
+  //for coordinate value thats been going far from the side motor >0, controlled by the pin 11
+  if(value>0){
+    while (stepper.distanceToGo() != 0 &&  digitalRead(sensor1) == LOW ) {
+      stepper.run();                  // Continuously move toward the target
+    }
+    stepper.stop();
   }
-  stepper.stop();
+  else {
+    while (stepper.distanceToGo() != 0 && digitalRead(sensor2) == LOW  ) {
+      stepper.run();                  // Continuously move toward the target
+    }
+    stepper.stop();
+  }
+  Serial.print("Moved by ");
+  Serial.println(value);
 }
+
 
 void CustomStepperControl::returnToInitialPositionSide() {
   stepperY.moveTo(0);
@@ -87,7 +100,7 @@ void CustomStepperControl::executeInterpreter(String command) {
 void CustomStepperControl::setupSteppers() {
   Serial.begin(9600);
   wemosSerial1.begin(9600);
-  wemosSerial2.begin(9600);
+  //wemosSerial2.begin(9600);
 
   stepperY.setMaxSpeed(5000.0);
   stepperY.setAcceleration(5000.0);
@@ -97,8 +110,8 @@ void CustomStepperControl::setupSteppers() {
   pinMode(EN, OUTPUT);
   digitalWrite(EN, LOW);
 
-  pinMode(sensor1Y, INPUT);
-  pinMode(sensor2Y, INPUT);
-  pinMode(sensor1X, INPUT);
-  pinMode(sensor2X, INPUT);
+  // pinMode(sensor1Y, INPUT);
+  // pinMode(sensor2Y, INPUT);
+  // pinMode(sensor1X, INPUT);
+  // pinMode(sensor2X, INPUT);
 }
