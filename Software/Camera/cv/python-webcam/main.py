@@ -13,12 +13,13 @@ MSG_END   = '\n'
 
 def get_ball_pos(img, clrRange):
     """
-    Processes the image and detect the ball.
+    Detects the ball.
 
     :img: The image to be processed.
     :type img: np.ndarray
     :returns: The position of the ball.
     """
+
     # Pre-Processing : convert to grayscale image and apply blur
     grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     grey = cv2.medianBlur(grey, 5)
@@ -46,11 +47,6 @@ def get_ball_pos(img, clrRange):
             mean = cv2.mean(
                 img[i[0]-length:i[0]+length, i[1]-length:i[1]+length]
             )
-            # Draw inner square
-            # cv2.rectangle(img,
-            #               (i[0]-length, i[1]-length),
-            #               (i[0]+length, i[1]+length),
-            #               (255, 0, 0), 3)
             print(clrRange)
             print(mean)
             print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
@@ -66,28 +62,37 @@ def get_ball_pos(img, clrRange):
 
     return pos
 
-def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None):
+def main(noSerOut=False,
+         noQR=False,
+         verbose=False,
+         windowScale=1,
+         windows=None):
     """
     Gets the live image of the camera, transforms it such that it only contains
     the playing field, detects the ball and sends the position of the ball over
     a serial output to the Arduino. Displays the ball detection on screen.
 
     :param noSerOut: Disables serial output (Use if serial port is disconnected)
-    :type noSerOut: bool
+    :type noSerOut:  bool
+
     :param noQR: If this is set to False, this function will first detect QR
-                  markers and transform the image such that it only contains the
-                  playing area, before doing ball detection.
-    :type noQR: bool
+                 markers and transform the image such that it only contains the
+                 playing area, before doing ball detection.
+    :type noQR:  bool
+
     :param verbose: If this is set to True, this function will open multiple
-                     windows showing different stages of the image processing
-    :type verbose: bool
+                    windows showing different stages of the image processing
+    :type verbose:  bool
+
     :param windowScale: Defines scaling of the displayed windows compared to
                         original capture height and width
-    :type windowScale: int
+    :type windowScale:  int
+
     :param windows: Defines which windows are being displayed. Should have
                     one entry for each possible window
-    :type windows: list(bool)
+    :type windows:  list(bool)
     """
+
     # For managing displayed windows
     if windows is None:
         windows = [True, False, False]
@@ -123,11 +128,8 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    print("Width: ", frameWidth)
+    print("Width: " , frameWidth )
     print("Height: ", frameHeight)
-
-    # Setting i to the minimum possible value
-    time = -sys.maxsize - 1
 
     # Defines a serial port for the output via user input
     if not noSerOut:
@@ -143,9 +145,6 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
         ser.open()
         print("Serial opened.")
 
-    # Setting i to the minimum possible value
-    i = -sys.maxsize - 1
-
     if not noQR:
         # Define destination points (corners of the image)
         dst_points = np.float32([
@@ -156,9 +155,9 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
         ])
 
         # Define Dictionary for keeping the last known positions of the markers
-        last_known_positions = {1: None, 2: None, 3: None, 4: None}
+        corner = None
 
-        # We use the markers at indexes 1, 2, 3, 4 of this pre-defined
+        # We use the marker at index 0 of this pre-defined
         # dictionary to mark the playing area
         aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 
@@ -183,7 +182,7 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
     try:
         while True:
             # Get an image from the camera
-            ret, frame = cap.read()
+            _, frame = cap.read()
 
             if not noQR:
                 # Detect markers in image
@@ -198,45 +197,27 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
 
                 # Updates the dictionary of last known positions if the right
                 # markers were detected
-                if ids is not None:
-                    for indices, corner in zip(ids, corners):
-                        index = indices[0]
-                        if index in last_known_positions:
-                            last_known_positions[index] = corner[0][0]
+                if ids is not None and ids.size == 1:
+                    corner = corners[0][0]
 
-                # Transforms the image if all 4 markers were detected (at some
-                                                                       # point)
-                if all(last_known_positions[i] is not None
-                       for i in last_known_positions.keys()):
-                    src_points = np.float32([
-                        last_known_positions[1],
-                        last_known_positions[2],
-                        last_known_positions[3],
-                        last_known_positions[4]
-                    ])
-                    transformation_matrix = cv2.getPerspectiveTransform(
-                        src_points, dst_points
-                    )
-                    transformed_frame = cv2.warpPerspective(
-                        frame, transformation_matrix, (frameWidth, frameHeight)
-                    )
+                # Transforms the image if marker was detected
+                if corner is not None:
+                    transformed_frame = frame[corner[0]:, corner[1]:]
                     if np.array(transformed_frame).size != 0:
                         frame = transformed_frame
                 if verbose or showTransformed:
                     cv2.imshow("Transformed Frame", frame)
                     cv2.waitKey(1)
 
-            timeStmp = time + 2**32 # Converting time to unsigned
             pos = get_ball_pos(frame, clrRange)
 
             # Sends the position to the Serial Port
             if not noSerOut and (pos[0] != -1 and pos[1] != -1):
-                ser.write(MSG_START + str(pos)      +
-                          MSG_SEP   + str(timeStmp) +
+                ser.write(MSG_START + str(pos[0]) +
+                          MSG_SEP   + str(pos[1]) +
                           MSG_END)
             if showOut:
                 cv2.imshow("Output", frame)
-            time += 1
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     except KeyboardInterrupt:
@@ -261,23 +242,25 @@ if __name__ == "__main__":
             Flags :
             - [-n | --noSerOut]                 : Disables Serial output
             - [-q | --noQR]                           : Disables use of QR Markers for image transformation
-            - [-v | --verbose]                  : If this option is present, the program will open multiple windows with 
+            - [-v | --verbose]                  : If this option is present, the program will open multiple windows with
                                                   views at different stages of the image processing
-            - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from 
-                                                  ["out", "markers", "transformed"]. So for example if you want to display 
+            - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from
+                                                  ["out", "markers", "transformed"]. So for example if you want to display
                                                   the output and the marker detection, you should use -window out markers
                                                   Passing -w without specified windows will disable all windows
-            - [[-s | --scale] <factor>]        : Scales Displayed window(s) to size 
+            - [[-s | --scale] <factor>]        : Scales Displayed window(s) to size
                                                   1/factor * (original width) x 1/factor * (original height)
     """
     windowScale = 1
+
     noSerOut = False
-    noQR = False
-    verbose = False
-    wOut = True
-    wMark = False
-    wTransf = False
+    noQR     = False
+    verbose  = False
+    wOut     = True
+    wMark    = False
+    wTransf  = False
     helpMode = False
+
     for arg in sys.argv:
         if arg == '--noSerOut' or arg == '-n':
             noSerOut = True
@@ -313,13 +296,13 @@ if __name__ == "__main__":
             Flags :
             - [-n | --noSerOut]                 : Disables Serial output
             - [-q | --noQR]                           : Disables use of QR Markers for image transformation
-            - [-v | --verbose]                  : If this option is present, the program will open multiple windows with 
+            - [-v | --verbose]                  : If this option is present, the program will open multiple windows with
                                                   views at different stages of the image processing
-            - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from 
-                                                  ["out", "markers", "transformed"]. So for example if you want to display 
+            - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from
+                                                  ["out", "markers", "transformed"]. So for example if you want to display
                                                   the output and the marker detection, you should use -window out markers
                                                   Passing -w without specified windows will disable all windows
-            - [[-s | --scale] <factor>]        : Scales Displayed window(s) to size 
+            - [[-s | --scale] <factor>]        : Scales Displayed window(s) to size
                                                   1/factor * (original width) x 1/factor * (original height)
     """)
     if not helpMode:
