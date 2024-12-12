@@ -20,20 +20,32 @@ CustomStepperControl::CustomStepperControl(int yDir, int yStep, int xDir, int xS
 
 void CustomStepperControl::setBeginning() {
   Serial.println("setBeginning() called.");
-  int full_distance = 1000;
-  moveSide(stepperX, sensor1Y, sensor2Y, full_distance); //check again if stepperX or stepperY
-  moveSide(stepperY, sensor1X, sensor2X, full_distance);
-    // for both stops when the sensor is triggered 
-  int middlePosition = -full_distance/2 ;
+  int big_distance = 2000; //max distance in motorstep for translation
+  moveSide(stepperY, sensor1Y, sensor2Y, big_distance); 
+  moveSide(stepperX, sensor1X, sensor2X, big_distance);
+  stepperY.setCurrentPosition(0);
+  stepperX.setCurrentPosition(0);
+  Serial.println(stepperY.currentPosition());
+  Serial.println(stepperX.currentPosition());
+  moveSide(stepperY, sensor1Y, sensor2Y, -big_distance); 
+  moveSide(stepperX, sensor1X, sensor2X, -big_distance);
+  int max_translation = stepperY.currentPosition();
+  moveSide(stepperY, sensor1Y, sensor2Y, -max_translation/2 * 5); 
+  moveSide(stepperX, sensor1X, sensor2X, -max_translation/2 * 5);
+  // Move into -z direction
 
-  rotateByAngle(wemosSerial1, 0); 
-  rotateByAngle(wemosSerial2, 0); 
 
-  moveSide(stepperY,sensor1Y, sensor2Y, middlePosition);
-  stepperY.setCurrentPosition(middlePosition); // now this is 0 position
+  //   // for both stops when the sensor is triggered 
+  // int middlePosition = -(40/2 * 5)/2 ;  //translation_width/2 * fieldXToMotorUnits
 
-  moveSide(stepperX,sensor1X, sensor2X,middlePosition);
-  stepperX.setCurrentPosition(middlePosition); // now this is 0 position
+  // rotateByAngle(wemosSerial1, 0); 
+  // rotateByAngle(wemosSerial2, 0); 
+
+  // moveSide(stepperY,sensor1Y, sensor2Y, middlePosition);
+  // stepperY.setCurrentPosition(middlePosition); // now this is 0 position
+
+  // moveSide(stepperX,sensor1X, sensor2X,middlePosition);
+  // stepperX.setCurrentPosition(middlePosition); // now this is 0 position
 }
 
 // MOVE <value>
@@ -102,10 +114,10 @@ void CustomStepperControl::setupSteppers() {
   wemosSerial1.begin(9600);
   //wemosSerial2.begin(9600);
 
-  stepperY.setMaxSpeed(5000.0);
-  stepperY.setAcceleration(5000.0);
-  stepperX.setMaxSpeed(5000.0);
-  stepperX.setAcceleration(5000.0);
+  stepperY.setMaxSpeed(4000.0);
+  stepperY.setAcceleration(2000.0);
+  stepperX.setMaxSpeed(4000.0);
+  stepperX.setAcceleration(2000.0);
 
   pinMode(EN, OUTPUT);
   digitalWrite(EN, LOW);

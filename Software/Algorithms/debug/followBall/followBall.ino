@@ -107,35 +107,23 @@ void moveField(int target_pos, int* cur_pos){
 void setup() {
   
   customStepper.setupSteppers();
+  customStepper.executeInterpreter(BEGIN());
 
 }
 
 void loop() {
 
-  if (!getBallData()){
-     return;
-  }
+  // if (!getBallData()){
+  //    return;
+  // }
 
-  ballData.x         = currentFrame.x * scaleX;  
-  ballData.y         = currentFrame.y * scaleY;
-  Serial.println(ballData.x);
-  Serial.println(ballData.y);
-  int target_pos = ballData.x;
-  moveField(target_pos, &cur_pos);
-  delay(50);
-  // Serial.println(cur_pos);
-  // Serial.println(target_pos);
-  // int diff1 = target_pos - cur_pos;
-  // int diffMotor1 = diff1 *fieldXToMotorUnits;
-  // int diff2 = cur_pos - target_pos;
-  // int diffMotor2 = diff2 *fieldXToMotorUnits;
-  // Serial.println(fieldXToMotorUnits);
-  // Serial.println(diff1);
-  // Serial.println(diffMotor1);
-  // Serial.println(diff2);
-  // Serial.println(diffMotor2);
-  // customStepper.executeInterpreter(MOVE1(diffMotor1));
-  // customStepper.executeInterpreter(MOVE1(diffMotor2));
+  // ballData.x         = currentFrame.x * scaleX;  
+  // ballData.y         = currentFrame.y * scaleY;
+  // Serial.println(ballData.x);
+  // Serial.println(ballData.y);
+  // int target_pos = ballData.x;
+  // moveField(target_pos, &cur_pos);
+  // delay(50);
 }
 
 
