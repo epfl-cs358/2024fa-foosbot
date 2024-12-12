@@ -61,7 +61,7 @@ def get_ball_pos(img, clrRange):
             pos = center
             cv2.circle(img, center, radius, (255, 0, 0), 3)
 
-            pos = (circles[0, 0][0], circles[0, 0][1])
+            cv2.circle(img, center, 1, (0, 100, 100), 3)
 
             cv2.circle(img, center, 1, (0, 100, 100), 3)
 
@@ -123,7 +123,7 @@ def main(noSerOut=False, noQR=False, verbose=False, adaptCoords=True, windowScal
 
     # For getting data
     # Open the default camera
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))

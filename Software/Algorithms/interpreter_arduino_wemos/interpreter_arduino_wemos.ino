@@ -17,20 +17,20 @@ AccelStepper stepperX(1,X_STP, X_DIR);
 
 long TravelY;
 
-const float stepsPerRevolution = 3200.0; 
-const float degreesPerStep = 360.0 / stepsPerRevolution; 
-int acceleration = 5;   
+const float stepsPerRevolution = 3200.0;
+const float degreesPerStep = 360.0 / stepsPerRevolution;
+int acceleration = 5;
 
 //BEGIN value
-//go to the side till it hits the sensor 
+//go to the side till it hits the sensor
 void setBeginning(){
   // max is 1000 units
   int full_distance = 1000;
   moveSide(stepperY,11,12,full_distance); // Move in the positive direction
   moveSide(stepperX,2,13, full_distance);
-  rotateByAngle(wemosSerial1,0 ); 
-  rotateByAngle(wemosSerial2,0); 
-  
+  rotateByAngle(wemosSerial1,0 );
+  rotateByAngle(wemosSerial2,0);
+
 
   // If sensor on pin 12 was triggered, go back to the middle
   if (digitalRead(12) == LOW) {
@@ -42,7 +42,7 @@ void setBeginning(){
     // Update the current position to middle
     stepperY.setCurrentPosition(middlePosition); // now this is 0 position
     Serial.println("Sensor triggered! Position set to the middle.");
-  } 
+  }
   if (digitalRead(13) == LOW) {
     // Calculate the middle position
     int middlePosition = full_distance/2 ;
@@ -52,7 +52,7 @@ void setBeginning(){
     // Update the current position to middle
     stepperX.setCurrentPosition(middlePosition); // now this is 0 position
     Serial.println("Sensor triggered! Position set to the middle.");
-  } 
+  }
   stepperY.setCurrentPosition(0); // Reset the logical position to 0 at the middle
   Serial.println("Middle position set as 0 point.");
 
@@ -60,12 +60,12 @@ void setBeginning(){
 }
 // MOVE <value>
 // <0 values to go far from the side motor
-// >0 values to come close to the side motor 
+// >0 values to come close to the side motor
 // for 7cm mov range of player, 350 unit is good
 // original 17 cm movement range
 void moveSide(AccelStepper &stepper,int sensor1, int sensor2,  int value){
-  int y =  stepper.currentPosition(); 
-  stepper.move(value);          // Set the final position 
+  int y =  stepper.currentPosition();
+  stepper.move(value);          // Set the final position
   //for coordinate value thats been going far from the side motor >0, controlled by the pin 11
   if(value>0){
     while (stepper.distanceToGo() != 0 ) {
@@ -92,8 +92,8 @@ void returnToInitialPositionSide() {
   Serial.print("Returned to initial X position ");
 }
 
-//ROTATE <angle> 
-// <0 value moves forward 
+//ROTATE <angle>
+// <0 value moves forward
 // >0 moves bavkwards
 // angle = +-12 == 180 deg rotation
 void rotateByAngle(SoftwareSerial &serialPort, float angle) {
@@ -134,20 +134,20 @@ void executeInterpreter(String command) {
 
 void setup()
 {
-  Serial.begin(9600); 
+  Serial.begin(9600);
   wemosSerial1.begin(9600);
   wemosSerial2.begin(9600);
   stepperY.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
-  stepperY.setAcceleration(5000.0); //set acceleration of the stepper 
+  stepperY.setAcceleration(5000.0); //set acceleration of the stepper
   stepperX.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
-  stepperX.setAcceleration(5000.0); //set acceleration of the stepper 
-  pinMode(EN, OUTPUT); 
+  stepperX.setAcceleration(5000.0); //set acceleration of the stepper
+  pinMode(EN, OUTPUT);
   digitalWrite(EN, LOW); // Enable motor driver
-  //stepperY.setCurrentPosition(0);  // initialize the current position im at to be 0 
+  //stepperY.setCurrentPosition(0);  // initialize the current position im at to be 0
 
   //sensors for the pole 1  single player
-  pinMode(11, INPUT); // sensor far from the  sideway motor, responsible for the pos unit move control 
-  pinMode(12, INPUT); // sensor close to the sideway motor, responsible for the pos unit move control  
+  pinMode(11, INPUT); // sensor far from the  sideway motor, responsible for the pos unit move control
+  pinMode(12, INPUT); // sensor close to the sideway motor, responsible for the pos unit move control
   // sensor for the pole 2 double player
   pinMode(2, INPUT); // TODO not set up yet
   pinMode(13, INPUT);
@@ -160,5 +160,5 @@ void loop() {
     command.trim();                                // Remove whitespace
     executeInterpreter(command);                      // Execute parsed command
   }
-  
+
 }
