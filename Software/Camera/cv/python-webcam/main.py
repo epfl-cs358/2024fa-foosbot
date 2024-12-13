@@ -7,6 +7,11 @@ import math
 import numpy as np
 from cv2 import aruco
 
+FIELD_WIDTH  = 690
+FIELD_HEIGHT = 615
+
+QR_SIZE = 47
+
 MSG_START = ':'
 MSG_SEP   = ';'
 MSG_END   = '\n'
@@ -63,11 +68,13 @@ def get_ball_pos(img, clrRange):
 
     return pos
 
-def main(noSerOut=False,
-         noQR=False,
-         verbose=False,
-         windowScale=1,
-         windows=None):
+def main(noSerOut   ,
+         noQR       ,
+         verbose    ,
+         adaptCoords,
+         windowScale,
+         windows    ,
+         input):
     """
     Gets the live image of the camera, transforms it such that it only contains
     the playing field, detects the ball and sends the position of the ball over
@@ -128,7 +135,7 @@ def main(noSerOut=False,
 
     # For getting data
     # Open the default camera
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(input)
 
     frameWidth  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -161,6 +168,7 @@ def main(noSerOut=False,
                              int(frameHeight / windowScale))
     if adaptCoords:
         lastOrigin = None
+        fieldDim   = None
         cv2.namedWindow("Origin", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("Origin",
                          int(frameWidth / windowScale),
@@ -236,12 +244,23 @@ def main(noSerOut=False,
                     if verbose or showTransformed:
                         cv2.imshow("Transformed Frame", frame)
                         cv2.waitKey(1)
-                else: # AdaptCoords is True
+                elif adaptCoords and lastOrigin is None:
                     if ids is not None:
                         for indices, corner in zip(ids, corners):
                             index = indices[0]
                             if index == 1:
-                                lastOrigin = corner[0][0]
+                                qr_pix = math.sqrt(
+                                    (corner[0][1][0] - corner[0][0][0])**2 +
+                                    (corner[0][1][1] - corner[0][0][1])**2)
+                                fieldDim = (int(FIELD_WIDTH  * qr_pix/QR_SIZE),
+                                            int(FIELD_HEIGHT * qr_pix/QR_SIZE))
+                                lastOrigin = (int(corner[0][0][0]),
+                                              int(corner[0][0][1]))
+                                print(corner[0][1][0])
+                                print(corner[0][0][0])
+                                print(qr_pix)
+                                print(fieldDim)
+                                print(lastOrigin)
 
 
             pos = get_ball_pos(frame, clrRange)
@@ -250,7 +269,8 @@ def main(noSerOut=False,
                 # TODO: Update the Position according to the last origin that was detected.
                 #pos -= lastOrigin
                 #print("pos: ", pos)
-                ...
+                frame = frame[lastOrigin[0]:lastOrigin[0] + fieldDim[0],
+                              lastOrigin[1]:lastOrigin[1] + fieldDim[1]]
             if adaptCoords and (verbose or showOrigin):
                     img = frame
                     if lastOrigin is not None:
@@ -286,35 +306,37 @@ if __name__ == "__main__":
     """
     Argument Parser when called from command line.
     Allowed Format:
-        <cmd> [-n | --noSerOut] [-q | --qrTransf] [-v | --verbose] [-c | --cameraOrigin] 
-                [[-w | --windows] <window 1> ...] [[-s | --scale] <factor>]
+        <cmd> [-n | --noSerOut] [-t | --qrTransf] [-v | --verbose] [-c | --cameraOrigin]
+                [[-w | --windows] <window 1> ...] [[-s | --scale] <factor>] [[-i | --input] <cam id>]
             Flags :
             - [-n | --noSerOut]                 : Disables Serial output
             - [-t | --qrTransf]                           : Disables use of QR Markers for image transformation
-            - [-v | --verbose]                  : If this option is present, the program will open multiple windows with 
+            - [-v | --verbose]                  : If this option is present, the program will open multiple windows with
                                                   views at different stages of the image processing
-            - [-c | --cameraOrigin]             : This option disables change of coordinates from original camera 
+            - [-c | --cameraOrigin]             : This option disables change of coordinates from original camera
                                                   coordinates to playing field coordinates
                                                   This flag is cannot be combined with the -t or --qrTransf flag
-            - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from 
-                                                  ["out", "markers", "transformed", "origin"]. So for example if you 
-                                                  want to display the output and the marker detection, you should use 
-                                                  -window out markers Passing -w without specified windows will 
+            - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from
+                                                  ["out", "markers", "transformed", "origin"]. So for example if you
+                                                  want to display the output and the marker detection, you should use
+                                                  -window out markers Passing -w without specified windows will
                                                   disable all windows
-            - [[-s | --scale] <factor>]        : Scales Displayed window(s) to size 
+            - [[-s | --scale] <factor>]        : Scales Displayed window(s) to size
                                                   1/factor * (original width) x 1/factor * (original height)
+            - [[-i | --input] <cam id>]        : Sets the video capture input
     """
     windowScale = 1
 
-    noSerOut = False
-    noQR = True
-    verbose = False
-    wOut = True
-    wMark = False
-    wTransf = False
-    wOrig = False
-    helpMode = False
+    noSerOut    = False
+    noQR        = True
+    verbose     = False
+    wOut        = True
+    wMark       = False
+    wTransf     = False
+    wOrig       = False
+    helpMode    = False
     adaptCoords = True
+    input       = 0
     for arg in sys.argv:
         if arg == '--noSerOut' or arg == '-n':
             noSerOut = True
@@ -345,28 +367,44 @@ if __name__ == "__main__":
                     windowScale = int(sys.argv[i])
                 except:
                     print("Invalid Factor")
+        if arg == '-i' or arg == '--input':
+            i = sys.argv.index(arg) + 1
+            if i < len(sys.argv):
+                try:
+                    input = int(sys.argv[i])
+                except:
+                    print("Invalid Input")
         if arg == '--help' or arg == '-h':
             helpMode = True
             print("""
     Argument Parser when called from command line.
     Allowed Format:
-        <cmd> [-n | --noSerOut] [-t | --qrTransf] [-v | --verbose] [-c | --cameraOrigin] 
-                [[-w | --windows] <window 1> ...] [[-s | --scale] <factor>]
+        <cmd> [-n | --noSerOut] [-t | --qrTransf] [-v | --verbose] [-c | --cameraOrigin]
+                [[-w | --windows] <window 1> ...] [[-s | --scale] <factor>] [[-i | --input] <cam id>]
             Flags :
             - [-n | --noSerOut]                 : Disables Serial output
             - [-t | --qrTransf]                           : Disables use of QR Markers for image transformation
-            - [-v | --verbose]                  : If this option is present, the program will open multiple windows with 
+            - [-v | --verbose]                  : If this option is present, the program will open multiple windows with
                                                   views at different stages of the image processing
-            - [-c | --cameraOrigin]             : This option disables change of coordinates from original camera 
+            - [-c | --cameraOrigin]             : This option disables change of coordinates from original camera
                                                   coordinates to playing field coordinates
                                                   This flag is cannot be combined with the -t or --qrTransf flag
-            - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from 
-                                                  ["out", "markers", "transformed", "origin"]. So for example if you 
-                                                  want to display the output and the marker detection, you should use 
-                                                  -window out markers Passing -w without specified windows will 
+            - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from
+                                                  ["out", "markers", "transformed", "origin"]. So for example if you
+                                                  want to display the output and the marker detection, you should use
+                                                  -window out markers Passing -w without specified windows will
                                                   disable all windows
-            - [[-s | --scale] <factor>]        : Scales Displayed window(s) to size 
+            - [[-s | --scale] <factor>]        : Scales Displayed window(s) to size
                                                   1/factor * (original width) x 1/factor * (original height)
+            - [[-i | --input] <cam id>]        : Sets the video capture input
     """)
     if not helpMode:
-        main(noSerOut, noQR, verbose, adaptCoords, windowScale, [wOut, wMark, wTransf, wOrig])
+        main(
+            noSerOut,
+            noQR,
+            verbose,
+            adaptCoords,
+            windowScale,
+            [wOut, wMark, wTransf, wOrig],
+            input
+        )
