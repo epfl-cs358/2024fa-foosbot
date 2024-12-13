@@ -28,7 +28,7 @@ def get_ball_pos(img, clrRange):
     # Detects circles
     circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                param1=100, param2=30,
-                               minRadius=1, maxRadius=30)
+                               minRadius=25, maxRadius=31)
 
     pos = (-1, -1)
 
@@ -38,7 +38,6 @@ def get_ball_pos(img, clrRange):
         for i in circles[0, :]:
             # Circle center
             center = (i[0], i[1])
-            cv2.circle(img, center, 1, (0, 100, 100), 3)
             # Circle outline
             radius = i[2]
             # Inner square length divided by two
@@ -51,22 +50,24 @@ def get_ball_pos(img, clrRange):
             #               (i[0]-length, i[1]-length),
             #               (i[0]+length, i[1]+length),
             #               (255, 0, 0), 3)
-            print(clrRange)
-            print(mean)
-            print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
+            # print(clrRange)
+            # print(mean)
+            # print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
 
-            if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
-                clrRange[1][0] <= mean[1] <= clrRange[1][1] and
-                clrRange[2][0] <= mean[2] <= clrRange[2][1]):
-                print("Found: ", mean)
-                pos = center
-                cv2.circle(img, center, radius, (255, 0, 0), 3)
+            # if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
+            #     clrRange[1][0] <= mean[1] <= clrRange[1][1] and
+            #     clrRange[2][0] <= mean[2] <= clrRange[2][1]):
+            print("Found: ", mean)
+            pos = center
+            cv2.circle(img, center, radius, (255, 0, 0), 3)
 
-                pos = (circles[0, 0][0], circles[0, 0][1])
+            cv2.circle(img, center, 1, (0, 100, 100), 3)
+
+            cv2.circle(img, center, 1, (0, 100, 100), 3)
 
     return pos
 
-def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None):
+def main(noSerOut=False, noQR=False, verbose=False, adaptCoords=True, windowScale=1, windows=None):
     """
     Gets the live image of the camera, transforms it such that it only contains
     the playing field, detects the ball and sends the position of the ball over
@@ -90,15 +91,19 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
     """
     # For managing displayed windows
     if windows is None:
-        windows = [True, False, False]
-    showOut, showMarkers, showTransformed = windows
+        windows = [True, False, False, False]
+    showOut, showMarkers, showTransformed, showOrigin = windows
 
     # For colour detection
     # Might be good fits (RGB):
     #  - #ae5757
     #  - #ff7f41
     #  - #eb9888
-    clr = [65, 127, 255] # BGR
+    #  - #eb5230
+    #  - #ffa894
+    #  - #70282a
+    #  - #7d342f
+    clr = [47, 52, 125] # BGR
     tlr = 100
     clrLo = [
         clr[0] - tlr,
@@ -116,7 +121,6 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
         (clrLo[2], clrHi[2])
     ]
 
-
     # For getting data
     # Open the default camera
     cap = cv2.VideoCapture(0)
@@ -125,9 +129,6 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
     frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     print("Width: ", frameWidth)
     print("Height: ", frameHeight)
-
-    # Setting i to the minimum possible value
-    time = -sys.maxsize - 1
 
     # Defines a serial port for the output via user input
     if not noSerOut:
@@ -140,12 +141,25 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
         ser = serial.Serial(
             port = port if not user_in else user_in
         )
-        ser.open()
+        if ser.isOpen() == False:
+            ser.open()
         print("Serial opened.")
 
-    # Setting i to the minimum possible value
-    i = -sys.maxsize - 1
-
+    if (not noQR) or adaptCoords:
+        # We use the markers at indexes 1, 2, 3, 4 of this pre-defined
+        # dictionary to mark the playing area
+        aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+        if verbose or showMarkers:
+            cv2.namedWindow("Marker Detection", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("Marker Detection",
+                             int(frameWidth / windowScale),
+                             int(frameHeight / windowScale))
+    if adaptCoords:
+        lastOrigin = None
+        cv2.namedWindow("Origin", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("Origin",
+                         int(frameWidth / windowScale),
+                         int(frameHeight / windowScale))
     if not noQR:
         # Define destination points (corners of the image)
         dst_points = np.float32([
@@ -158,15 +172,6 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
         # Define Dictionary for keeping the last known positions of the markers
         last_known_positions = {1: None, 2: None, 3: None, 4: None}
 
-        # We use the markers at indexes 1, 2, 3, 4 of this pre-defined
-        # dictionary to mark the playing area
-        aruco_dict = aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-
-        if verbose or showMarkers:
-            cv2.namedWindow("Marker Detection", cv2.WINDOW_NORMAL)
-            cv2.resizeWindow("Marker Detection",
-                             int(frameWidth / windowScale),
-                             int(frameHeight / windowScale))
         if verbose or showTransformed:
             cv2.namedWindow("Transformed Frame", cv2.WINDOW_NORMAL)
             cv2.resizeWindow("Transformed Frame",
@@ -185,7 +190,7 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
             # Get an image from the camera
             ret, frame = cap.read()
 
-            if not noQR:
+            if (not noQR) or adaptCoords:
                 # Detect markers in image
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 corners, ids, _ = aruco.detectMarkers(gray, aruco_dict)
@@ -196,47 +201,66 @@ def main(noSerOut=False, noQR=False, verbose=False, windowScale=1, windows=None)
                     cv2.imshow("Marker Detection", markers)
                     cv2.waitKey(1)
 
-                # Updates the dictionary of last known positions if the right
-                # markers were detected
-                if ids is not None:
-                    for indices, corner in zip(ids, corners):
-                        index = indices[0]
-                        if index in last_known_positions:
-                            last_known_positions[index] = corner[0][0]
+                if not noQR:
+                    # Updates the dictionary of last known positions if the right
+                    # markers were detected
+                    if ids is not None:
+                        for indices, corner in zip(ids, corners):
+                            index = indices[0]
+                            if index in last_known_positions:
+                                last_known_positions[index] = corner[0][0]
 
-                # Transforms the image if all 4 markers were detected (at some
-                                                                       # point)
-                if all(last_known_positions[i] is not None
-                       for i in last_known_positions.keys()):
-                    src_points = np.float32([
-                        last_known_positions[1],
-                        last_known_positions[2],
-                        last_known_positions[3],
-                        last_known_positions[4]
-                    ])
-                    transformation_matrix = cv2.getPerspectiveTransform(
-                        src_points, dst_points
-                    )
-                    transformed_frame = cv2.warpPerspective(
-                        frame, transformation_matrix, (frameWidth, frameHeight)
-                    )
-                    if np.array(transformed_frame).size != 0:
-                        frame = transformed_frame
-                if verbose or showTransformed:
-                    cv2.imshow("Transformed Frame", frame)
-                    cv2.waitKey(1)
+                    # Transforms the image if all 4 markers were detected (at some
+                                                                           # point)
+                    if all(last_known_positions[i] is not None
+                           for i in last_known_positions.keys()):
+                        src_points = np.float32([
+                            last_known_positions[1],
+                            last_known_positions[2],
+                            last_known_positions[3],
+                            last_known_positions[4]
+                        ])
+                        transformation_matrix = cv2.getPerspectiveTransform(
+                            src_points, dst_points
+                        )
+                        transformed_frame = cv2.warpPerspective(
+                            frame, transformation_matrix, (frameWidth, frameHeight)
+                        )
+                        if np.array(transformed_frame).size != 0:
+                            frame = transformed_frame
+                    if verbose or showTransformed:
+                        cv2.imshow("Transformed Frame", frame)
+                        cv2.waitKey(1)
+                else: # AdaptCoords is True
+                    if ids is not None:
+                        for indices, corner in zip(ids, corners):
+                            index = indices[0]
+                            if index == 1:
+                                lastOrigin = corner[0][0]
 
-            timeStmp = time + 2**32 # Converting time to unsigned
+
             pos = get_ball_pos(frame, clrRange)
+
+            if adaptCoords and lastOrigin is not None:
+                # TODO: Update the Position according to the last origin that was detected.
+                #pos -= lastOrigin
+                #print("pos: ", pos)
+                ...
+            if adaptCoords and (verbose or showOrigin):
+                    img = frame
+                    if lastOrigin is not None:
+                        cv2.circle(img, (int(lastOrigin[0]), int(lastOrigin[1])), 5, (0, 0, 255), 3)
+                    cv2.imshow("Origin", img)
 
             # Sends the position to the Serial Port
             if not noSerOut and (pos[0] != -1 and pos[1] != -1):
-                ser.write(MSG_START + str(pos)      +
-                          MSG_SEP   + str(timeStmp) +
-                          MSG_END)
-            if showOut:
+                ser.write((
+                    MSG_START + str(pos[0])   +
+                    MSG_SEP   + str(pos[1])   +
+                    MSG_END).encode())
+
+            if verbose or showOut:
                 cv2.imshow("Output", frame)
-            time += 1
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     except KeyboardInterrupt:
@@ -257,34 +281,43 @@ if __name__ == "__main__":
     """
     Argument Parser when called from command line.
     Allowed Format:
-        <cmd> [-n | --noSerOut] [-q | --noQR] [-v | --verbose] [[-w | --windows] <window 1> ...] [[-s | --scale] <factor>]
+        <cmd> [-n | --noSerOut] [-q | --qrTransf] [-v | --verbose] [-c | --cameraOrigin] 
+                [[-w | --windows] <window 1> ...] [[-s | --scale] <factor>]
             Flags :
             - [-n | --noSerOut]                 : Disables Serial output
-            - [-q | --noQR]                           : Disables use of QR Markers for image transformation
+            - [-t | --qrTransf]                           : Disables use of QR Markers for image transformation
             - [-v | --verbose]                  : If this option is present, the program will open multiple windows with 
                                                   views at different stages of the image processing
+            - [-c | --cameraOrigin]             : This option disables change of coordinates from original camera 
+                                                  coordinates to playing field coordinates
+                                                  This flag is cannot be combined with the -t or --qrTransf flag
             - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from 
-                                                  ["out", "markers", "transformed"]. So for example if you want to display 
-                                                  the output and the marker detection, you should use -window out markers
-                                                  Passing -w without specified windows will disable all windows
+                                                  ["out", "markers", "transformed", "origin"]. So for example if you 
+                                                  want to display the output and the marker detection, you should use 
+                                                  -window out markers Passing -w without specified windows will 
+                                                  disable all windows
             - [[-s | --scale] <factor>]        : Scales Displayed window(s) to size 
                                                   1/factor * (original width) x 1/factor * (original height)
     """
     windowScale = 1
     noSerOut = False
-    noQR = False
+    noQR = True
     verbose = False
     wOut = True
     wMark = False
     wTransf = False
+    wOrig = False
     helpMode = False
+    adaptCoords = True
     for arg in sys.argv:
         if arg == '--noSerOut' or arg == '-n':
             noSerOut = True
-        if arg == '--noQR' or arg == '-q':
-            noQR = True
+        if arg == '--qrTransf' or arg == '-t':
+            noQR = False
         if arg == '--verbose' or arg == '-v':
             detailed = True
+        if arg == '--cameraOrigin' or arg == '-c':
+            adaptCoords = False
         if arg == '--windows' or arg == '-w':
             i = sys.argv.index(arg) + 1
             wOut = False
@@ -296,6 +329,8 @@ if __name__ == "__main__":
                     wMark = True
                 if window == 'transformed':
                     wTransf = True
+                if window == 'origin':
+                    wOrig = True
                 i += 1
         if arg == '--scale' or arg == '-s':
             i = sys.argv.index(arg) + 1
@@ -309,18 +344,23 @@ if __name__ == "__main__":
             print("""
     Argument Parser when called from command line.
     Allowed Format:
-        <cmd> [-n | --noSerOut] [-q | --noQR] [-v | --verbose] [[-w | --windows] <window 1> ...] [[-s | --scale] <factor>]
+        <cmd> [-n | --noSerOut] [-t | --qrTransf] [-v | --verbose] [-c | --cameraOrigin] 
+                [[-w | --windows] <window 1> ...] [[-s | --scale] <factor>]
             Flags :
             - [-n | --noSerOut]                 : Disables Serial output
-            - [-q | --noQR]                           : Disables use of QR Markers for image transformation
+            - [-t | --qrTransf]                           : Disables use of QR Markers for image transformation
             - [-v | --verbose]                  : If this option is present, the program will open multiple windows with 
                                                   views at different stages of the image processing
+            - [-c | --cameraOrigin]             : This option disables change of coordinates from original camera 
+                                                  coordinates to playing field coordinates
+                                                  This flag is cannot be combined with the -t or --qrTransf flag
             - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from 
-                                                  ["out", "markers", "transformed"]. So for example if you want to display 
-                                                  the output and the marker detection, you should use -window out markers
-                                                  Passing -w without specified windows will disable all windows
+                                                  ["out", "markers", "transformed", "origin"]. So for example if you 
+                                                  want to display the output and the marker detection, you should use 
+                                                  -window out markers Passing -w without specified windows will 
+                                                  disable all windows
             - [[-s | --scale] <factor>]        : Scales Displayed window(s) to size 
                                                   1/factor * (original width) x 1/factor * (original height)
     """)
     if not helpMode:
-        main(noSerOut, noQR, verbose, windowScale, [wOut, wMark, wTransf])
+        main(noSerOut, noQR, verbose, adaptCoords, windowScale, [wOut, wMark, wTransf, wOrig])
