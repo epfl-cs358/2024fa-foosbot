@@ -51,14 +51,14 @@ def get_ball_pos(img, clrRange):
             mean = cv2.mean(
                 img[i[0]-length:i[0]+length, i[1]-length:i[1]+length]
             )
-            print(clrRange)
-            print(mean)
-            print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
+            # print(clrRange)
+            # print(mean)
+            # print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
 
             # if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
             #     clrRange[1][0] <= mean[1] <= clrRange[1][1] and
             #     clrRange[2][0] <= mean[2] <= clrRange[2][1]):
-            print("Found: ", mean)
+            # print("Found: ", mean)
             pos = center
             cv2.circle(img, center, radius, (255, 0, 0), 3)
 
@@ -99,11 +99,13 @@ def main(noSerOut   ,
     :param windows: Defines which windows are being displayed. Should have
                     one entry for each possible window
     :type windows:  list(bool)
+
+    :param input:
+
+    :type input:
     """
 
     # For managing displayed windows
-    if windows is None:
-        windows = [True, False, False, False]
     showOut, showMarkers, showTransformed, showOrigin = windows
 
     # For colour detection
@@ -169,21 +171,22 @@ def main(noSerOut   ,
     if adaptCoords:
         lastOrigin = None
         fieldDim   = None
-        cv2.namedWindow("Origin", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("Origin",
-                         int(frameWidth / windowScale),
-                         int(frameHeight / windowScale))
+        if verbose or showOrigin:
+            cv2.namedWindow("Origin", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("Origin",
+                             int(frameWidth / windowScale),
+                             int(frameHeight / windowScale))
     if not noQR:
         # Define destination points (corners of the image)
-        dst_points = np.float32([
-            [0, 0],  # Upper-left corner
-            [frameWidth - 1, 0],  # Upper-right corner
-            [frameWidth - 1, frameHeight - 1],  # Lower-right corner
-            [0, frameHeight - 1]  # Lower-left corner
-        ])
+        # dst_points = np.float32([
+        #     [0, 0],  # Upper-left corner
+        #     [frameWidth - 1, 0],  # Upper-right corner
+        #     [frameWidth - 1, frameHeight - 1],  # Lower-right corner
+        #     [0, frameHeight - 1]  # Lower-left corner
+        # ])
 
         # Define Dictionary for keeping the last known positions of the markers
-        corner = None
+        lastKnownPos = {1: None, 2: None, 3: None, 4: None}
 
         if verbose or showTransformed:
             cv2.namedWindow("Transformed Frame", cv2.WINDOW_NORMAL)
@@ -220,24 +223,32 @@ def main(noSerOut   ,
                     if ids is not None:
                         for indices, corner in zip(ids, corners):
                             index = indices[0]
-                            if index in last_known_positions:
-                                last_known_positions[index] = corner[0][0]
+                            if index in lastKnownPos:
+                                lastKnownPos[index] = corner[0][0]
 
                     # Transforms the image if all 4 markers were detected (at some
                                                                            # point)
-                    if all(last_known_positions[i] is not None
-                           for i in last_known_positions.keys()):
+                    if all(lastKnownPos[i] is not None
+                           for i in lastKnownPos.keys()):
                         src_points = np.float32([
-                            last_known_positions[1],
-                            last_known_positions[2],
-                            last_known_positions[3],
-                            last_known_positions[4]
+                            lastKnownPos[1],
+                            lastKnownPos[2],
+                            lastKnownPos[3],
+                            lastKnownPos[4]
+                        ])
+                        fieldWidth = lastKnownPos[2][0] - lastKnownPos[1][0]
+                        fieldHeight = lastKnownPos[3][1] - lastKnownPos[2][1]
+                        dst_points = np.float32([
+                            [0, 0],  # Upper-left corner
+                            [fieldWidth, 0],  # Upper-right corner
+                            [fieldWidth, fieldHeight],  # Lower-right corner
+                            [0, fieldHeight]  # Lower-left corner
                         ])
                         transformation_matrix = cv2.getPerspectiveTransform(
                             src_points, dst_points
                         )
                         transformed_frame = cv2.warpPerspective(
-                            frame, transformation_matrix, (frameWidth, frameHeight)
+                            frame, transformation_matrix, (int(fieldWidth), int(fieldHeight))
                         )
                         if np.array(transformed_frame).size != 0:
                             frame = transformed_frame
@@ -256,11 +267,11 @@ def main(noSerOut   ,
                                             int(FIELD_HEIGHT * qr_pix/QR_SIZE))
                                 lastOrigin = (int(corner[0][0][0]),
                                               int(corner[0][0][1]))
-                                print(corner[0][1][0])
-                                print(corner[0][0][0])
-                                print(qr_pix)
-                                print(fieldDim)
-                                print(lastOrigin)
+                                # print(corner[0][1][0])
+                                # print(corner[0][0][0])
+                                # print(qr_pix)
+                                # print(fieldDim)
+                                # print(lastOrigin)
 
 
             pos = get_ball_pos(frame, clrRange)
