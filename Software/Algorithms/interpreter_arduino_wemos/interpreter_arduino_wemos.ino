@@ -8,7 +8,7 @@
 // 1000 units is for the full range side to side
 const float stepsPerMM = 400.0; // Adjust based on your setup ==> nb of steps required to move 1mm
 SoftwareSerial wemosSerial1(-1, 10);  // single player pole rotary
-SoftwareSerial wemosSerial2(-1, 2);  // double player pole rotary
+SoftwareSerial wemosSerial2(-1, 11);  // double player pole rotary
 
 // AccelStepper set up this is for the side to side of rod 1 (goalie)
 AccelStepper stepperY(1,Y_STP, Y_DIR);
