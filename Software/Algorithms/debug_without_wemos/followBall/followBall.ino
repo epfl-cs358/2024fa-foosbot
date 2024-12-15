@@ -73,7 +73,6 @@ int playerPosition[4][2]; // Player positions: [x, angle]
 // Retrieve ball data
 bool getBallData(){
 
-    Serial.println("hey");
     if (Serial.available() > 0) {
         Serial.readStringUntil(':');
         int x         = Serial.readStringUntil(';' ).toInt();

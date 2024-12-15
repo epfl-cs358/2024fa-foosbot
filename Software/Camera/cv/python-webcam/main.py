@@ -34,7 +34,7 @@ def get_ball_pos(img, clrRange, clrDet):
     # Detects circles
     circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                param1=100, param2=30,
-                               minRadius=25, maxRadius=31)
+                               minRadius=10, maxRadius=15)
 
     pos = (-1, -1)
 
@@ -57,12 +57,12 @@ def get_ball_pos(img, clrRange, clrDet):
                     print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
                     print("Found: ", mean)
 
-                if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
-                    clrRange[1][0] <= mean[1] <= clrRange[1][1] and
-                    clrRange[2][0] <= mean[2] <= clrRange[2][1]):
+                # if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
+                #     clrRange[1][0] <= mean[1] <= clrRange[1][1] and
+                #     clrRange[2][0] <= mean[2] <= clrRange[2][1]):
 
-                    pos = center
-                    cv2.circle(img, center, radius, (255, 0, 0), 3)
+                pos = center
+                cv2.circle(img, center, radius, (255, 0, 0), 3)
             else:
                 cv2.circle(img, center, radius, (255, 0, 0), 3)
             cv2.circle(img, center, 1, (0, 100, 100), 3)
@@ -317,8 +317,8 @@ if __name__ == "__main__":
     wTransf     = False
     wOrig       = False
     helpMode    = False
-    inp       = 0
-    port = None
+    inp         = 0
+    port        = "/dev/ttyUSB0"
     for arg in sys.argv:
         if arg == '--no-ser-out' or arg == '-n':
             noSerOut = True
@@ -327,7 +327,7 @@ if __name__ == "__main__":
         if arg == '--c' or arg == '--clr-det':
             clrDet = True
         if arg == '--verbose' or arg == '-v':
-            detailed = True
+            verbose = True
         if arg == '--windows' or arg == '-w':
             i = sys.argv.index(arg) + 1
             wOut = False
