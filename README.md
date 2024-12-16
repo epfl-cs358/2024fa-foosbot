@@ -16,6 +16,27 @@ A traditional foosball table is as large as a standard table and has four handle
 - Set up the Camera Vision
 
 ## List of Materials
+- 4 x 17HS4401 Stepper Motors
+- 4 x A4988 Motor Drivers
+- 4 x End stop Sensors
+- 1 x Arduino Uno
+- 1 x USB cable to connect to the Arduino
+- 1 x H Bridge
+- 1 x USB Isolator
+- 1 x Logitech Webcam C270
+- 2 x Aluminium Profile 20 x 20 mm of length 41 cm
+- 1 x 12V Power Supply
+- 1 x Power Supply Plug
+- 2 x ~1 meter GT2 6mm belt
+- 1 x 1 meter WS2813 LED Strips
+- 1 x Bread board
+- 2 x Metal Bars with diameter 15 mm
+- 2 x Metal Bars with diameter 8 mm
+- 4 x Ball Bearings that allow for both rotational and linear motion
+- 8 x Wheels (See picture below)
+- 2 x Pully
+- Jumper cables
+- A ball
 
 ## Building the table
 
