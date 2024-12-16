@@ -1,4 +1,10 @@
 # Foosbot
+TODO : Replace images below by images of final version
+
+![table](https://github.com/user-attachments/assets/b8c47ceb-1c6e-445f-9500-ef7e5aeb1a10)
+
+
+![circuitry](https://github.com/user-attachments/assets/d1ccab5b-6c06-4c52-b9e3-3810068a2918)
 
 ## Overview
 Table football, also known as foosball or table soccer, is a game based on as- sociation football. The objective is to move the ball into the opponent’s goal by manipulating rods with figures resembling football players of two opposing teams. This fast-paced game is typically played by 2-4 players, but it is not designed for solo play.
@@ -6,14 +12,6 @@ Our project proposes the creation of a Foosball table that can be played by a si
 A traditional foosball table is as large as a standard table and has four handles per side. However, for the sake of our project’s budget and complexity, the prototype will be based on a smaller version with only two handles per side. This approach will reduce system complexity and improve motor reaction times.
 
 ## Project Structure
-
-## General Overview of tasks
-- Lasercut
-- 3D Print
-- Assemble the Table
-- Wire up the motors to the Arduino
-- Connect and mount the LED Strips
-- Set up the Camera Vision
 
 ## List of Materials
 - 4 x 17HS4401 Stepper Motors
@@ -38,6 +36,14 @@ A traditional foosball table is as large as a standard table and has four handle
 - Jumper cables
 - A ball
 
+## General Overview of tasks
+- Lasercut
+- 3D Print
+- Assemble the Table
+- Wire up the motors to the Arduino
+- Connect and mount the LED Strips
+- Set up the Camera Vision
+
 ## Building the table
 
 ## Wiring of the Motors
@@ -48,12 +54,16 @@ You need to print out the 4 QR Code Markers stored in the file
 [`/Software/Camera/cv/python-webcam/ArUco markers.pdf`](https://github.com/epfl-cs358/2024fa-foosbot/blob/main/Software/Camera/cv/python-webcam/ArUco%20markers.pdf)
 and cut them out. 
 
-![QRCodeMarkers.png]()
+<img width="359" alt="QRCodeMarkers" src="https://github.com/user-attachments/assets/70fe4499-404d-41a1-beef-c1cddc03354b" />
 
-You then have to tape the QR Codes into the Right corners. 
-Here is a picture from below the table where the motors are to the left:
 
-![table.png]()
+
+You then have to tape the QR Codes into the Right corners. Note that the top left corner, marked red in image above, should point towards the corner.
+Here is a picture from below the table where the motors are at the top:
+
+![QROrientation](https://github.com/user-attachments/assets/b5999db4-da25-40d2-b06f-c2f30c9e86fd)
+
+
 
 __It is important that the Codes are oriented the right way!__
 Otherwise the camera won't detect the full playing field.
