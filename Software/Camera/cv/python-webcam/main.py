@@ -149,7 +149,7 @@ def main(noSerOut,
     # Defines a serial port for the output via user input
     if not noSerOut:
         if port is None:
-            port = '/dev/ttyUSB0'
+            port = '/dev/cu.usbserial-1110'
             user_in = input("Device ['" + port + "']:")
             if user_in:
                 port = user_in

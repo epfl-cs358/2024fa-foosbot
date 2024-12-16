@@ -7,23 +7,24 @@
 
 class CustomStepperControl {
   public:
-    CustomStepperControl(int yDir, int yStep, int xDir, int xStep, int enPin, int sensor1Y, int sensor2Y, int sensor1X, int sensor2X);
+    CustomStepperControl(int yDir, int yStep, int zDir, int zStep, int aStep, int aDir, int xStep, int xDir, int enPin, int sensorYF, int sensorYB, int sensorZF, int sensorZB);
     
     void setBeginning();
     void moveSide(AccelStepper &stepper, int sensor1, int sensor2, int value);
+    void moveSide2(AccelStepper &stepper, int value);
     void returnToInitialPositionSide();
-    void rotateByAngle(SoftwareSerial &serialPort, float angle);
+    void rotateByAngle(AccelStepper &stepper, int angle);
     void executeInterpreter(String command);
     void setupSteppers();
   
   private:
     AccelStepper stepperY;
+    AccelStepper stepperZ;
     AccelStepper stepperX;
-    SoftwareSerial wemosSerial1;
-    SoftwareSerial wemosSerial2;
+    AccelStepper stepperA;
     int EN;
-    int Y_DIR, Y_STP, X_DIR, X_STP;
-    int sensor1Y, sensor2Y, sensor1X, sensor2X;
+    int Y_DIR, Y_STP, Z_DIR, Z_STP, A_DIR, A_STP, X_DIR, X_STP;
+    int sY_front, sY_back, sZ_front, sZ_back;
     const float stepsPerMM = 400.0;
     const float stepsPerRevolution = 3200.0;
     const float degreesPerStep = 360.0 / stepsPerRevolution;

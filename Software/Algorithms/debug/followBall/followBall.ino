@@ -33,8 +33,8 @@
 #define MOVE2(pos)      ("MOVE2 " + String(pos))   
 #define ROTATE1(angle)  ("ROTATE1 " + String(angle))          // Rotate by angle
 #define ROTATE2(angle)  ("ROTATE2 " + String(angle))   
-#define INITIALX()       "INITIALX"                          // Reset Position
-#define INITIALY()       "INITIALY"                          // Reset Rotation
+#define INITIALX()       "INITIX"                          // Reset Position
+
 
 //inputs of the cv
 typedef struct {
@@ -60,7 +60,7 @@ typedef struct {
 } Infos;
 
 Infos ballData;
-CustomStepperControl customStepper(6, 3, 7, 4, 8, 9, 12, 2, 5);
+CustomStepperControl customStepper(6, 3, 7, 4, 12, 13, 2, 5, 8, 10, 11 ,9, A0);
 int cur_pos = fieldWidth/2 * scaleX;
 
 //Movement commands for players
@@ -117,13 +117,13 @@ void loop() {
   //    return;
   // }
 
-  // ballData.x         = currentFrame.x * scaleX;  
-  // ballData.y         = currentFrame.y * scaleY;
-  // Serial.println(ballData.x);
-  // Serial.println(ballData.y);
-  // int target_pos = ballData.x;
-  // moveField(target_pos, &cur_pos);
-  // delay(50);
+  ballData.x         = currentFrame.x * scaleX;  
+  ballData.y         = currentFrame.y * scaleY;
+  Serial.println(ballData.x);
+  Serial.println(ballData.y);
+  int target_pos = ballData.x;
+  moveField(target_pos, &cur_pos);
+  delay(50);
 }
 
 

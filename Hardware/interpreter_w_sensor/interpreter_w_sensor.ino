@@ -1,29 +1,45 @@
-#include "CustomStepperControl.h"
+#include "AccelStepper.h"
+#include <SoftwareSerial.h>
+#define EN 8
+#define Y_DIR 6
+#define Y_STP 3
+#define Z_DIR 7
+#define Z_STP 4
+#define A_STP 12
+#define A_DIR 13
+#define X_STP 2
+#define X_DIR 5
 
-// Constructor
-CustomStepperControl::CustomStepperControl(int yDir, int yStep, int zDir, int zStep, int aStep, int aDir, int xStep, int xDir, int enPin, int sensorYF, int sensorYB, int sensorZF, int sensorZB) 
-  : stepperY(1, yStep, yDir), 
-    stepperZ(1, zStep, zDir), 
-    stepperX(1, xStep, xDir),
-    stepperA(1, aStep, aDir)  
-{
-  Y_DIR = yDir;
-  Y_STP = yStep;
-  Z_DIR = zDir;
-  Z_STP = zStep;
-  A_DIR = aDir;
-  A_STP = aStep;
-  X_DIR = xDir;
-  X_STP = xStep;
-  EN = enPin;
-  this->sY_front = sY_front;
-  this->sY_back = sY_back;
-  this->sZ_front = sZ_front;
-  this->sZ_back = sZ_back;
-}
 
-void CustomStepperControl::setBeginning() {
 
+// Sensor Pins
+#define sY_front 10 // Front endstop for Y-axis
+#define sY_back 11  // Back endstop for Y-axis
+#define sZ_front 9 // Front endstop for Z-axis
+#define sZ_back A0  // Back endstop for Z-axis
+
+// 1000 units is for the full range side to side
+const float stepsPerMM = 400.0; // Adjust based on your setup ==> nb of steps required to move 1mm
+
+
+// AccelStepper set up this is for the side to side of rod 1 (goalie)
+AccelStepper stepperY(1,Y_STP, Y_DIR);  //MOVE1
+// other side to side road
+AccelStepper stepperZ(1,Z_STP, Z_DIR);  //MOVE2
+// rotation motor for stepperY
+AccelStepper stepperX(1,X_STP, X_DIR);
+// rotation motor for stepperX
+AccelStepper stepperA(1,A_STP, A_DIR);
+
+
+const float stepsPerRevolution =2000.0; 
+const float degreesPerStep = 360.0 / stepsPerRevolution; 
+int acceleration = 5;   
+
+//BEGIN value
+//go to the side till it hits the sensor 
+void setBeginning(){
+  
   int max_distance = 1100; //max distance in motorstep for translation between the trigger -> 241 mm * 5 (for motor units)
 
   moveSide(stepperY, sY_front, sY_back, max_distance); // Move in the positive direction, going backwards
@@ -41,9 +57,9 @@ void CustomStepperControl::setBeginning() {
 // MOVE <value>
 // <0 values to go far from the side motor
 // >0 values to come close to the side motor 
-// for 7cm mov range of player, 350 unit is good
-// original 22 cm 
-void CustomStepperControl::moveSide(AccelStepper &stepper, int sensor1, int sensor2, int value) {
+// for 1mm mov range of player, 5 units is good
+// original 28 cm 
+void moveSide(AccelStepper &stepper,int sensor1, int sensor2,  int value){
   //int y =  stepper.currentPosition(); 
   stepper.move(value);          // Set the final position 
   //for coordinate value thats been going far from the side motor >0, controlled by the pin 11
@@ -59,11 +75,13 @@ void CustomStepperControl::moveSide(AccelStepper &stepper, int sensor1, int sens
     }
     stepper.stop();
   }
-  Serial.print("Moved by ");
-  Serial.println(value);
+  //Serial.print("Moved by ");
+  //Serial.println(value);
+  Serial.print("Current Position 1 : ");
+  Serial.println(stepper.currentPosition());
 }
 
-void CustomStepperControl::moveSide2(AccelStepper &stepper, int value){
+void moveSide2(AccelStepper &stepper, int value){
   //int y =  stepper.currentPosition(); 
   stepper.move(value);          // Set the final position 
   //for coordinate value thats been going far from the side motor >0, controlled by the pin 11
@@ -79,12 +97,14 @@ void CustomStepperControl::moveSide2(AccelStepper &stepper, int value){
     }
     stepper.stop();
   }
-  Serial.print("Moved by ");
-  Serial.println(value);
+  //Serial.print("Moved by ");
+  //Serial.println(value);
+  Serial.print("Current Position 2 : ");
+  Serial.println(stepper.currentPosition());
 }
 
-
-void CustomStepperControl::returnToInitialPositionSide() {
+//INITIALX
+void returnToInitialPositionSide() {
   int middle = -1100/2;  
   stepperY.moveTo(middle);            // Command to move to position 0
   stepperZ.moveTo(middle);
@@ -93,11 +113,16 @@ void CustomStepperControl::returnToInitialPositionSide() {
   Serial.print("Returned to initial X position ");
 }
 
-void CustomStepperControl::rotateByAngle(AccelStepper &stepper, int angle) {
+//ROTATE <angle> 
+// <0 value moves forward 
+// >0 moves bavkwards
+// angle = +-12 == 180 deg rotation
+void rotateByAngle(AccelStepper &stepper, int angle) {
   moveSide2(stepper,angle);
 }
+//
 
-void CustomStepperControl::executeInterpreter(String command) {
+void executeInterpreter(String command) {
   char cmd[20];
   int value;
   sscanf(command.c_str(), "%s %d", cmd, &value);
@@ -110,7 +135,7 @@ void CustomStepperControl::executeInterpreter(String command) {
     moveSide2(stepperX,value); // Rotate by angle single player pole
   }else if(strcmp(cmd, "ROTATE2") == 0){
     moveSide2(stepperA,value); // Rotate by angle double player pole
-   }else if(strcmp(cmd, "BEGIN")==0){
+  }else if(strcmp(cmd, "BEGIN")==0){
     setBeginning();
   }else if(strcmp(cmd, "INITX")==0){
     returnToInitialPositionSide();
@@ -118,8 +143,10 @@ void CustomStepperControl::executeInterpreter(String command) {
     Serial.println("Invalid Command!");
   }
 }
+// full set up if i was in one corner 1000 unit mo
 
-void CustomStepperControl::setupSteppers() {
+void setup()
+{
   Serial.begin(9600); 
   stepperY.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
   stepperY.setAcceleration(5000.0); //set acceleration of the stepper 
@@ -132,4 +159,16 @@ void CustomStepperControl::setupSteppers() {
   pinMode(EN, OUTPUT); 
   digitalWrite(EN, LOW); // Enable motor driver
   //stepperY.setCurrentPosition(0);  // initialize the current position im at to be 0 
+
+ 
+
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    String command = Serial.readStringUntil('\n'); // Read command from serial
+    command.trim();                                // Remove whitespace
+    executeInterpreter(command);                      // Execute parsed command
+  }
+  
 }
