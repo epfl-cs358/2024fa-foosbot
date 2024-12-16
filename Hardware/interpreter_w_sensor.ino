@@ -6,7 +6,7 @@
 #define Z_DIR 7
 #define Z_STP 4
 #define A_STP 13
-#define A_DIR 9
+#define A_DIR 12
 #define X_DIR 5
 #define X_STP 2
 
@@ -14,7 +14,7 @@
 // Sensor Pins
 #define sY_front 10 // Front endstop for Y-axis
 #define sY_back 11  // Back endstop for Y-axis
-#define sZ_front 12 // Front endstop for Z-axis
+#define sZ_front 9 // Front endstop for Z-axis
 #define sZ_back A0  // Back endstop for Z-axis
 
 // 1000 units is for the full range side to side
