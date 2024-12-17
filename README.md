@@ -53,7 +53,8 @@ A traditional foosball table is as large as a standard table and has four handle
 
 ### Wiring of the Motors
 ###Electronics Chart
-[Prog.pdf](https://github.com/user-attachments/files/18169458/Prog.pdf)
+![photo_2024-12-17_18-52-56](https://github.com/user-attachments/assets/1b046676-7fc6-4c36-af1d-b620efba9c2d)
+
 
 CNC shield mounted on top of the Arduino Uno , reset buttons should be aligned 
 CNC shield-Arduino Uno pin correspondance
