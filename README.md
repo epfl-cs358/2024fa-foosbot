@@ -12,7 +12,11 @@ Our project proposes the creation of a Foosball table that can be played by a si
 A traditional foosball table is as large as a standard table and has four handles per side. However, for the sake of our project’s budget and complexity, the prototype will be based on a smaller version with only two handles per side. This approach will reduce system complexity and improve motor reaction times.
 
 ## Project Structure
-
+- `CAD` : Contains all the CAD files as well as the dxf files for lasercutting
+- `Hardware` : Contains the electronic circuit diagram
+- `Software` : Contains all the code
+  - `Software/Algorithms` : Contains the Arduino code for controlling the motors and handling the game logic
+  - `Software/Camera/cv/python-webcam` : Contains the python code for the computer vision as well as the QR Markers to printout
 ## List of Materials
 - 4 x 17HS4401 Stepper Motors
 - 4 x A4988 Motor Drivers
@@ -31,12 +35,13 @@ A traditional foosball table is as large as a standard table and has four handle
 - 2 x Metal Bars with diameter 15 mm
 - 2 x Metal Bars with diameter 8 mm
 - 4 x Ball Bearings that allow for both rotational and linear motion
-- 8 x Wheels (See picture below)
+- 8 x Wheels (Something like [this](https://www.zyltech.com/zyltech-20-series-wheel-pulley-bearing-for-2020-aluminum-extrusion-v-slot-compatible/))
 - 2 x Pully
 - Jumper cables
 - A ball
 
-## General Overview of tasks
+## Do it yourself
+### General Overview of tasks
 - Lasercut
 - 3D Print
 - Assemble the Table
@@ -44,12 +49,18 @@ A traditional foosball table is as large as a standard table and has four handle
 - Connect and mount the LED Strips
 - Set up the Camera Vision
 
-## Building the table
+### Building the table
 
-## Wiring of the Motors
+### Wiring of the Motors
 
-## Camera Vision
-### QR Code Markers
+
+#### Protecting the motors and your laptop
+Always connect the Arduino via a USB-Isolator to your laptop and ideally don't charge your laptop while it is connected to the Arduino.
+It is also important that you unplug the power and the Arduino before changing anything on the wiring or manually moving the motors.
+
+
+### Camera Vision
+#### QR Code Markers
 You need to print out the 4 QR Code Markers stored in the file
 [`/Software/Camera/cv/python-webcam/ArUco markers.pdf`](https://github.com/epfl-cs358/2024fa-foosbot/blob/main/Software/Camera/cv/python-webcam/ArUco%20markers.pdf)
 and cut them out. 
@@ -68,10 +79,10 @@ Here is a picture from below the table where the motors are at the top:
 __It is important that the Codes are oriented the right way!__
 Otherwise the camera won't detect the full playing field.
 
-### Code
+#### Code
 The code for the Camera Vision is located in the folder
 [`/Software/Camera/cv/python-webcam/main.py`](https://github.com/epfl-cs358/2024fa-foosbot/blob/main/Software/Camera/cv/python-webcam/main.py)
-### Installing Dependencies
+#### Installing Dependencies
 You need to have python installed on your computer (See [here](https://realpython.com/installing-python/) an article how to install python).
 You als need the following libraries:
 - [PySerial](https://pypi.org/project/pyserial/)
@@ -85,7 +96,7 @@ pip install opencv
 ```
 If you're having trouble, check with your package manager whether it accepts pip installs.
 
-### Starting camera vision
+#### Starting camera vision
 
 1. Plug in the Arduino UNO,
 2. Plug in the Logitech webcam,
@@ -94,10 +105,21 @@ If you're having trouble, check with your package manager whether it accepts pip
 
 If you want to know how to use different flags, type `./main.py --help`.
 
-### Troubleshooting
+#### Troubleshooting
 
 If the camera is not activating properly, try changing the parameter of the
 call to the ` cv2.VideoCapture ` function to another number (usually 0 or 2).
 You can also use the `-i` flag for that.
 
-## Uploading code to the Arduino
+### Uploading code to the Arduino
+#### Dependencies
+You need to have [Arduino IDE](https://www.arduino.cc/en/software) installed, as well as the libraries
+#### Uploading Code
+1. Open the code for the Arduino in `/Software/Algorithms/beginner/beginner.ino`
+2. Connect the Arduino via the USB Isolator to your laptop
+3. Press the upload button in the top left of the Arduino IDE
+
+#### Troubleshooting
+If you get a compilation error, check whether you have all libraries installed.
+
+If you get an error while uploading, check whether you have selected the right board and port and try again.
