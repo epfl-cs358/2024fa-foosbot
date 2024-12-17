@@ -111,11 +111,10 @@ bool getBallData(){
         currentFrame.x         = x;
         currentFrame.y         = y;
 
-        if (!firstFrameReceived) {
-            firstFrameReceived = true;
-        }
+      if (!firstFrameReceived) {
+        firstFrameReceived = true;
+      }
     }
-
     return firstFrameReceived;
 }
 
