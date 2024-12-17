@@ -14,12 +14,12 @@
 #define speedThreshold 25
 #define fieldWidth   680
 #define fieldHeight  605
-#define cameraWidth  1280
-#define cameraHeight 960
+#define cameraWidth  509
+#define cameraHeight 455
 #define offsetGoalie 20
 #define crossFireOffset 15
-#define minGoal 250
-#define maxGoal 430
+#define minGoal 176
+#define maxGoal 563
 
 // Ratio of CV coordinates into the field dimension
 #define scaleX ((float)fieldWidth / cameraWidth)
@@ -102,15 +102,14 @@ int playerPosition[4][2]; // Player positions: [x, angle]
 bool getBallData(){
 
     if (Serial.available() > 0) {
+      Serial.println("Serial available");
         Serial.readStringUntil(':');
         int x         = Serial.readStringUntil(';' ).toInt();
         int y         = Serial.readStringUntil(';' ).toInt();
-        int timestamp = Serial.readStringUntil('\n').toInt();
 
         previousFrame = currentFrame;
         currentFrame.x         = x;
         currentFrame.y         = y;
-        currentFrame.timestamp = timestamp;
 
         if (!firstFrameReceived) {
             firstFrameReceived = true;
@@ -127,25 +126,37 @@ void moveField(){
   int target = ballData.x;
 
   if (minGoal < target && target < maxGoal) {
+    Serial.println("Moving to ball");
     customStepper.executeInterpreter(
-        MOVE2((target-cur_pos) * fieldXToMotorUnits)
+        MOVE1((target-cur_pos) * fieldXToMotorUnits)
     );
     cur_pos = target;
   } else if (target < minGoal){
+    Serial.println("Moving to minGoal");
     customStepper.executeInterpreter(
-        MOVE2((minGoal-cur_pos) * fieldXToMotorUnits)
+        MOVE1((minGoal-cur_pos) * fieldXToMotorUnits)
     );
     cur_pos = minGoal;
   } else {
+    Serial.println("Moving to maxGoal");
     customStepper.executeInterpreter(
-        MOVE2((maxGoal-cur_pos) * fieldXToMotorUnits)
+        MOVE1((maxGoal-cur_pos) * fieldXToMotorUnits)
     );
     cur_pos = maxGoal;
   }
 }
 
+/*
+ * Shoots the ball.
+ */
+void shootBall()
+{
+  
+}
+
 
 void setup() {
+  Serial.begin(9600);
   customStepper.setupSteppers();
   customStepper.executeInterpreter(BEGIN());
 }
@@ -156,8 +167,8 @@ void loop() {
      return;
   }
 
-  ballData.x         = currentFrame.x * scaleX;
-  ballData.y         = currentFrame.y * scaleY;
+  ballData.x = currentFrame.x * scaleX;
+  ballData.y = currentFrame.y * scaleY;
 
   Serial.println(ballData.x);
   Serial.println(ballData.y);
