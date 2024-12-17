@@ -34,7 +34,7 @@ def get_ball_pos(img, clrRange, clrDet):
     # Detects circles
     circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                param1=100, param2=30,
-                               minRadius=10, maxRadius=15)
+                               minRadius=25, maxRadius=31)
 
     pos = (-1, -1)
 
@@ -57,13 +57,14 @@ def get_ball_pos(img, clrRange, clrDet):
                     print("\nB: ", mean[0], "\nG: ", mean[1], "\nR: ", mean[2])
                     print("Found: ", mean)
 
-                # if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
-                #     clrRange[1][0] <= mean[1] <= clrRange[1][1] and
-                #     clrRange[2][0] <= mean[2] <= clrRange[2][1]):
+                if (clrRange[0][0] <= mean[0] <= clrRange[0][1] and
+                    clrRange[1][0] <= mean[1] <= clrRange[1][1] and
+                    clrRange[2][0] <= mean[2] <= clrRange[2][1]):
 
-                pos = center
-                cv2.circle(img, center, radius, (255, 0, 0), 3)
+                    pos = center
+                    cv2.circle(img, center, radius, (255, 0, 0), 3)
             else:
+                pos = center
                 cv2.circle(img, center, radius, (255, 0, 0), 3)
             cv2.circle(img, center, 1, (0, 100, 100), 3)
 
@@ -148,23 +149,21 @@ def main(noSerOut,
 
     # Defines a serial port for the output via user input
     if not noSerOut:
-        if port is None:
+        if port is not None:
             port = '/dev/ttyUSB0'
             user_in = input("Device ['" + port + "']:")
             if user_in:
                 port = user_in
         try:
-            # Creates a Serial Port object with the port from the user input or
-            # the default value otherwise
+            # Creates a Serial Port object with the port from the user input or the
+            # default value otherwise
             ser = serial.Serial(port = port)
             if ser.isOpen() == False:
                 ser.open()
             print("Serial opened.")
         except serial.SerialException:
             noSerOut = False
-            print("Invalid Port : "
-                  + port
-                  + "\nLaunching the program with Serial output disabled.\n")
+            print("Invalid Port : "+str(port)+" !\nLaunching the program with Serial output disabled.\n")
 
     # Opens the camera for video capturing
     cap = cv2.VideoCapture(inp)
@@ -319,8 +318,8 @@ if __name__ == "__main__":
     wTransf     = False
     wOrig       = False
     helpMode    = False
-    inp         = 0
-    port        = None
+    inp       = 0
+    port = None
     for arg in sys.argv:
         if arg == '--no-ser-out' or arg == '-n':
             noSerOut = True
@@ -329,7 +328,7 @@ if __name__ == "__main__":
         if arg == '--c' or arg == '--clr-det':
             clrDet = True
         if arg == '--verbose' or arg == '-v':
-            verbose = True
+            detailed = True
         if arg == '--windows' or arg == '-w':
             i = sys.argv.index(arg) + 1
             wOut = False
@@ -362,31 +361,29 @@ if __name__ == "__main__":
             i = sys.argv.index(arg) + 1
             if i < len(sys.argv) and not sys.argv[i].startswith('-'):
                 inp = sys.argv[i]
-            else:
-                print("Could not read argument")
         if arg == '--help' or arg == '-h':
             helpMode = True
             print("""
-Argument Parser when called from command line.
-Allowed Format:
-    <cmd> [-n | --no-ser-out] [-t | --no-transf] [-c | -clr-det] [-v | --verbose] [[-w | --windows] <window 1> ...] 
-            [[-s | --scale] <factor>] [[-i | --input] <cam id>] [[-p | --port] <port>]
-        Flags :
-        - [-n | --no-ser-out]               : Disables Serial output
-        - [-t | --no-transf]                : Disables use of QR Markers for image transformation
-        - [-c | --clr-det]                  : Activates filtering by Color Detection
-        - [-v | --verbose]                  : If this option is present, the program will open multiple windows with
-                                              views at different stages of the image processing
-        - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from
-                                              ["out", "markers", "transformed", "origin"]. So for example if you
-                                              want to display the output and the marker detection, you should use
-                                              -window out markers Passing -w without specified windows will
-                                              disable all windows
-        - [[-s | --scale] <factor>]         : Scales Displayed window(s) to size
-                                              1/factor * (original width) x 1/factor * (original height)
-        - [[-i | --input] <cam id>]         : Sets the video capture input¨
-        - [-p || -port <port>]              : Defines a port for the serial output
-            """)
+    Argument Parser when called from command line.
+    Allowed Format:
+        <cmd> [-n | --no-ser-out] [-t | --no-transf] [-c | -clr-det] [-v | --verbose] [[-w | --windows] <window 1> ...] 
+                [[-s | --scale] <factor>] [[-i | --input] <cam id>] [[-p | --port] <port>]
+            Flags :
+            - [-n | --no-ser-out]               : Disables Serial output
+            - [-t | --no-transf]                : Disables use of QR Markers for image transformation
+            - [-c | --clr-det]                  : Activates filtering by Color Detection
+            - [-v | --verbose]                  : If this option is present, the program will open multiple windows with
+                                                  views at different stages of the image processing
+            - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from
+                                                  ["out", "markers", "transformed", "origin"]. So for example if you
+                                                  want to display the output and the marker detection, you should use
+                                                  -window out markers Passing -w without specified windows will
+                                                  disable all windows
+            - [[-s | --scale] <factor>]         : Scales Displayed window(s) to size
+                                                  1/factor * (original width) x 1/factor * (original height)
+            - [[-i | --input] <cam id>]         : Sets the video capture input¨
+            - [-p || -port <port>]              : Defines a port for the serial output
+    """)
     if not helpMode:
         main(
             noSerOut,
