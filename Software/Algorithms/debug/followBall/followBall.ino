@@ -102,21 +102,20 @@ int playerPosition[4][2]; // Player positions: [x, angle]
 bool getBallData(){
 
     if (Serial.available() > 0) {
-        Serial.readStringUntil(':');
-        int x         = Serial.readStringUntil(';' ).toInt();
-        int y         = Serial.readStringUntil(';' ).toInt();
-        int timestamp = Serial.readStringUntil('\n').toInt();
+      Serial.readStringUntil(':');
+      int x         = Serial.readStringUntil(';' ).toInt();
+      int y         = Serial.readStringUntil(';' ).toInt();
+      int timestamp = Serial.readStringUntil('\n').toInt();
 
-        previousFrame = currentFrame;
-        currentFrame.x         = x;
-        currentFrame.y         = y;
-        currentFrame.timestamp = timestamp;
+      previousFrame = currentFrame;
+      currentFrame.x         = x;
+      currentFrame.y         = y;
+      currentFrame.timestamp = timestamp;
 
-        if (!firstFrameReceived) {
-            firstFrameReceived = true;
-        }
+      if (!firstFrameReceived) {
+        firstFrameReceived = true;
+      }
     }
-
     return firstFrameReceived;
 }
 
