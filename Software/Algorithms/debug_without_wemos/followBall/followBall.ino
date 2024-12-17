@@ -134,15 +134,23 @@ void trackBall(){
         MOVE2((target-cur_pos) * fieldXToMotorUnits)
     );
     cur_pos = target;
+  } else if (target < minGoal){
+    customStepper.executeInterpreter(
+        MOVE2((minGoal-cur_pos) * fieldXToMotorUnits)
+    );
+    cur_pos = minGoal;
   } else {
-    cur_pos = target<minGoal ? minGoal : maxGoal;
+    customStepper.executeInterpreter(
+        MOVE2((maxGoal-cur_pos) * fieldXToMotorUnits)
+    );
+    cur_pos = maxGoal;
   }
 }
 
 
 void setup() {
   customStepper.setupSteppers();
-  // customStepper.executeInterpreter(BEGIN());
+  customStepper.executeInterpreter(BEGIN());
 }
 
 void loop() {
@@ -156,6 +164,6 @@ void loop() {
   Serial.println(ballData.x);
   Serial.println(ballData.y);
 
-  trackBall(&cur_pos);
+  trackBall();
   delay(50);
 }

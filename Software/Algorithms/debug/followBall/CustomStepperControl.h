@@ -7,7 +7,7 @@
 
 class CustomStepperControl {
   public:
-    CustomStepperControl(int yDir, int yStep, int zDir, int zStep, int aStep, int aDir, int xStep, int xDir, int enPin, int sensorYF, int sensorYB, int sensorZF, int sensorZB);
+    CustomStepperControl(int yDir, int yStep, int zDir, int zStep, int aDir, int aStep, int xDir, int xStep, int enPin, int sY_front, int sY_back, int sZ_front, int sZ_back);
     
     void setBeginning();
     void moveSide(AccelStepper &stepper, int sensor1, int sensor2, int value);

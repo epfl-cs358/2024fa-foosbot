@@ -149,20 +149,22 @@ def main(noSerOut,
     # Defines a serial port for the output via user input
     if not noSerOut:
         if port is None:
-            port = '/dev/cu.usbserial-1110'
+            port = '/dev/ttyUSB0'
             user_in = input("Device ['" + port + "']:")
             if user_in:
                 port = user_in
         try:
-            # Creates a Serial Port object with the port from the user input or the
-            # default value otherwise
+            # Creates a Serial Port object with the port from the user input or
+            # the default value otherwise
             ser = serial.Serial(port = port)
             if ser.isOpen() == False:
                 ser.open()
             print("Serial opened.")
         except serial.SerialException:
             noSerOut = False
-            print("Invalid Port : "+str(port)+" !\nLaunching the program with Serial output disabled.\n")
+            print("Invalid Port : "
+                  + port
+                  + "\nLaunching the program with Serial output disabled.\n")
 
     # Opens the camera for video capturing
     cap = cv2.VideoCapture(inp)

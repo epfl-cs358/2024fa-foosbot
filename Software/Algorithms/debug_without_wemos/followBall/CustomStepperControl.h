@@ -16,7 +16,9 @@ class CustomStepperControl {
     void setupSteppers();
 
   private:
+    // Goalee
     AccelStepper stepperY;
+    // Attack
     AccelStepper stepperX;
     int EN;
     int Y_DIR, Y_STP, X_DIR, X_STP;

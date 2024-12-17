@@ -56,16 +56,22 @@ void CustomStepperControl::moveSide(AccelStepper &stepper, int sensor1, int sens
   stepper.move(value);          // Set the final position
   //for coordinate value thats been going far from the side motor >0, controlled by the pin 11
   if(value>0){
-    while (stepper.distanceToGo() != 0 &&  digitalRead(sensor1) == LOW ) {
+    while (digitalRead(sensor1) == LOW && digitalRead(sensor2) == LOW && stepper.distanceToGo() != 0) {
+      Serial.println(digitalRead(sensor1));
+      Serial.println(digitalRead(sensor2));
       stepper.run();                  // Continuously move toward the target
     }
     stepper.stop();
+    stepper.runSpeedToPosition();
   }
   else {
-    while (stepper.distanceToGo() != 0 && digitalRead(sensor2) == LOW  ) {
+    while (digitalRead(sensor1) == LOW && digitalRead(sensor2) == LOW && stepper.distanceToGo() != 0) {
+      Serial.println(digitalRead(sensor1));
+      Serial.println(digitalRead(sensor2));
       stepper.run();                  // Continuously move toward the target
     }
     stepper.stop();
+    stepper.runSpeedToPosition();
   }
   Serial.print("Moved by ");
   Serial.println(value);
@@ -110,10 +116,10 @@ void CustomStepperControl::executeInterpreter(String command) {
 void CustomStepperControl::setupSteppers() {
   Serial.begin(9600);
 
-  stepperY.setMaxSpeed(4000.0);
-  stepperY.setAcceleration(2000.0);
-  stepperX.setMaxSpeed(4000.0);
-  stepperX.setAcceleration(2000.0);
+  stepperY.setMaxSpeed(500.0);
+  stepperY.setAcceleration(4000.0);
+  stepperX.setMaxSpeed(500.0);
+  stepperX.setAcceleration(4000.0);
 
   pinMode(EN, OUTPUT);
   digitalWrite(EN, LOW);
