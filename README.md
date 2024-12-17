@@ -52,7 +52,7 @@ A traditional foosball table is as large as a standard table and has four handle
 ### Building the table
 
 ### Wiring of the Motors
-###Electronics Chart
+### Electronics Chart
 ![photo_2024-12-17_18-52-56](https://github.com/user-attachments/assets/1b046676-7fc6-4c36-af1d-b620efba9c2d)
 
 
