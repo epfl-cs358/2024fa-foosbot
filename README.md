@@ -13,17 +13,18 @@ A traditional foosball table is as large as a standard table and has four handle
 
 ## Project Structure
 - `CAD` : Contains all the CAD files as well as the dxf files for lasercutting
-- `Hardware` : Contains the electronic circuit diagram
+- `Hardware` : Contains the electronic circuit diagram and a document with hardware component specifications
 - `Software` : Contains all the code
   - `Software/Algorithms` : Contains the Arduino code for controlling the motors and handling the game logic
   - `Software/Camera/cv/python-webcam` : Contains the python code for the computer vision as well as the QR Markers to printout
+
 ## List of Materials
 - 4 x 17HS4401 Stepper Motors
 - 4 x A4988 Motor Drivers
 - 4 x End stop Sensors
 - 1 x Arduino Uno
 - 1 x USB cable to connect to the Arduino
-- 1 x H Bridge
+- 1 x CNC Shield
 - 1 x USB Isolator
 - 1 x Logitech Webcam C270
 - 2 x Aluminium Profile 20 x 20 mm of length 41 cm
@@ -46,7 +47,6 @@ A traditional foosball table is as large as a standard table and has four handle
 - 3D Print
 - Assemble the Table
 - Wire up the motors to the Arduino
-- Connect and mount the LED Strips
 - Set up the Camera Vision
 
 ### Building the table
@@ -64,7 +64,21 @@ CNC shield-Arduino Uno pin correspondance
 #### Protecting the motors and your laptop
 Always connect the Arduino via a USB-Isolator to your laptop and ideally don't charge your laptop while it is connected to the Arduino.
 It is also important that you unplug the power and the Arduino before changing anything on the wiring or manually moving the motors.
+Generally it is also advised to disconnect the power and the arduino whenever you're not using them.
+Also note that the motor drivers on the CNC shield might head up a bit if used for a long period of time.
 
+### Uploading code to the Arduino
+#### Dependencies
+You need to have [Arduino IDE](https://www.arduino.cc/en/software) installed, as well as the libraries
+#### Uploading Code
+1. Open the code for the Arduino in `/Software/Algorithms/beginner/beginner.ino`
+2. Connect the Arduino via the USB Isolator to your laptop
+3. Press the upload button in the top left of the Arduino IDE
+
+#### Troubleshooting
+If you get a compilation error, check whether you have all libraries installed.
+
+If you get an error while uploading, check whether you have selected the right board and port and try again.
 
 ### Camera Vision
 #### QR Code Markers
@@ -104,9 +118,9 @@ pip install opencv
 If you're having trouble, check with your package manager whether it accepts pip installs.
 
 #### Starting camera vision
-
-1. Plug in the Arduino UNO,
+Note that you have to close all Serial monitors in the ArduinoIDE since it prevents the computer vision from opening the port. You can open it again when the computer vision is running.
 2. Plug in the Logitech webcam,
+1. Plug in the Arduino UNO,
 3. Navigate to folder ` Software/Camera/cv/python-webcam `,
 4. Run ` ./main.py `.
 
@@ -117,16 +131,3 @@ If you want to know how to use different flags, type `./main.py --help`.
 If the camera is not activating properly, try changing the parameter of the
 call to the ` cv2.VideoCapture ` function to another number (usually 0 or 2).
 You can also use the `-i` flag for that.
-
-### Uploading code to the Arduino
-#### Dependencies
-You need to have [Arduino IDE](https://www.arduino.cc/en/software) installed, as well as the libraries
-#### Uploading Code
-1. Open the code for the Arduino in `/Software/Algorithms/beginner/beginner.ino`
-2. Connect the Arduino via the USB Isolator to your laptop
-3. Press the upload button in the top left of the Arduino IDE
-
-#### Troubleshooting
-If you get a compilation error, check whether you have all libraries installed.
-
-If you get an error while uploading, check whether you have selected the right board and port and try again.
