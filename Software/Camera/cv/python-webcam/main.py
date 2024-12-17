@@ -34,7 +34,7 @@ def get_ball_pos(img, clrRange, clrDet):
     # Detects circles
     circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                param1=100, param2=30,
-                               minRadius=25, maxRadius=31)
+                               minRadius=10, maxRadius=15)
 
     pos = (-1, -1)
 
@@ -149,7 +149,7 @@ def main(noSerOut,
 
     # Defines a serial port for the output via user input
     if not noSerOut:
-        if port is not None:
+        if port is None:
             port = '/dev/ttyUSB0'
             user_in = input("Device ['" + port + "']:")
             if user_in:
@@ -239,7 +239,9 @@ def main(noSerOut,
                         lastKnownPos[4]
                     ])
                     fieldWidth = lastKnownPos[2][0] - lastKnownPos[1][0]
+                    print("Width: " + str(fieldWidth))
                     fieldHeight = lastKnownPos[3][1] - lastKnownPos[2][1]
+                    print("Height: " + str(fieldHeight))
                     dst_points = np.float32([
                         [0, 0],  # Upper-left corner
                         [fieldWidth, 0],  # Upper-right corner
@@ -318,8 +320,8 @@ if __name__ == "__main__":
     wTransf     = False
     wOrig       = False
     helpMode    = False
-    inp       = 0
-    port = None
+    inp         = 0
+    port        = None
     for arg in sys.argv:
         if arg == '--no-ser-out' or arg == '-n':
             noSerOut = True
