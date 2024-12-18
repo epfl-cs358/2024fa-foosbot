@@ -21,10 +21,10 @@
 #define minGoal 176
 #define maxGoal 563
 
-#define  glRangeLo 0
-#define  glRange   0
-#define attRangeLo 0
-#define attRange   0
+#define  glRangeLo 56
+#define  glRange   202 - glRangeLo
+#define attRangeLo 280
+#define attRange   428 - attRangeLo
 
 // Ratio of CV coordinates into the field dimension
 #define scaleX ((float)fieldWidth / cameraWidth)
@@ -119,7 +119,7 @@ int playerPosition[4][2]; // Player positions: [x, angle]
 bool getBallData(){
 
     if (Serial.available() > 0) {
-      Serial.println("Serial available");
+      //Serial.println("Serial available");
         Serial.readStringUntil(':');
         int x         = Serial.readStringUntil(';' ).toInt();
         int y         = Serial.readStringUntil(';' ).toInt();
@@ -170,6 +170,7 @@ void moveField(){
  */
 void shoot(int rangeLo, int range)
 {
+  /*
   if (ballData.y < rangeLo+(range/2)) {
     customStepper.executeInterpreter(
       ROTATE1(-360);
@@ -181,14 +182,14 @@ void shoot(int rangeLo, int range)
     customStepper.executeInterpreter(
       ROTATE1(-45);
     );
-  }
+  }*/
 }
 
 
 void setup() {
   Serial.begin(9600);
   customStepper.setupSteppers();
-  customStepper.executeInterpreter(BEGIN());
+  //customStepper.executeInterpreter(BEGIN());
 }
 
 void loop() {
@@ -200,16 +201,20 @@ void loop() {
   ballData.x = currentFrame.x * scaleX;
   ballData.y = currentFrame.y * scaleY;
 
-  Serial.println(ballData.x);
-  Serial.println(ballData.y);
+  //Serial.println(currentFrame.x);
+  //Serial.println(currentFrame.y);
 
-  int target_pos = ballData.x;
+  //int target_pos = ballData.x;
 
-  if (glRangeLo < ballData.y && ballData.y < glRangeLo+glRange) {
-    shoot(glRangeLo, glRange);
+  if (glRangeLo * scaleY < ballData.y && ballData.y < (glRangeLo+glRange) *scaleY) {
+    Serial.println("Shooting with Goalie !");
+    //shoot(glRangeLo, glRange);
+    //ROTATE1(-360);
   }
-  if (attRangeLo < ballData.y && ballData.y < attRangeLo+attRange) {
-    shoot(attRangeLo, attRange);
+  if (attRangeLo * scaleY < ballData.y && ballData.y < (attRangeLo+attRange)*scaleY) {
+    Serial.println("Shooting with Attacker !");
+    //shoot(attRangeLo, attRange);
+    //ROTATE2(-360);
   }
-  delay(50);
+  delay(500);
 }
