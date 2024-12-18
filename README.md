@@ -50,7 +50,37 @@ A traditional foosball table is as large as a standard table and has four handle
 - Wire up the motors to the Arduino
 - Set up the Camera Vision
 
-### Building the table
+#### Building the table
+
+#### Overview
+
+#### Laser Cutting
+Lasercut all the pieces in `CAD`.
+
+- MDF:
+  - ...
+- Plexiglass:
+  - Floor
+
+
+#### 3D Printing
+3D Print the following pieces (All of them are in `CAD/3D`):
+- 4 x Players with big radius (Computer Controlled)
+- 4 x Players with small raduis (Human Controlled)
+- 2 x Stoppers with big radius
+- 2 x Stoppers with small radius
+- 8 x Bushing with big radius
+- 8 x Bushing with small radius
+- 2 x Handles
+- 2 x Bar protection
+- 2 x Standing Motor holder
+- 2 x Rotation Motor holder
+- 2 x Motor to Pole Connector
+- 2 x Railing holder without pulley
+- 2 x Railing holder with pulley
+- 2 x pulley
+- 2 x wheels (to put at the end of the belts)
+- 4 x Belt to motor Platform Connector
 
 ### Wiring of the Motors
 #### Electronics Chart
