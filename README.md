@@ -1,6 +1,6 @@
 # Foosbot
 
-/Admin/demo.mp4
+https://github.com/user-attachments/assets/dd09006e-b9f9-418b-b552-d5e2579a633e
 
 ![table](/Admin/table.jpeg)
 
