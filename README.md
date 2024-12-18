@@ -65,14 +65,16 @@ Lasercut all the pieces in `CAD`.
 
 #### 3D Printing
 3D Print the following pieces (All of them are in `CAD/3D`):
-- 4 x Players with big radius (Computer Controlled)
-- 4 x Players with small raduis (Human Controlled)
-- 2 x Stoppers with big radius
-- 2 x Stoppers with small radius
-- 8 x Bushing with big radius
-- 8 x Bushing with small radius
-- 2 x Handles
-- 2 x Bar protection
+- 4 x Players with 15mm radius (Computer Controlled) -> Perimeter 6
+- 4 x Players with 8mm radius (Human Controlled)     -> Perimeter 6
+- 2 x GardianStop 15mm radius                        -> Perimeter 2
+- 2 x GardianStop 8mm radius                         -> Perimeter 2
+- 4 x Bumpers with 15mm radius                       -> Perimeter 2
+- 4 x Bumpers with 8mm radius                        -> Perimeter 2
+- 8 x Bushing with 15mm radius                       -> Perimeter 3
+- 8 x Bushing with 8mm radius                        -> Perimeter 3
+- 2 x Handles                                        -> Perimeter 5
+- 2 x Bar protection                                 -> Perimeter 3
 - 2 x Standing Motor holder
 - 2 x Rotation Motor holder
 - 2 x Motor to Pole Connector
@@ -81,6 +83,28 @@ Lasercut all the pieces in `CAD`.
 - 2 x pulley
 - 2 x wheels (to put at the end of the belts)
 - 4 x Belt to motor Platform Connector
+
+Our 3D printing steps: 
+Use Fusion 360 to create and edit the pieces 
+Open Prusaslicer to prepare pieces for impression: 
+1. Select Filament PETG
+2. Select Printer MK4 with 0.4 nozzle or i3 MK3S & MK3S+
+3. Select Print Setting 0.20mm QUALITY
+4. Place and add necessary supports to print out pieces correctly
+5. Edit the perimeter of the pieces for more resistance if needed
+6. Slice and Print
+
+For the Bumpers:
+Open Prusaslicer to prepare pieces for impression: 
+1. Select Filament NinjaTek NinjaFlex TPU
+2. Select Printer i3 MK3S & MK3S+
+3. Select Print Setting 0.20mm QUALITY
+4. ! don't use supports
+5. Place pieces and Slice 
+6. Add glue to printing bed
+7. Print 
+
+When slicing be careful of the surface on which you print your pieces, to ideally minimize supports needed or place them in a smart way. 
 
 ### Wiring of the Motors
 #### Electronics Chart
@@ -172,6 +196,11 @@ By default the camera should open a window called Output which displays the area
 - If the camera is not activating properly, try changing the parameter of the call to the ` cv2.VideoCapture ` function to another number (usually 0 or 2). You can also use the `-i` flag for that.
 - If the camera vision does a weird transformation then the QR Codes are not placed in the right corners.
 - If the output doesn't show the entire field, then the QR Codes might not be oriented correctly (Top left corner ins't pointing towards the corner).
-- If the ball isn't detected then you might need to change the allowed range for the radius (line 37 in [`main.py`](https://github.com/epfl-cs358/2024fa-foosbot/blob/main/Software/Camera/cv/python-webcam/main.py)). By default it is set to accept radii between 25 and 31. This works well for us on Macbooks but we observed that on Linux a range of 10 to 15 is appropriate.
+- If the ball isn't detected then you might need to change the allowed range for the radius (line 37 in [`main.py`](https://github.com/epfl-cs358/2024fa-foosbot/blob/main/Software/Camera/cv/python-webcam/main.py)). By default it is set to accept radius between 25 and 31. This works well for us on Macbooks but we observed that on Linux a range of 10 to 15 is appropriate.
+- If the code has a problem uploading to the arduino try doing the following (sometimes the port has a problem):
+  1. Stop the computer vision
+  2. Make sure you have no serial monitor open on the arduino ide and close all other sketches
+  3. Plug in the arduino uno again and upload the code
+  4. Start the computer vision again 
 
 Remember that you can use different flags to debug the computer vision. For example you can display views of different stages of computer vision (Marker detection, image transformation, etc.) using the --w or --windows flag or you can disable the Serial output if no Arduino is connected by  using the -n or --no-ser-out flag.
