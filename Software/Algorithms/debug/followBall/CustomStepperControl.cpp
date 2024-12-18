@@ -122,14 +122,14 @@ void CustomStepperControl::executeInterpreter(String command) {
 
 void CustomStepperControl::setupSteppers() {
   Serial.begin(9600);
-  stepperY.setMaxSpeed(3500.0); // set max speed of the stepper , slower to get better accuracy
-  stepperY.setAcceleration(3500.0); //set acceleration of the stepper
-  stepperX.setMaxSpeed(3500.0); // set max speed of the stepper , slower to get better accuracy
-  stepperX.setAcceleration(3500.0); //set acceleration of the stepper
-  stepperZ.setMaxSpeed(3500.0); // set max speed of the stepper , slower to get better accuracy
-  stepperZ.setAcceleration(3500.0); //set acceleration of the stepper
-  stepperA.setMaxSpeed(3500.0); // set max speed of the stepper , slower to get better accuracy
-  stepperA.setAcceleration(3500.0); //set acceleration of the stepper
+  stepperY.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
+  stepperY.setAcceleration(5000.0); //set acceleration of the stepper
+  stepperX.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
+  stepperX.setAcceleration(5000.0); //set acceleration of the stepper
+  stepperZ.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
+  stepperZ.setAcceleration(5000.0); //set acceleration of the stepper
+  stepperA.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
+  stepperA.setAcceleration(5000.0); //set acceleration of the stepper
   pinMode(EN, OUTPUT);
   digitalWrite(EN, LOW); // Enable motor driver
   //stepperY.setCurrentPosition(0);  // initialize the current position im at to be 0
