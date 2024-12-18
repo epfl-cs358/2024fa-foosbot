@@ -65,7 +65,7 @@
 
 // MM Constants //
 
-#define MOVE_THR 20
+#define MOVE_THR 10
 
 #define MIN_GOAL_X_MM MIN_GOAL_X_CV * SCALE_X
 #define MAX_GOAL_X_MM MAX_GOAL_X_CV * SCALE_X
@@ -198,7 +198,10 @@ void updateAttackPlayerX(double dist){
 bool getBallData(){
 
     if (Serial.available() > 0) {
-      Serial.read(); // Flush the incoming serial to have last frame
+      // Flush incoming serial
+      Serial.end();
+      Serial.begin(9600);
+
       Serial.readStringUntil(':');
       int x = Serial.readStringUntil(';').toInt();
       int y = Serial.readStringUntil(';').toInt();
