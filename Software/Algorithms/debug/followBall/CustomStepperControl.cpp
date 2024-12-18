@@ -44,13 +44,13 @@ void CustomStepperControl::setBeginning() {
 // >0 values to come close to the side motor
 // for 7cm mov range of player, 350 unit is good
 // original 22 cm
-void CustomStepperControl::moveSide(AccelStepper &stepper, int sensor1, int sensor2, int value) {
+void CustomStepperControl::moveSide(AccelStepper &stepper, int sensor1, int sensor2, double value) {
   //int y =  stepper.currentPosition();
   stepper.move(value);          // Set the final position
   //for coordinate value thats been going far from the side motor >0, controlled by the pin 11
   if(value>0){
     while (stepper.distanceToGo() != 0 &&  digitalRead(sensor1) == LOW ) {
-      stepper.run();                  // Continuously move toward the target
+      stepper.run();                 // Continuously move toward the target
     }
     stepper.stop();
   }
@@ -64,7 +64,7 @@ void CustomStepperControl::moveSide(AccelStepper &stepper, int sensor1, int sens
   Serial.println(value);
 }
 
-void CustomStepperControl::moveSide2(AccelStepper &stepper, int value){
+void CustomStepperControl::moveSide2(AccelStepper &stepper, double value){
   //int y =  stepper.currentPosition();
   stepper.move(value);          // Set the final position
   //for coordinate value thats been going far from the side motor >0, controlled by the pin 11
@@ -94,7 +94,7 @@ void CustomStepperControl::returnToInitialPositionSide() {
   Serial.print("Returned to initial X position ");
 }
 
-void CustomStepperControl::rotateByAngle(AccelStepper &stepper, int angle) {
+void CustomStepperControl::rotateByAngle(AccelStepper &stepper, double angle) {
   moveSide2(stepper,angle);
 }
 
@@ -108,9 +108,9 @@ void CustomStepperControl::executeInterpreter(String command) {
   }else if(strcmp(cmd, "MOVE2")==0){
     moveSide(stepperZ, sZ_front, sZ_back,value);
   } else if (strcmp(cmd, "ROTATE1") == 0) {
-    moveSide2(stepperX,value); // Rotate by angle single player pole
+    moveSide2(stepperX, value); // Rotate by angle single player pole
   }else if(strcmp(cmd, "ROTATE2") == 0){
-    moveSide2(stepperA,value); // Rotate by angle double player pole
+    moveSide2(stepperA, value); // Rotate by angle double player pole
    }else if(strcmp(cmd, "BEGIN")==0){
     setBeginning();
   }else if(strcmp(cmd, "INITX")==0){

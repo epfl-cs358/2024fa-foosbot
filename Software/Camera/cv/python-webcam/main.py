@@ -34,7 +34,7 @@ def get_ball_pos(img, clrRange, clrDet):
     # Detects circles
     circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                param1=100, param2=30,
-                               minRadius=10, maxRadius=15)
+                               minRadius=25, maxRadius=31)
 
     pos = (-1, -1)
 
@@ -162,7 +162,7 @@ def main(noSerOut,
                 ser.open()
             print("Serial opened.")
         except serial.SerialException:
-            noSerOut = False
+            noSerOut = True
             print("Invalid Port : "+str(port)+" !\nLaunching the program with Serial output disabled.\n")
 
     # Opens the camera for video capturing
@@ -239,9 +239,9 @@ def main(noSerOut,
                         lastKnownPos[4]
                     ])
                     fieldWidth = lastKnownPos[2][0] - lastKnownPos[1][0]
-                    print("Width: " + str(fieldWidth))
+                    #print(fieldWidth)
                     fieldHeight = lastKnownPos[3][1] - lastKnownPos[2][1]
-                    print("Height: " + str(fieldHeight))
+                    #print(fieldHeight)
                     dst_points = np.float32([
                         [0, 0],  # Upper-left corner
                         [fieldWidth, 0],  # Upper-right corner
@@ -362,7 +362,7 @@ if __name__ == "__main__":
         if arg == '--port' or arg == '-p':
             i = sys.argv.index(arg) + 1
             if i < len(sys.argv) and not sys.argv[i].startswith('-'):
-                inp = sys.argv[i]
+                port = sys.argv[i]
         if arg == '--help' or arg == '-h':
             helpMode = True
             print("""
