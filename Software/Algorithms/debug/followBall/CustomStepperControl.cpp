@@ -108,9 +108,9 @@ void CustomStepperControl::executeInterpreter(String command) {
   }else if(strcmp(cmd, "MOVE2")==0){
     moveSide(stepperZ, sZ_front, sZ_back,value);
   } else if (strcmp(cmd, "ROTATE1") == 0) {
-    moveSide2(stepperX,value); // Rotate by angle single player pole
+    moveSide2(stepperX, value); // Rotate by angle single player pole
   }else if(strcmp(cmd, "ROTATE2") == 0){
-    moveSide2(stepperA,value); // Rotate by angle double player pole
+    moveSide2(stepperA, value); // Rotate by angle double player pole
    }else if(strcmp(cmd, "BEGIN")==0){
     setBeginning();
   }else if(strcmp(cmd, "INITX")==0){

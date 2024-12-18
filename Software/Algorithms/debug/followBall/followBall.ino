@@ -44,11 +44,17 @@
 #define MID_ATT_LO_CV 166
 #define MID_ATT_HI_CV 334
 
-#define MIN_GOAL_Y_CV  56
-#define MAX_GOAL_Y_CV 202
+//#define MIN_GOAL_Y_CV  56
+//#define MAX_GOAL_Y_CV 202
+//
+//#define MIN_ATT_Y_CV 280
+//#define MAX_ATT_Y_CV 428
 
-#define MIN_ATT_Y_CV 280
-#define MAX_ATT_Y_CV 428
+#define MIN_GOAL_Y_CV  36
+#define MAX_GOAL_Y_CV 100
+
+#define MIN_ATT_Y_CV 144
+#define MAX_ATT_Y_CV 214
 
 #define MAX_ATT1_X_CV 216
 
@@ -146,7 +152,7 @@ typedef struct {
 
 Info ballData;
 CustomStepperControl customStepper(
-        6, 3, 7, 4, 9, 13, 5,
+        6, 3, 7, 4, 13, 12, 5,
         2, 8, 10, 11, A3, A0
 );
 
@@ -309,6 +315,34 @@ void moveField(){
   }
 }
 
+/*
+ * Checks if shoot available and shoots the ball according to the given
+ * range if it is.
+ *
+ * @param rangeLo The smallest accessible location to the player
+ * @param rangeHi The largest accessible location to the player
+ */
+void checkAndShoot()
+{
+  if (MIN_GOAL_Y_MM < ballData.y &&
+      ballData.y < MAX_GOAL_Y_MM) {
+    Serial.println("Shooting with Goalie !");
+    customStepper.executeInterpreter(
+      ROTATE1(-200)
+    );
+  }
+
+  if (MIN_ATT_Y_MM < ballData.y &&
+      ballData.y < MAX_ATT_Y_MM) {
+    Serial.println("Shooting with Attacker !");
+    customStepper.executeInterpreter(
+      ROTATE2(-200)
+    );
+  }
+
+  delay(500);
+}
+
 
 void setup() {
 
@@ -331,7 +365,8 @@ void loop() {
   ballData.x = CV_TO_MM(currentFrame.x, SCALE_X);
   ballData.y = CV_TO_MM(currentFrame.y, SCALE_Y);
 
-  Serial.println(currentFrame.x);
+  Serial.println(currentFrame.y);
 
   moveField();
+  checkAndShoot();
 }
