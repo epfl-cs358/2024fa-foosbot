@@ -239,9 +239,9 @@ def main(noSerOut,
                         lastKnownPos[4]
                     ])
                     fieldWidth = lastKnownPos[2][0] - lastKnownPos[1][0]
-                    #print("Width: " + str(fieldWidth))
+                    #print(fieldWidth)
                     fieldHeight = lastKnownPos[3][1] - lastKnownPos[2][1]
-                    #print("Height: " + str(fieldHeight))
+                    #print(fieldHeight)
                     dst_points = np.float32([
                         [0, 0],  # Upper-left corner
                         [fieldWidth, 0],  # Upper-right corner

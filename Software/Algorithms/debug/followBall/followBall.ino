@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <math.h>
 #include "CustomStepperControl.h"
+#include "ConstantsForMac.h"
+//#include "ConstantsForLinux.h"
 
 /*************
  * Constants *
@@ -10,9 +12,6 @@
 
 #define FIELD_WIDTH   680
 #define FIELD_HEIGHT  605
-
-#define CAM_WIDTH  509
-#define CAM_HEIGHT 455
 
 // Scaling factors //
 
@@ -32,36 +31,6 @@
 
 #define  GL_ROD_POS  81.5 // Position of the goalkeeper rod
 #define ATT_ROD_POS 232   // Position of the attack rod
-
-// CV Constants //
-
-#define MIN_GOAL_X_CV 170
-#define MAX_GOAL_X_CV 350
-
-#define MIN_ATT_X_CV  62
-#define MAX_ATT_X_CV 936
-
-#define MID_ATT_LO_CV 166
-#define MID_ATT_HI_CV 334
-
-//#define MIN_GOAL_Y_CV  56
-//#define MAX_GOAL_Y_CV 202
-//
-//#define MIN_ATT_Y_CV 280
-//#define MAX_ATT_Y_CV 428
-
-#define MIN_GOAL_Y_CV  36
-#define MAX_GOAL_Y_CV 100
-
-#define MIN_ATT_Y_CV 144
-#define MAX_ATT_Y_CV 214
-
-#define MAX_ATT1_X_CV 216
-
-#define MIN_ATT2_X_CV 180
-#define MAX_ATT2_X_CV 360
-
-#define MIN_ATT3_X_CV 314
 
 // MM Constants //
 
@@ -350,13 +319,15 @@ void checkAndShoot()
 void setup() {
 
   Serial.begin(9600);
-  playerPosition[0][0] = CV_TO_MM(258, SCALE_X);
-  playerPosition[1][0] = CV_TO_MM(110, SCALE_X);
-  playerPosition[2][0] = CV_TO_MM(258, SCALE_X);
-  playerPosition[3][0] = CV_TO_MM(390, SCALE_X);
+  playerPosition[0][0] = CV_TO_MM(PLAYER_0_X, SCALE_X);
+  playerPosition[1][0] = CV_TO_MM(PLAYER_1_X, SCALE_X);
+  playerPosition[2][0] = CV_TO_MM(PLAYER_2_X, SCALE_X);
+  playerPosition[3][0] = CV_TO_MM(PLAYER_3_X, SCALE_X);
 
   customStepper.setupSteppers();
+  //customStepper.executeInterpreter(ROTATE2(-10));
   customStepper.executeInterpreter(BEGIN());
+
 }
 
 void loop() {
@@ -364,6 +335,9 @@ void loop() {
   if (!getBallData()){
      return;
   }
+   
+  Serial.println(currentFrame.y);
+
 
   ballData.x = CV_TO_MM(currentFrame.x, SCALE_X);
   ballData.y = CV_TO_MM(currentFrame.y, SCALE_Y);
