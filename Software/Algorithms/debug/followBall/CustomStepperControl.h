@@ -10,10 +10,10 @@ class CustomStepperControl {
     CustomStepperControl(int yDir, int yStep, int zDir, int zStep, int aDir, int aStep, int xDir, int xStep, int enPin, int sY_front, int sY_back, int sZ_front, int sZ_back);
     
     void setBeginning();
-    void moveSide(AccelStepper &stepper, int sensor1, int sensor2, int value);
-    void moveSide2(AccelStepper &stepper, int value);
+    void moveSide(AccelStepper &stepper, int sensor1, int sensor2, double value);
+    void moveSide2(AccelStepper &stepper, double value);
     void returnToInitialPositionSide();
-    void rotateByAngle(AccelStepper &stepper, int angle);
+    void rotateByAngle(AccelStepper &stepper, double angle);
     void executeInterpreter(String command);
     void setupSteppers();
   

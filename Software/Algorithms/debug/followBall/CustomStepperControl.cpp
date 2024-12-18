@@ -44,13 +44,13 @@ void CustomStepperControl::setBeginning() {
 // >0 values to come close to the side motor
 // for 7cm mov range of player, 350 unit is good
 // original 22 cm
-void CustomStepperControl::moveSide(AccelStepper &stepper, int sensor1, int sensor2, int value) {
+void CustomStepperControl::moveSide(AccelStepper &stepper, int sensor1, int sensor2, double value) {
   //int y =  stepper.currentPosition();
   stepper.move(value);          // Set the final position
   //for coordinate value thats been going far from the side motor >0, controlled by the pin 11
   if(value>0){
     while (stepper.distanceToGo() != 0 &&  digitalRead(sensor1) == LOW ) {
-      stepper.run();                  // Continuously move toward the target
+      stepper.run();                 // Continuously move toward the target
     }
     stepper.stop();
   }
@@ -64,7 +64,7 @@ void CustomStepperControl::moveSide(AccelStepper &stepper, int sensor1, int sens
   Serial.println(value);
 }
 
-void CustomStepperControl::moveSide2(AccelStepper &stepper, int value){
+void CustomStepperControl::moveSide2(AccelStepper &stepper, double value){
   //int y =  stepper.currentPosition();
   stepper.move(value);          // Set the final position
   //for coordinate value thats been going far from the side motor >0, controlled by the pin 11
@@ -94,7 +94,7 @@ void CustomStepperControl::returnToInitialPositionSide() {
   Serial.print("Returned to initial X position ");
 }
 
-void CustomStepperControl::rotateByAngle(AccelStepper &stepper, int angle) {
+void CustomStepperControl::rotateByAngle(AccelStepper &stepper, double angle) {
   moveSide2(stepper,angle);
 }
 
@@ -122,14 +122,14 @@ void CustomStepperControl::executeInterpreter(String command) {
 
 void CustomStepperControl::setupSteppers() {
   Serial.begin(9600);
-  stepperY.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
-  stepperY.setAcceleration(5000.0); //set acceleration of the stepper
-  stepperX.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
-  stepperX.setAcceleration(5000.0); //set acceleration of the stepper
-  stepperZ.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
-  stepperZ.setAcceleration(5000.0); //set acceleration of the stepper
-  stepperA.setMaxSpeed(5000.0); // set max speed of the stepper , slower to get better accuracy
-  stepperA.setAcceleration(5000.0); //set acceleration of the stepper
+  stepperY.setMaxSpeed(3500.0); // set max speed of the stepper , slower to get better accuracy
+  stepperY.setAcceleration(3500.0); //set acceleration of the stepper
+  stepperX.setMaxSpeed(3500.0); // set max speed of the stepper , slower to get better accuracy
+  stepperX.setAcceleration(3500.0); //set acceleration of the stepper
+  stepperZ.setMaxSpeed(3500.0); // set max speed of the stepper , slower to get better accuracy
+  stepperZ.setAcceleration(3500.0); //set acceleration of the stepper
+  stepperA.setMaxSpeed(3500.0); // set max speed of the stepper , slower to get better accuracy
+  stepperA.setAcceleration(3500.0); //set acceleration of the stepper
   pinMode(EN, OUTPUT);
   digitalWrite(EN, LOW); // Enable motor driver
   //stepperY.setCurrentPosition(0);  // initialize the current position im at to be 0
