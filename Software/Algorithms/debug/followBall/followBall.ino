@@ -237,50 +237,50 @@ void moveField(){
   double target = ballData.x;
 
 
-  // // Moving attack players //
+  // Moving attack players //
 
-  // double distAtt = 0;
-  // if (target < MIN_ATT_X_MM) {
-  //   // Serial.println("Moving attack to minAtt");
-  //   distAtt = MIN_ATT_X_MM - playerPosition[1][0];
+  double distAtt = 0;
+  if (target < MIN_ATT_X_MM) {
+    // Serial.println("Moving attack to minAtt");
+    distAtt = MIN_ATT_X_MM - playerPosition[1][0];
 
-  // } else if (MAX_ATT_X_MM < target) {
-  //   // Serial.println("Moving attack to maxAtt");
-  //   distAtt = MAX_ATT_X_MM - playerPosition[3][0];
+  } else if (MAX_ATT_X_MM < target) {
+    // Serial.println("Moving attack to maxAtt");
+    distAtt = MAX_ATT_X_MM - playerPosition[3][0];
 
-  // } else if (MIN_ATT_X_MM < target && target < MIN_ATT2_X_MM){
-  //   distAtt = target - playerPosition[1][0];
+  } else if (MIN_ATT_X_MM < target && target < MIN_ATT2_X_MM){
+    distAtt = target - playerPosition[1][0];
 
-  // } else if (MIN_ATT2_X_MM < target && target < MAX_ATT1_X_MM){
-  //   distAtt = target - playerPosition[closestAttPlayer(1,2, target)][0];
+  } else if (MIN_ATT2_X_MM < target && target < MAX_ATT1_X_MM){
+    distAtt = target - playerPosition[closestAttPlayer(1,2, target)][0];
 
-  // } else if (MAX_ATT1_X_MM < target && target < MIN_ATT3_X_MM){
-  //   distAtt = target - playerPosition[2][0];
+  } else if (MAX_ATT1_X_MM < target && target < MIN_ATT3_X_MM){
+    distAtt = target - playerPosition[2][0];
 
-  // } else if (MIN_ATT3_X_MM < target && target  < MAX_ATT2_X_MM){
-  //   distAtt = target - playerPosition[closestAttPlayer(2,3, target)][0];
+  } else if (MIN_ATT3_X_MM < target && target  < MAX_ATT2_X_MM){
+    distAtt = target - playerPosition[closestAttPlayer(2,3, target)][0];
 
-  // } else {
-  //   distAtt = target - playerPosition[3][0];
+  } else {
+    distAtt = target - playerPosition[3][0];
 
+  }
+
+  //   // Serial.println("Moving attack to ball");
+  //   distAtt = target - playerPosition[
+  //     MID_ATT_LO_MM < target ?
+  //       target < MID_ATT_HI_MM ?
+  //         2 : // Middle player
+  //       3 :   // Last player
+  //     1       // First player
+  //   ][0];
   // }
 
-  // //   // Serial.println("Moving attack to ball");
-  // //   distAtt = target - playerPosition[
-  // //     MID_ATT_LO_MM < target ?
-  // //       target < MID_ATT_HI_MM ?
-  // //         2 : // Middle player
-  // //       3 :   // Last player
-  // //     1       // First player
-  // //   ][0];
-  // // }
-
-  // if (abs(distAtt) >= MOVE_THR) {
-  //   customStepper.executeInterpreter(
-  //     MOVE2(distAtt * FIELD_X_TO_MU)
-  //   );
-  //   updateAttackPlayerX(distAtt);
-  // }
+  if (abs(distAtt) >= MOVE_THR) {
+    customStepper.executeInterpreter(
+      MOVE2(distAtt * FIELD_X_TO_MU)
+    );
+    updateAttackPlayerX(distAtt);
+  }
 
 
   // Moving goalie //
