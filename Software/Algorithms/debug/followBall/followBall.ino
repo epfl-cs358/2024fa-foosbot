@@ -6,27 +6,42 @@
  * Constants *
  *************/
 
-#define controlSpeedThreshold 10
-#define controlPositionThresholdX 15
-#define controlPositionThresholdY 15
-#define rod0_Y 81.5 //position of the goalkeeper rod
-#define rod1_Y 232  //position of the attack rod
-#define speedThreshold 25
-#define fieldWidth   680
-#define fieldHeight  605
-#define cameraWidth  509
-#define cameraHeight 455
-#define offsetGoalie 20
-#define crossFireOffset 15
-#define minGoal 490 //510
-#define maxGoal 845 //865
-#define minGoalie 454
-#define maxGoalie 948
+#define CTRL_SPEED_THR 10
+#define CTRL_POS_THR_X 15
+#define CTRL_POS_THR_Y 15
+
+#define  GL_ROD_POS  81.5 // Position of the goalkeeper rod
+#define ATT_ROD_POS 232   // Position of the attack rod
+
+#define SPEED_THR 25
+
+#define FIELD_WIDTH   680
+#define FIELD_HEIGHT  605
+
+#define CAM_WIDTH  509
+#define CAM_HEIGHT 455
+
+#define         GL_OFF 20
+#define CROSS_FIRE_OFF 15
+
+// #define MIN_GOAL_CV 490 // 510
+// #define MAX_GOAL_CV 845 // 865
+#define MIN_GOAL_CV 170
+#define MAX_GOAL_CV 350
+
+#define MIN_ATT_CV  62
+#define MAX_ATT_CV 936
+
+// #define minGoalie 454
+// #define maxGoalie 948
+#define MID_ATT_LO 166
+#define MID_ATT_HI 334
 
 // Ratio of CV coordinates into the field dimension
-#define scaleX ((double)fieldWidth / cameraWidth)
-#define scaleY ((double)fieldHeight/ cameraHeight)
-#define fieldXToMotorUnits 5 //6.25
+#define SCALE_X ((double)FIELD_WIDTH / CAM_WIDTH)
+#define SCALE_Y ((double)FIELD_HEIGHT/ CAM_HEIGHT)
+
+#define FIELD_X_TO_MU 5 // 6.25
 
 /**********************************************************
  * Define your interpreter-compatible commands as strings *
@@ -47,8 +62,8 @@
 /*
  * CV Input.
  *
- * @param x         x component of ball position (width)
- * @param y         y component of ball position (height)
+ * @param x         x component of ball position in CV metric (width)
+ * @param y         y component of ball position in CV metric (height)
  * @param timestamp Attributed timestamp to the frame
  */
 typedef struct {
@@ -57,17 +72,17 @@ typedef struct {
   int timestamp;
 } FrameData;
 
-FrameData currentFrame = {-1,-1,-1};
-FrameData previousFrame = {-1,-1,-1};
+FrameData currentFrame  = {-1, -1, -1};
+FrameData previousFrame = {-1, -1, -1};
 
-bool firstFrameReceived = false;
+bool firstFrameReceived  = false;
 bool secondFrameReceived = false;
 
 /*
  * Internal information on the ball.
  *
- * @param x         x-coordinate of ball position
- * @param y         y-coordinate of ball position
+ * @param x         x-coordinate of ball position in millimeters
+ * @param y         y-coordinate of ball position in millimeters
  * @param timestamp Metrics to determine when the frame has arrived
  * @param a         Slope of the line
  * @param b         Intercept of the line
@@ -88,27 +103,36 @@ CustomStepperControl customStepper(
         2, 8, 10, 11, A3, A0
 );
 
-//double cur_pos = CVtoMM(fieldWidth/2, scaleX);
+//double cur_pos = CVtoMM(FIELD_WIDTH/2, SCALE_X);
 
 //Movement commands for players
 double motorMovement[4]; // 0: Goalkeeper X,
                       // 1: Goalkeeper angle,
                       // 2: Attack rod X,
                       // 3: Attack rod angle
-double playerPosition[4][2]; // Player positions: [x, angle]
+/*
+ * Player positions in millimeters:
+ *   [0: gl, 1: att1, 2: att2, 3: att3][x, angle]
+ */
+double playerPosition[4][2];
 
-//hard coding initial values for xposition of players 
+//hard coding initial values for xposition of players
 
+/*
+ * TODO: Doc
+ */
 //helper function to understand code better
 double CVtoMM(int value, double scale){
   return value * scale;
 }
 
-void updateAttackPlayerX(double newPos){
+/*
+ * TODO: Doc
+ */
+void updateAttackPlayerX(double dist){
   for (int i = 1; i < 4; i++){
-    playerPosition[i][0] += newPos;
+    playerPosition[i][0] += dist;
   }
-
 }
 
 
@@ -120,20 +144,19 @@ void updateAttackPlayerX(double newPos){
 bool getBallData(){
 
     if (Serial.available() > 0) {
-      Serial.println("Serial available");
       Serial.readStringUntil(':');
-      int x         = Serial.readStringUntil(';' ).toInt();
-      int y         = Serial.readStringUntil(';' ).toInt();
+      int x = Serial.readStringUntil(';').toInt();
+      int y = Serial.readStringUntil(';').toInt();
 
       // Check for valid x and y
-      if (x <= 0 || x > cameraWidth) {
+      if (x <= 0 || x > CAM_WIDTH) {
           Serial.println("Invalid data received. Ignoring frame.");
           return false; // Exit early and return false
       }
 
-      previousFrame = currentFrame;
-      currentFrame.x         = x;
-      currentFrame.y         = y;
+      previousFrame  = currentFrame;
+      currentFrame.x = x;
+      currentFrame.y = y;
 
       if (!firstFrameReceived) {
         firstFrameReceived = true;
@@ -143,73 +166,83 @@ bool getBallData(){
 }
 
 /*
- * Tracks the ball with the player.
+ * Tracks the ball with the players.
  */
 void moveField(){
 
-  double target = CVtoMM(ballData.x, scaleX);
+  // No need for that, x is already in mm
+  // double target = CVtoMM(ballData.x, SCALE_X);
+  double target = ballData.x / SCALE_X; // Switching back to CV
 
-  if (minGoal < target && target < maxGoal) {
-    //Serial.println("Moving to ball");
-    double newPos0 = target-playerPosition[0][0];
-    customStepper.executeInterpreter(
-        MOVE1(newPos0 * fieldXToMotorUnits)
-    );
-    Serial.println(playerPosition[0][0]);
-     double newPos1 = target - playerPosition[2][0];
-     customStepper.executeInterpreter(
-         MOVE2(newPos1 * fieldXToMotorUnits)
-     ) ;
-    playerPosition[0][0] += newPos0;
-    Serial.println(playerPosition[0][0]);
-    updateAttackPlayerX(newPos1);
-    
-  } else if (target < minGoal){
-     //Serial.println("Moving to minGoal");
-    double newPos = minGoal-playerPosition[0][0];
-    customStepper.executeInterpreter(
-         MOVE1(newPos * fieldXToMotorUnits)
-    );
-  //   double newPos = target - playerPosition[1][0];
-  //   customStepper.executeInterpreter(
-  //      MOVE2(newPos * fieldXToMotorUnits)
-  //   );
-    playerPosition[0][0] += newPos;
-  //   updateAttackPlayerX(newPos);
-    } else {
-     //Serial.println("Moving to maxGoal");
-    double newPos = maxGoal-playerPosition[0][0];
-    customStepper.executeInterpreter(
-        MOVE1(newPos * fieldXToMotorUnits)
-     );
-  //   double newPos = target - playerPosition[3][0];
-  //   customStepper.executeInterpreter(
-  //      MOVE2(newPos * fieldXToMotorUnits)
-  //   );
-    playerPosition[0][0] += newPos;
-  //   updateAttackPlayerX(newPos);
+
+  // Moving goalie //
+
+  double distGl = 0;
+  double glPos  = playerPosition[0][0] / SCALE_X; // Switching to CV
+
+  if (MIN_GOAL_CV < target && target < MAX_GOAL_CV) {
+    // Serial.println("Moving goalie to ball");
+    distGl = target - glPos;
+
+  } else if (target < MIN_GOAL_CV) {
+    // Serial.println("Moving goalie to minGoal");
+    distGl = MIN_GOAL_CV - glPos;
+
+  } else {
+    // Serial.println("Moving goalie to maxGoal");
+    distGl = MAX_GOAL_CV - glPos;
   }
-}
 
-// /*
-//  * Shoots the ball.
-//  */
-// void shootBall()
-// {
-  
-// }
+  customStepper.executeInterpreter(
+    MOVE1(distGl * FIELD_X_TO_MU)
+  );
+  playerPosition[0][0] += distGl;
+
+
+  // Moving attack players //
+
+  double distAtt = 0;
+  if (target < MIN_ATT_CV) {
+    // Serial.println("Moving attack to minAtt");
+    distAtt = MIN_ATT_CV - playerPosition[1][0];
+
+  } else if (MAX_ATT_CV < target) {
+    // Serial.println("Moving attack to maxAtt");
+    distAtt = MAX_ATT_CV - playerPosition[3][0];
+
+  } else {
+    // Serial.println("Moving attack to ball");
+    distAtt = target - playerPosition[
+      MID_ATT_LO < target ?
+        target < MID_ATT_HI ?
+          2 : // Middle player
+        3 :   // Last player
+      1       // First player
+    ][0];
+  }
+
+  customStepper.executeInterpreter(
+    MOVE2(distAtt * FIELD_X_TO_MU)
+  );
+  updateAttackPlayerX(distAtt);
+}
 
 
 void setup() {
-  
+
   Serial.begin(9600);
-  playerPosition[0][0] = CVtoMM(694, scaleX);
-  playerPosition[1][0] = CVtoMM(300, scaleX);
-  playerPosition[2][0] = CVtoMM(696, scaleX);
-  playerPosition[3][0] = CVtoMM(1060, scaleX);
+  // playerPosition[0][0] = CVtoMM( 694, SCALE_X); // 258
+  // playerPosition[1][0] = CVtoMM( 300, SCALE_X); // 110
+  // playerPosition[2][0] = CVtoMM( 696, SCALE_X); // 258
+  // playerPosition[3][0] = CVtoMM(1060, SCALE_X); // 390
+
+  playerPosition[0][0] = CVtoMM(258, SCALE_X);
+  playerPosition[1][0] = CVtoMM(110, SCALE_X);
+  playerPosition[2][0] = CVtoMM(258, SCALE_X);
+  playerPosition[3][0] = CVtoMM(390, SCALE_X);
+
   customStepper.setupSteppers();
   customStepper.executeInterpreter(BEGIN());
-
 }
 
 void loop() {
@@ -218,14 +251,11 @@ void loop() {
      return;
   }
 
-  ballData.x = CVtoMM(currentFrame.x, scaleX);
-  ballData.y = CVtoMM(currentFrame.y, scaleY);
+  ballData.x = CVtoMM(currentFrame.x, SCALE_X);
+  ballData.y = CVtoMM(currentFrame.y, SCALE_Y);
 
-  Serial.println(ballData.x);
-  Serial.println(ballData.y);
-
-  //int target = ballData.x;
+  Serial.println(currentFrame.x);
+  Serial.println(currentFrame.y);
 
   moveField();
-  //delay(50);
 }
