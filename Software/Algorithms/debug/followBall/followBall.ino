@@ -59,7 +59,7 @@
 
 // MM Constants //
 
-#define MOVE_THR 10
+#define MOVE_THR 20
 
 #define MIN_GOAL_X_MM MIN_GOAL_X_CV * SCALE_X
 #define MAX_GOAL_X_MM MAX_GOAL_X_CV * SCALE_X
