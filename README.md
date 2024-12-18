@@ -1,10 +1,10 @@
 # Foosbot
 
-https://github.com/user-attachments/assets/93106235-c6af-46eb-8334-a48d785348d0
+/Admin/demo.mp4
 
-![table](https://github.com/user-attachments/assets/d53f9f6b-330a-4f3f-b5df-cbbba390c06f)
+![table](/Admin/table.jpeg)
 
-![circuitry](https://github.com/user-attachments/assets/fd3dcc90-f1f6-4451-a09b-e1358a30fe21)
+![circuitry](/Admin/circuitry.jpeg)
 
 ## Overview
 Table football, also known as foosball or table soccer, is a game based on as- sociation football. The objective is to move the ball into the opponent’s goal by manipulating rods with figures resembling football players of two opposing teams. This fast-paced game is typically played by 2-4 players, but it is not designed for solo play.
@@ -54,19 +54,19 @@ A traditional foosball table is as large as a standard table and has four handle
 
 ### Wiring of the Motors
 #### Electronics Chart
-![photo_2024-12-17_18-52-56](https://github.com/user-attachments/assets/1b046676-7fc6-4c36-af1d-b620efba9c2d)
+![ElectronicCircuit](/Admin/ElectronicsChart.jpg)
 
 
 CNC shield mounted on top of the Arduino Uno , reset buttons should be aligned 
 CNC shield-Arduino Uno pin correspondance
-![cf988326f7e0baaa42da84e9b4440201e97f966a](https://github.com/user-attachments/assets/9fa05bec-4b6c-4132-ae6e-10df3555fa08)
+![CNCShieldPinout](Admin/CNCShieldPinout.jpeg)
 
 #### Motor Labeling
 On the CNC Shield there are 3 slots for motor drivers labelled X, Y, Z, A. In the picture below you see to which motor they should be connected to.
 
 The End stop sensors have three cables that need to be connected, one to the ground, one to the 5V Power and one to the correct pins on the CNC Shield. The mapping of the position of the end stop sensors to the pins on the CNC Shield are shown in green in the picture below.
 
-![MotorLabels](https://github.com/user-attachments/assets/7c3adf2b-dc6a-4176-9014-4f16ec0fd249)
+![MotorLabels](Admin/MotorLabels.jpeg)
 
 #### Protecting the motors and your laptop
 Always connect the Arduino via a USB-Isolator to your laptop and ideally don't charge your laptop while it is connected to the Arduino.
@@ -95,11 +95,11 @@ and cut them out.
 
 You then have to tape the QR Codes into the Right corners. Note that the top left corner, marked red in images below, should always point towards the corner. The QR Codes are numbered (see below) and they need to be in the right corners, according to the image below.
 
-<img width="359" alt="QRCodeMarkers" src="https://github.com/user-attachments/assets/70fe4499-404d-41a1-beef-c1cddc03354b" />
+<img width="359" alt="QRCodeMarkers" src="/Admin/QRCodeMarkers.png" />
 
-![QROrientation](https://github.com/user-attachments/assets/a2bb6433-0d0d-45ec-a09f-859c6c584163)
+![QROrientation](Admin/QROrientation.jpeg)
 
-![TopView](https://github.com/user-attachments/assets/339f815d-c2ab-453e-b471-d48fd438579c)
+![TopView](Admin/TopView.jpeg)
 
 
 __It is important that the Codes are at in the right corners and oriented the right way!__
@@ -133,7 +133,7 @@ If you want to know how to use different flags, type `./main.py --help`.
 
 #### Output
 
-![ExampleCV](https://github.com/user-attachments/assets/33007776-5cc6-4fb6-ae6e-93c52b24a5ed)
+![ExampleCV](Admin/ExampleCV.png)
 
 
 By default the camera should open a window called Output which displays the area in which the ball can be detected. If  the ball is detected, there should be a blue circle around it.
