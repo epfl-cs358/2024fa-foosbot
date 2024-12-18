@@ -15,7 +15,7 @@
 // Sensor Pins
 #define sY_front 10 // Front endstop for Y-axis
 #define sY_back 11  // Back endstop for Y-axis
-#define sZ_front 9 // Front endstop for Z-axis
+#define sZ_front A3 // Front endstop for Z-axis
 #define sZ_back A0  // Back endstop for Z-axis
 
 // 1000 units is for the full range side to side

@@ -94,6 +94,9 @@ int motorMovement[4]; // 0: Goalkeeper X,
                       // 3: Attack rod angle
 int playerPosition[4][2]; // Player positions: [x, angle]
 
+// int angleToMotor(int angle){
+
+// }
 /*
  * Retrieve ball data from CV.
  *
