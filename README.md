@@ -34,14 +34,13 @@
         <li><a href="#lasercutting">LaserCutting</a></li>
         <li><a href="#3d-printing">3D Printing</a></li>
         <li><a href="#assembling-the-table">Assembling The Table</a></li>
-        <li><a href="#final-result">Final Result</a></li>
       </ul>
     </li>
     <li>
       <a href="#wiring-of-the-motors">Wiring Of The Motors</a>
       <ul>
         <li><a href="#electronics-chart">Electronics Chart</a></li>
-        <li><a href="#motor-labelling">Motor Labelling</a></li>
+        <li><a href="#motor-and-endstop-sensor-labelling">Motor And EndStop Sensor Labelling</a></li>
         <li><a href="#protecting-motors-and-laptop">Protecting Motors And Laptop</a></li>
       </ul>
     </li>
@@ -89,12 +88,12 @@ However, to simplify development and reduce costs, the prototype will use a smal
   - `Software/Camera/cv/python-webcam` : Contains the python code for the computer vision as well as the QR Markers to printout
 
 ### Final Result 
-https://github.com/user-attachments/assets/dd09006e-b9f9-418b-b552-d5e2579a633e
-![photo_2024-12-19_15-15-30](https://github.com/user-attachments/assets/01baf76d-775e-42e2-b4f7-0aa8c144ceea)
-![photo_2024-12-19_15-16-20](https://github.com/user-attachments/assets/06a10ff9-39b4-4759-a609-86d5f74c3ae9)
-![photo_2024-12-19_15-16-50](https://github.com/user-attachments/assets/865af195-e5e9-4f30-a915-ad6760a29411)
-![photo_2024-12-19_15-17-22](https://github.com/user-attachments/assets/be07acf9-c4b2-4e5a-915e-69778b2ee23b)
 
+https://github.com/user-attachments/assets/dd09006e-b9f9-418b-b552-d5e2579a633e
+
+![Table](https://github.com/user-attachments/assets/bf46b7f8-2c9b-4224-9fdb-b37fdb968ca5)
+
+![Circuitry](https://github.com/user-attachments/assets/d6b28ec1-cc35-4f4a-a98b-b4bf0d07dae0)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -164,12 +163,7 @@ have access to:
 - Set up the Camera Vision
 
 ### LaserCutting
-Lasercut all the pieces in `CAD`.
-
-- MDF:
-  - ...
-- Plexiglass:
-  - Floor
+Lasercut with the right MDF thickness (is in the file names): [DXF files](CAD/laser_Cuted_Components) 
 
 ### 3D Printing
 3D Print the following pieces from the CAD:
@@ -229,10 +223,12 @@ When slicing be careful of the surface on which you print your pieces, to ideall
 4. Insert poles into second bushing and add endcaps and handles
 5. Follow picture in Final Result to finish assembly
 
-### Final Result 
+![Foosbot Assembly Animation](Photo/AssembledGroundWithJoint.gif)
 
+<p align="right">(<a href="#final_result_top">back to Final Result</a>)</p>
 
-
+For ball reception place the following way
+![BallReception](https://github.com/user-attachments/assets/f096e563-2137-4add-9d66-0e456012fb5d)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -249,7 +245,7 @@ CNC shield-Arduino Uno pin correspondance
 When installing the A4988 Motor Drivers set the voltage in alternate current to 1.2V
 by turning the screws and using a multimeter. 
 
-### Motor And End-Stop Sensor Labelling
+### Motor And EndStop Sensor Labelling
 On the CNC Shield there are 3 slots for motor drivers labelled X, Y, Z, A. In the picture below you see to which motor they should be connected to.
 
 The End stop sensors have three cables that need to be connected, one to the ground, one to the 5V Power and one to the correct pins on the CNC Shield. The mapping of the position of the end stop sensors to the pins on the CNC Shield are shown in green in the picture below.
