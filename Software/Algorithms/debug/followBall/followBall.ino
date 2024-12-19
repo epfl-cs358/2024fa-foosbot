@@ -29,8 +29,8 @@
 
 // Rod positions //
 
-#define  GL_ROD_POS  81.5 // Position of the goalkeeper rod
-#define ATT_ROD_POS 232   // Position of the attack rod
+#define  GL_ROD_Y 81.5 // Position of the goalkeeper rod
+#define ATT_ROD_Y 232   // Position of the attack rod
 
 // MM Constants //
 
@@ -137,6 +137,8 @@ CustomStepperControl customStepper(
  */
 double playerPosition[4][2];
 
+double pos_yz[2];
+
 /*
  * Scales by the given factor to get millimeters from CV input.
  *
@@ -159,9 +161,6 @@ void updateAttackPlayerX(double dist){
 }
 
 
-// int angleToMotor(int angle){
-
-// }
 /*
  * Retrieve ball data from CV.
  *
@@ -204,7 +203,7 @@ bool getBallData(){
  *
  * @returns the closest player to ball.
  */
-int closestAttPlayer(int p1, int p2, double x)
+int defendingAttPlayer(int p1, int p2, double x)
 {
   return
     abs(playerPosition[p1][0] - x) < abs(playerPosition[p2][0] - x) ? p1 : p2;
@@ -233,13 +232,13 @@ void moveField(){
     distAtt = target - playerPosition[1][0];
 
   } else if (MIN_ATT2_X_MM < target && target < MAX_ATT1_X_MM){
-    distAtt = target - playerPosition[closestAttPlayer(1,2, target)][0];
+    distAtt = target - playerPosition[defendingAttPlayer(1,2, target)][0];
 
   } else if (MAX_ATT1_X_MM < target && target < MIN_ATT3_X_MM){
     distAtt = target - playerPosition[2][0];
 
   } else if (MIN_ATT3_X_MM < target && target  < MAX_ATT2_X_MM){
-    distAtt = target - playerPosition[closestAttPlayer(2,3, target)][0];
+    distAtt = target - playerPosition[defendingAttPlayer(2,3, target)][0];
 
   } else {
     distAtt = target - playerPosition[3][0];
@@ -290,6 +289,32 @@ void moveField(){
   }
 }
 
+//helper function
+int getClosestPlayer(){
+
+  //Calulate the euclidian distance for the goalkeeper 
+  double distance = srqt(pow(playerPosition[0][0] - ballData.x, 2) + pow(GL_ROD_Y- ballData.y, 2));
+  double minDistance = distance
+  double closestIndex = 0;
+
+  //Calulate the euclidian distance to the ball for each player
+  for(int i = 1; i < 4; i++)){
+
+    // Calculate the Euclidean distance to the ball
+    double distance = srqt(pow(playerPosition[i][0] - ballData.x, 2) + pow(ATT_ROD_Y - ballData.y, 2));
+  }
+
+    // Update the closest player if this distance is smaller
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestIndex = i;
+    }
+  }
+
+  return closestIndex;
+
+}
+
 /*
  * Checks if shoot available and shoots the ball according to the given
  * range if it is.
@@ -299,6 +324,25 @@ void moveField(){
  */
 void checkAndShoot()
 {
+
+  //check player that attacks and add treshold 
+  int index = getClosestPlayer();
+
+  if(index == 0){
+    int x_min = playerPosition[0][0] - MAX_HIT_RANGE_MM;
+    int x_max = playerPosition[0][0] + MAX_HIT_RANGE_MM;
+
+    if (MIN_GOAL_Y_MM < ballData.y && ballData.y < MAX_GOAL_Y_MM 
+    &&  x_min < ballData.x && ballData.x < x_max) {
+    Serial.println("Shooting with Goalie !");
+    customStepper.executeInterpreter(
+      ROTATE1(-200)
+    );
+
+
+
+  }
+
   if (MIN_GOAL_Y_MM < ballData.y &&
       ballData.y < MAX_GOAL_Y_MM) {
     Serial.println("Shooting with Goalie !");
@@ -328,7 +372,6 @@ void setup() {
   playerPosition[3][0] = CV_TO_MM(PLAYER_3_X, SCALE_X);
 
   customStepper.setupSteppers();
-  //customStepper.executeInterpreter(ROTATE2(-10));
   customStepper.executeInterpreter(BEGIN());
 
 }

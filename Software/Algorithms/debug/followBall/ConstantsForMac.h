@@ -1,4 +1,3 @@
-
 // Dimensions //
 
 #define CAM_WIDTH  1022
@@ -12,7 +11,7 @@
 #define MIN_ATT_X_CV  60
 #define MAX_ATT_X_CV  944
 
-#define MID_ATT_LO_CV 352 
+#define MID_ATT_LO_CV 352
 #define MID_ATT_HI_CV 670
 
 #define MIN_GOAL_Y_CV  68
@@ -23,7 +22,7 @@
 
 #define MAX_ATT1_X_CV 400
 
-#define MIN_ATT2_X_CV 345 
+#define MIN_ATT2_X_CV 345
 #define MAX_ATT2_X_CV 680
 
 #define MIN_ATT3_X_CV 625
@@ -32,3 +31,5 @@
 #define PLAYER_1_X    300
 #define PLAYER_2_X    696
 #define PLAYER_3_X    1060
+
+#define MAX_HIT_RANGE_MM 10 
