@@ -90,10 +90,11 @@ However, to simplify development and reduce costs, the prototype will use a smal
 
 ### Final Result 
 https://github.com/user-attachments/assets/dd09006e-b9f9-418b-b552-d5e2579a633e
+![photo_2024-12-19_15-15-30](https://github.com/user-attachments/assets/01baf76d-775e-42e2-b4f7-0aa8c144ceea)
+![photo_2024-12-19_15-16-20](https://github.com/user-attachments/assets/06a10ff9-39b4-4759-a609-86d5f74c3ae9)
+![photo_2024-12-19_15-16-50](https://github.com/user-attachments/assets/865af195-e5e9-4f30-a915-ad6760a29411)
+![photo_2024-12-19_15-17-22](https://github.com/user-attachments/assets/be07acf9-c4b2-4e5a-915e-69778b2ee23b)
 
-![table](/Admin/table.jpeg)
-
-![circuitry](/Admin/circuitry.jpeg)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
