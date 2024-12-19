@@ -184,7 +184,8 @@ For 3D printing of Pole Components: [STL files](CAD/PoleComponents)
 - 8 x Bushing with _15mm_ radius                       -> Perimeter 3
 - 8 x Bushing with _8mm_ radius                        -> Perimeter 3
 - 2 x Handles                                          -> Perimeter 5
-- 2 x Bar protection                                   -> Perimeter 3
+- 2 x End Caps _8mm_ radius                            -> Perimeter 3
+- 2 x End Caps _15mm_ radius                           -> Perimeter 3
 
 For 3D printing of Mechanical Components: [STL files](CAD/MechanicalComponents)
   
@@ -339,10 +340,10 @@ By default the camera should open a window called Output which displays the area
 - If the output doesn't show the entire field, then the QR Codes might not be oriented correctly (Top left corner ins't pointing towards the corner).
 - If the ball isn't detected then you might need to change the allowed range for the radius (line 37 in [`main.py`](https://github.com/epfl-cs358/2024fa-foosbot/blob/main/Software/Camera/cv/python-webcam/main.py)). By default it is set to accept radius between 25 and 31. This works well for us on Macbooks but we observed that on Linux a range of 10 to 15 is appropriate.
 - If the code has a problem uploading to the arduino try doing the following (sometimes the port has a problem):
-  1. Stop the computer vision
-  2. Make sure you have no serial monitor open on the arduino ide and close all other sketches
-  3. Plug in the arduino uno again and upload the code
-  4. Start the computer vision again 
+1. Stop the computer vision
+2. Make sure you have no serial monitor open on the arduino ide and close all other sketches
+3. Plug in the arduino uno again and upload the code
+4. Start the computer vision again 
 
 Remember that you can use different flags to debug the computer vision. For example you can display views of different stages of computer vision (Marker detection, image transformation, etc.) using the --w or --windows flag or you can disable the Serial output if no Arduino is connected by  using the -n or --no-ser-out flag.
 
