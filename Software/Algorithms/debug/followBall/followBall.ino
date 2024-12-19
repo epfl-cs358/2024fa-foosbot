@@ -246,7 +246,6 @@ void moveField(){
 
   } else {
     distAtt = target - playerPosition[3][0];
-
   }
 
 
@@ -272,33 +271,21 @@ void moveField(){
   // Move //
 
   if (abs(distAtt) >= MOVE_THR) {
-    if  (abs(distGl) >= MOVE_THR) {
 
-      interpret.executeInterpreter(
-        MOVE2(distAtt * FIELD_X_TO_MU) +
-        " " +
-        MOVE1(distGl * FIELD_X_TO_MU)
-      );
-
-      playerPosition[0][0] += distGl;
-
-    } else {
-
-      interpret.executeInterpreter(
-        MOVE2(distAtt * FIELD_X_TO_MU)
-      );
-    }
+    interpret.executeInterpreter(
+      MOVE2(distAtt * FIELD_X_TO_MU)
+    );
 
     updateAttackPlayerX(distAtt);
+  }
 
-  } else if (abs(distGl) >= MOVE_THR) {
+  if  (abs(distGl) >= MOVE_THR) {
+
     interpret.executeInterpreter(
       MOVE1(distGl * FIELD_X_TO_MU)
     );
 
     playerPosition[0][0] += distGl;
-
-  }
 }
 
 //helper function
@@ -337,7 +324,7 @@ int getClosestPlayer(){
 void checkAndShoot()
 {
 
-  //check player that attacks and add treshold
+  // Check player that attacks and add treshold
   int index = getClosestPlayer();
 
   if(index == 0) {
@@ -355,7 +342,7 @@ void checkAndShoot()
 
   if (MIN_GOAL_Y_MM < ballData.y &&
       ballData.y < MAX_GOAL_Y_MM) {
-    Serial.println("Shooting with Goalie !");
+    Serial.println("Shooting with Goalie!");
     interpret.executeInterpreter(
       ROTATE1(-200)
     );
@@ -363,7 +350,7 @@ void checkAndShoot()
 
   if (MIN_ATT_Y_MM < ballData.y &&
       ballData.y < MAX_ATT_Y_MM) {
-    Serial.println("Shooting with Attacker !");
+    Serial.println("Shooting with Attacker!");
     interpret.executeInterpreter(
       ROTATE2(-200)
     );
