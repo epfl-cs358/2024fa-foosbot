@@ -8,7 +8,7 @@
 class CustomStepperControl {
   public:
     CustomStepperControl(int yDir, int yStep, int zDir, int zStep, int aDir, int aStep, int xDir, int xStep, int enPin, int sY_front, int sY_back, int sZ_front, int sZ_back);
-    
+
     void setBeginning();
     void moveSide(AccelStepper &stepper, int sensor1, int sensor2, double value);
     void moveSide2(AccelStepper &stepper, double value);
@@ -16,7 +16,7 @@ class CustomStepperControl {
     void rotateByAngle(AccelStepper &stepper, double angle);
     void executeInterpreter(String command);
     void setupSteppers();
-  
+
   private:
     AccelStepper stepperY;
     AccelStepper stepperZ;
