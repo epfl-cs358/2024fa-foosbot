@@ -16,7 +16,7 @@ MSG_START = ':'
 MSG_SEP   = ';'
 MSG_END   = '\n'
 
-def get_ball_pos(img, clrRange, clrDet):
+def get_ball_pos(img, clrRange, clrDet, radii):
     """
     Detects the ball.
 
@@ -34,7 +34,7 @@ def get_ball_pos(img, clrRange, clrDet):
     # Detects circles
     circles = cv2.HoughCircles(grey, cv2.HOUGH_GRADIENT, 1, rows / 8,
                                param1=100, param2=30,
-                               minRadius=25, maxRadius=31)
+                               minRadius=radii[0], maxRadius=radii[1])
 
     pos = (-1, -1)
 
@@ -77,14 +77,14 @@ def main(noSerOut,
          windowScale,
          windows,
          inp,
-         port):
+         port,
+         radii):
     """
     Gets the live image of the camera, transforms it such that it only contains
     the playing field, detects the ball and sends the position of the ball over
     a serial output to the Arduino. Displays the ball detection on screen.
 
     :param noSerOut: Disables serial output (Use if serial port is disconnected)
-
     :type noSerOut:  bool
 
     :param noQR: If this is set to False, this function will first detect QR
@@ -93,7 +93,6 @@ def main(noSerOut,
     :type noQR:  bool
 
     :param clrDet: Activates Color Detection to complement Circle Detection.
-
     :type clrDet: bool
 
     :param verbose: If this is set to True, this function will open multiple
@@ -110,12 +109,13 @@ def main(noSerOut,
 
     :param inp:     Defines what is passed to the VideoCapture function.
                     Passing 0 generally opens the default camera.
-
     :type inp:      int
 
     :param port:    The Serial port to which the position should be sent
-
     :type port:     str
+
+    :param radii:   Radii to be used to detect the ball
+    :type radii:    tuple(int)
     """
 
     # Decides what windows will be displayed
@@ -260,7 +260,7 @@ def main(noSerOut,
                     cv2.imshow("Transformed Frame", frame)
                     cv2.waitKey(1)
 
-            pos = get_ball_pos(frame, clrRange, clrDet)
+            pos = get_ball_pos(frame, clrRange, clrDet, radii)
 
             # Sends the position to the Serial Port
             if not noSerOut and (pos[0] != -1 and pos[1] != -1):
@@ -291,23 +291,26 @@ if __name__ == "__main__":
     """
     Argument Parser when called from command line.
     Allowed Format:
-        <cmd> [-n | --no-ser-out] [-t | --no-transf] [-c | -clr-det] [-v | --verbose] [[-w | --windows] <window 1> ...] 
+        <cmd> [-n | --no-ser-out] [-t | --no-transf] [-c | -clr-det] [-v | --verbose] [[-w | --windows] <window 1> ...]
                 [[-s | --scale] <factor>] [[-i | --input] <cam id>] [[-p | --port] <port>]
+                [[-r | --radii] <min radius> <max radius>]
+
             Flags :
-            - [-n | --no-ser-out]               : Disables Serial output
-            - [-t | --no-transf]                : Disables use of QR Markers for image transformation
-            - [-c | --clr-det]                  : Activates filtering by Color Detection
-            - [-v | --verbose]                  : If this option is present, the program will open multiple windows with
-                                                  views at different stages of the image processing
-            - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from
-                                                  ["out", "markers", "transformed", "origin"]. So for example if you
-                                                  want to display the output and the marker detection, you should use
-                                                  -window out markers Passing -w without specified windows will
-                                                  disable all windows
-            - [[-s | --scale] <factor>]         : Scales Displayed window(s) to size
-                                                  1/factor * (original width) x 1/factor * (original height)
-            - [[-i | --input] <cam id>]         : Sets the video capture input¨
-            - [-p || -port <port>]              : Defines a port for the serial output
+            - [-n | --no-ser-out]                        : Disables Serial output
+            - [-t | --no-transf]                         : Disables use of QR Markers for image transformation
+            - [-c | --clr-det]                           : Activates filtering by Color Detection
+            - [-v | --verbose]                           : If this option is present, the program will open multiple windows with
+                                                           views at different stages of the image processing
+            - [[-w | --windows] <window 1> ...]          : Specify the windows that should be displayed. Choose from
+                                                           ["out", "markers", "transformed", "origin"]. So for example if you
+                                                           want to display the output and the marker detection, you should use
+                                                           -window out markers Passing -w without specified windows will
+                                                           disable all windows
+            - [[-s | --scale] <factor>]                  : Scales Displayed window(s) to size
+                                                           1/factor * (original width) x 1/factor * (original height)
+            - [[-i | --input] <cam id>]                  : Sets the video capture input¨
+            - [-p || -port <port>]                       : Defines a port for the serial output
+            - [[-r | --radii] <min radius> <max radius>] : Defines the minimum and maximum radii of the ball
     """
     windowScale = 1
 
@@ -322,6 +325,7 @@ if __name__ == "__main__":
     helpMode    = False
     inp         = 0
     port        = None
+    radii       = (25, 31)
     for arg in sys.argv:
         if arg == '--no-ser-out' or arg == '-n':
             noSerOut = True
@@ -361,30 +365,44 @@ if __name__ == "__main__":
                     print("Invalid Input")
         if arg == '--port' or arg == '-p':
             i = sys.argv.index(arg) + 1
-            if i < len(sys.argv) and not sys.argv[i].startswith('-'):
+            if i < sys.argv.index(arg) and not sys.argv[i].startswith('-'):
                 port = sys.argv[i]
+            else:
+                print("Not enough for argument for the radii.\n")
+                print("Terminating...")
+        if arg == '--radii' or arg == '-r':
+            i = sys.argv.index(arg) + 1
+            if (i < len(sys.argv) and not sys.argv[i  ].startswith('-')
+                                  and not sys.argv[i+1].startswith('-')):
+                radii = (sys.argv[i], sys.argv[i+1])
+            else:
+                print("Not enough for argument for the radii.\n")
+                print("Terminating...")
         if arg == '--help' or arg == '-h':
             helpMode = True
             print("""
     Argument Parser when called from command line.
     Allowed Format:
-        <cmd> [-n | --no-ser-out] [-t | --no-transf] [-c | -clr-det] [-v | --verbose] [[-w | --windows] <window 1> ...] 
+        <cmd> [-n | --no-ser-out] [-t | --no-transf] [-c | -clr-det] [-v | --verbose] [[-w | --windows] <window 1> ...]
                 [[-s | --scale] <factor>] [[-i | --input] <cam id>] [[-p | --port] <port>]
+                [[-r | --radii] <min radius> <max radius>]
+
             Flags :
-            - [-n | --no-ser-out]               : Disables Serial output
-            - [-t | --no-transf]                : Disables use of QR Markers for image transformation
-            - [-c | --clr-det]                  : Activates filtering by Color Detection
-            - [-v | --verbose]                  : If this option is present, the program will open multiple windows with
-                                                  views at different stages of the image processing
-            - [[-w | --windows] <window 1> ...] : Specify the windows that should be displayed. Choose from
-                                                  ["out", "markers", "transformed", "origin"]. So for example if you
-                                                  want to display the output and the marker detection, you should use
-                                                  -window out markers Passing -w without specified windows will
-                                                  disable all windows
-            - [[-s | --scale] <factor>]         : Scales Displayed window(s) to size
-                                                  1/factor * (original width) x 1/factor * (original height)
-            - [[-i | --input] <cam id>]         : Sets the video capture input¨
-            - [-p || -port <port>]              : Defines a port for the serial output
+            - [-n | --no-ser-out]                        : Disables Serial output
+            - [-t | --no-transf]                         : Disables use of QR Markers for image transformation
+            - [-c | --clr-det]                           : Activates filtering by Color Detection
+            - [-v | --verbose]                           : If this option is present, the program will open multiple windows with
+                                                           views at different stages of the image processing
+            - [[-w | --windows] <window 1> ...]          : Specify the windows that should be displayed. Choose from
+                                                           ["out", "markers", "transformed", "origin"]. So for example if you
+                                                           want to display the output and the marker detection, you should use
+                                                           -window out markers Passing -w without specified windows will
+                                                           disable all windows
+            - [[-s | --scale] <factor>]                  : Scales Displayed window(s) to size
+                                                           1/factor * (original width) x 1/factor * (original height)
+            - [[-i | --input] <cam id>]                  : Sets the video capture input¨
+            - [-p || -port <port>]                       : Defines a port for the serial output
+            - [[-r | --radii] <min radius> <max radius>] : Defines the minimum and maximum radii of the ball
     """)
     if not helpMode:
         main(
@@ -395,5 +413,6 @@ if __name__ == "__main__":
             windowScale,
             [wOut, wMark, wTransf, wOrig],
             inp,
-            port
+            port,
+            radii
         )
