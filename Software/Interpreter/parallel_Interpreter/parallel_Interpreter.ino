@@ -7,16 +7,16 @@
 #define Y_STP 3
 #define Z_DIR 7
 #define Z_STP 4
-#define A_STP 12
 #define A_DIR 13
-#define X_STP 2
+#define A_STP 12
 #define X_DIR 5
+#define X_STP 2
 
 // Sensor Pins
 #define sY_front 10
-#define sY_back 11
+#define sY_back  11
 #define sZ_front A3
-#define sZ_back A0
+#define sZ_back  A0
 #define fieldSize 1300
 // Stepper Motor Initialization
 AccelStepper stepperY(1, Y_STP, Y_DIR);  // MOVE1

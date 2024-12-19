@@ -8,11 +8,6 @@
 
 class ParallelInterpreter {
   public:
-    AccelStepper stepperY;
-    AccelStepper stepperZ;
-    AccelStepper stepperX;
-    AccelStepper stepperA;
-
     ParallelInterpreter(int yDir, int yStep,
                        int zDir, int zStep,
                        int aDir, int aStep,
@@ -41,6 +36,11 @@ class ParallelInterpreter {
     void moveMotorsWithSensors();
 
   private:
+
+    AccelStepper stepperY;
+    AccelStepper stepperZ;
+    AccelStepper stepperX;
+    AccelStepper stepperA;
 
     int targetY, targetZ, targetX, targetA;
     int minY, maxY, minZ, maxZ;
