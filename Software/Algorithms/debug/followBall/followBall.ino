@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <math.h>
 #include "ParallelInterpreter.h"
-#include "ConstantsForMac.h"
-//#include "ConstantsForLinux.h"
+//#include "ConstantsForMac.h"
+#include "ConstantsForLinux.h"
 
 /*************
  * Constants *
@@ -286,6 +286,7 @@ void moveField(){
     );
 
     playerPosition[0][0] += distGl;
+  }
 }
 
 //helper function
