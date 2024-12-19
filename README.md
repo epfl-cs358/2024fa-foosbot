@@ -249,12 +249,12 @@ CNC shield-Arduino Uno pin correspondance
 When installing the A4988 Motor Drivers set the voltage in alternate current to 1.2V
 by turning the screws and using a multimeter. 
 
-### Motor Labelling
+### Motor And End-Stop Sensor Labelling
 On the CNC Shield there are 3 slots for motor drivers labelled X, Y, Z, A. In the picture below you see to which motor they should be connected to.
 
 The End stop sensors have three cables that need to be connected, one to the ground, one to the 5V Power and one to the correct pins on the CNC Shield. The mapping of the position of the end stop sensors to the pins on the CNC Shield are shown in green in the picture below.
+![photo_2024-12-19_15-29-11](https://github.com/user-attachments/assets/e5647167-fd13-469d-adc3-863e7b10f043)
 
-![MotorLabels](Admin/MotorLabels.jpeg)
 
 ### Protecting Motors and Laptop
 Always connect the Arduino via a USB-Isolator to your laptop and ideally don't charge your laptop while it is connected to the Arduino.
