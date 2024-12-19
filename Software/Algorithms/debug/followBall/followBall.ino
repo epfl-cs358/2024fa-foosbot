@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <math.h>
 #include "ParallelInterpreter.h"
-//#include "ConstantsForMac.h"
-#include "ConstantsForLinux.h"
+#include "ConstantsForMac.h"
+//#include "ConstantsForLinux.h"
 
 /*************
  * Constants *
@@ -76,13 +76,13 @@
 // Move to an extreme and reset rotation
 #define BEGIN()          "BEGIN 100"
 // Move towards motor by +v
-#define MOVE1(pos)      ("MOVE1 " + String(pos))
-#define MOVE2(pos)      ("MOVE2 " + String(pos))
+#define MOVE1(pos)      ("MOVE1 " + String((int)pos))
+#define MOVE2(pos)      ("MOVE2 " + String((int)pos))
 // Rotate by angle
-#define ROTATE1(angle)  ("ROTATE1 " + String(angle))
-#define ROTATE2(angle)  ("ROTATE2 " + String(angle))
+#define ROTATE1(angle)  ("ROTATE1 " + String((int)angle))
+#define ROTATE2(angle)  ("ROTATE2 " + String((int)angle))
 // Reset Position
-#define INITIALX()       "INITIX"
+//#define INITIALX()       "INITIX"
 
 
 /*
@@ -382,6 +382,7 @@ void setup() {
   playerPosition[3][0] = CV_TO_MM(PLAYER_3_X, SCALE_X);
 
   interpret.setupSteppers();
+  delay(1000);
   interpret.executeInterpreter(BEGIN());
 
 }
@@ -392,16 +393,26 @@ void loop() {
      return;
   }
 
-  Serial.println(currentFrame.y);
+  //Serial.println(currentFrame.y);
 
 
   ballData.x = CV_TO_MM(currentFrame.x, SCALE_X);
   ballData.y = CV_TO_MM(currentFrame.y, SCALE_Y);
 
-  Serial.println(currentFrame.y);
+  //Serial.println(currentFrame.y);
 
   moveField();
   checkAndShoot();
 
+
   interpret.moveMotorsWithSensors();
+  while (interpret.stepperX.distanceToGo() != 0 ||
+         interpret.stepperY.distanceToGo() != 0 ||
+         interpret.stepperZ.distanceToGo() != 0 ||
+         interpret.stepperA.distanceToGo()) {
+    interpret.stepperX.run();
+    interpret.stepperY.run();
+    interpret.stepperA.run();
+    interpret.stepperZ.run();
+  }
 }

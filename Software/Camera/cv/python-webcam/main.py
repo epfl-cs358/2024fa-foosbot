@@ -365,10 +365,10 @@ if __name__ == "__main__":
                     print("Invalid Input")
         if arg == '--port' or arg == '-p':
             i = sys.argv.index(arg) + 1
-            if i < sys.argv.index(arg) and not sys.argv[i].startswith('-'):
+            if i < len(sys.argv) and not sys.argv[i].startswith('-'):
                 port = sys.argv[i]
             else:
-                print("Not enough for argument for the radii.\n")
+                print("Not enough for argument for the port.\n")
                 print("Terminating...")
         if arg == '--radii' or arg == '-r':
             i = sys.argv.index(arg) + 1
