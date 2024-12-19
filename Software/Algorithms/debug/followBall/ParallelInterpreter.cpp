@@ -109,12 +109,9 @@ void ParallelInterpreter::rangeEstimation(){
   Serial.println(minY);
 
   // Move forward until sY_front is triggered
-  stepperY.move(FIELD_SIZE - 100); // Go fast close to the second sensor
-  while (digitalRead(sY_front) == LOW) {
-    stepperY.run();
-  }
-  // Then go really slowly to the sensor to define accurately how many steps
-  // are between the two sensors
+  stepperY.moveTo(1000); // Go fast close to the second sensor
+  stepperY.runToPosition();
+  //and then goes really slowly to the sensor to define accurately how many steps are between the two sensors
   while (digitalRead(sY_front) == LOW) {
     stepperY.move(1);
     stepperY.run();
@@ -135,7 +132,7 @@ void ParallelInterpreter::rangeEstimation(){
   Serial.println("Estimating Z-axis range...");
 
   // Move forward until sZ_front is triggered
-  stepperZ.move(-FIELD_SIZE - 2000);
+  stepperZ.move(-FIELD_SIZE - 1000);
   while (digitalRead(sZ_back) == LOW) {
     stepperZ.run();
   }
@@ -147,12 +144,9 @@ void ParallelInterpreter::rangeEstimation(){
   Serial.println(minZ);
 
   // Move backward until sZ_back is triggered
-  stepperZ.move(FIELD_SIZE - 100); // Go fast close to the second sensor
-  while (digitalRead(sZ_front) == LOW) {
-    stepperZ.run();
-  }
-  // Then go really slowly to the sensor to define accurately how many
-  // steps are between the two sensors
+  stepperZ.moveTo(1000); // Go fast close to the second sensor
+  stepperZ.runToPosition();
+  //and then goes really slowly to the sensor to define accurately how many steps are between the two sensors
   while (digitalRead(sZ_front) == LOW) {
     stepperZ.move(1);
     stepperZ.run();
@@ -172,6 +166,7 @@ void ParallelInterpreter::rangeEstimation(){
 
 void ParallelInterpreter::executeInterpreter(String command){
   command.trim();
+  Serial.println(command);
 
   char indiv_Cmd[20];
   int value;
@@ -188,10 +183,14 @@ void ParallelInterpreter::executeInterpreter(String command){
 
       // Update offset to skip the current command and value
       offset += strlen(indiv_Cmd) + 2 + intLength(value);
+    } else {
+      // No valid command, break out of loop
+      break;
     }
   }
 }
 
+// Non-blocking Motor Control with Sensor Safety
 void ParallelInterpreter::moveMotorsWithSensors(){
 
   // MOVE1 (stepperY)
@@ -274,10 +273,10 @@ void ParallelInterpreter::setupSteppers(){
   Serial.begin(9600);
 
   // Initialize steppers
-  stepperY.setMaxSpeed    (3000.0);
-  stepperY.setAcceleration(3000.0);
-  stepperZ.setMaxSpeed    (3000.0);
-  stepperZ.setAcceleration(3000.0);
+  stepperY.setMaxSpeed    (5000.0);
+  stepperY.setAcceleration(5000.0);
+  stepperZ.setMaxSpeed    (5000.0);
+  stepperZ.setAcceleration(5000.0);
   stepperX.setMaxSpeed    (5000.0);
   stepperX.setAcceleration(5000.0);
   stepperA.setMaxSpeed    (5000.0);

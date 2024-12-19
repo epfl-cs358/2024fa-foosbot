@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-#include "CustomStepperControl.h"
+#include "ParallelInterpreter.h"
 #include "ConstantsForMac.h"
 //#include "ConstantsForLinux.h"
 
@@ -13,6 +13,8 @@
 #define FIELD_WIDTH   680
 #define FIELD_HEIGHT  605
 
+#define FIELD_SIZE 1300
+
 // Scaling factors //
 
 #define SCALE_X ((double)FIELD_WIDTH / CAM_WIDTH)
@@ -22,6 +24,10 @@
                         // axis
 
 #define CV_TO_MM(VALUE, SCALE) (VALUE * SCALE)
+
+// Control factors //
+
+#define CTRL_SPEED_THR 10
 
 // Rod positions //
 
@@ -54,6 +60,8 @@
 
 #define MIN_ATT3_X_MM MIN_ATT3_X_CV * SCALE_X
 
+#define MAX_HIT_RANGE_MM 10
+
 // Misc //
 
 #define SPEED_THR 25
@@ -66,15 +74,15 @@
  **********************************************************/
 
 // Move to an extreme and reset rotation
-#define BEGIN()          "BEGIN"
-// Move towards motor by +v and -v
-#define MOVE1(pos)      ("MOVE1 " + String(pos))
-#define MOVE2(pos)      ("MOVE2 " + String(pos))
+#define BEGIN()          "BEGIN 100"
+// Move towards motor by +v
+#define MOVE1(pos)      ("MOVE1 " + String((int)pos))
+#define MOVE2(pos)      ("MOVE2 " + String((int)pos))
 // Rotate by angle
-#define ROTATE1(angle)  ("ROTATE1 " + String(angle))
-#define ROTATE2(angle)  ("ROTATE2 " + String(angle))
+#define ROTATE1(angle)  ("ROTATE1 " + String((int)angle))
+#define ROTATE2(angle)  ("ROTATE2 " + String((int)angle))
 // Reset Position
-#define INITIALX()       "INITIX"
+//#define INITIALX()       "INITIX"
 
 
 /*
@@ -116,9 +124,9 @@ typedef struct {
 } Info;
 
 Info ballData;
-CustomStepperControl customStepper(
-        6, 3, 7, 4, 13, 12, 5,
-        2, 8, 10, 11, A3, A0
+ParallelInterpreter interpret(
+        6, 3,  7,  4, 13, 12, 5,
+        2, 8, 10, 11, A3, A0, FIELD_SIZE
 );
 
 // TODO: Remove
@@ -133,6 +141,7 @@ CustomStepperControl customStepper(
  */
 double playerPosition[4][2];
 
+double pos_yz[2];
 
 /*
  * Scales by the given factor to get millimeters from CV input.
@@ -212,7 +221,7 @@ void moveField(){
   double target = ballData.x;
 
 
-  // Moving attack players //
+  // Attack players position //
 
   double distAtt = 0;
   if (target < MIN_ATT_X_MM) {
@@ -240,50 +249,72 @@ void moveField(){
 
   }
 
-  if (abs(distAtt) >= MOVE_THR) {
-    customStepper.executeInterpreter(
-      MOVE2(distAtt * FIELD_X_TO_MU)
-    );
-    updateAttackPlayerX(distAtt);
-  }
 
-
-  // Moving goalie //
+  // Goalie position //
 
   double distGl = 0;
   double glPos  = playerPosition[0][0];
 
   if (MIN_GOAL_X_MM < target && target < MAX_GOAL_X_MM) {
+    // Serial.println("Moving goalie to ball");
     distGl = target - glPos;
 
   } else if (target < MIN_GOAL_X_MM) {
+    // Serial.println("Moving goalie to minGoal");
     distGl = MIN_GOAL_X_MM - glPos;
 
   } else {
+    // Serial.println("Moving goalie to maxGoal");
     distGl = MAX_GOAL_X_MM - glPos;
   }
 
-  if (abs(distGl) >= MOVE_THR) {
-    customStepper.executeInterpreter(
+
+  // Move //
+
+  if (abs(distAtt) >= MOVE_THR) {
+    if  (abs(distGl) >= MOVE_THR) {
+
+      interpret.executeInterpreter(
+        MOVE2(distAtt * FIELD_X_TO_MU) +
+        " " +
+        MOVE1(distGl * FIELD_X_TO_MU)
+      );
+
+      playerPosition[0][0] += distGl;
+
+    } else {
+
+      interpret.executeInterpreter(
+        MOVE2(distAtt * FIELD_X_TO_MU)
+      );
+    }
+
+    updateAttackPlayerX(distAtt);
+
+  } else if (abs(distGl) >= MOVE_THR) {
+    interpret.executeInterpreter(
       MOVE1(distGl * FIELD_X_TO_MU)
     );
+
     playerPosition[0][0] += distGl;
+
   }
 }
 
-//helper function to determine which player shoots
+//helper function
 int getClosestPlayer(){
 
-  //Calulate the euclidian distance for the goalkeeper 
-  double distance = srqt(pow(playerPosition[0][0] - ballData.x, 2) + pow(GL_ROD_Y- ballData.y, 2));
-  double minDistance = distance
+  // Calulate the euclidian distance for the goalkeeper
+  double distance = sqrt(pow(playerPosition[0][0] - ballData.x, 2) +
+                         pow(GL_ROD_Y- ballData.y, 2));
+  double minDistance = distance;
   double closestIndex = 0;
 
-  //Calulate the euclidian distance to the ball for each attack player
-  for(int i = 1; i < 4; i++)){
+  //Calulate the euclidian distance to the ball for each player
+  for(int i = 1; i < 4; i++) {
 
-    double distance = srqt(pow(playerPosition[i][0] - ballData.x, 2) + pow(ATT_ROD_Y - ballData.y, 2));
-  }
+    // Calculate the Euclidean distance to the ball
+    double distance = sqrt(pow(playerPosition[i][0] - ballData.x, 2) + pow(ATT_ROD_Y - ballData.y, 2));
 
     // Update the closest player if this distance is smaller
     if (distance < minDistance) {
@@ -300,40 +331,46 @@ int getClosestPlayer(){
  * Checks if shoot available and shoots the ball according to the given
  * range if it is.
  *
+ * @param rangeLo The smallest accessible location to the player
+ * @param rangeHi The largest accessible location to the player
  */
 void checkAndShoot()
 {
 
-  //check player that attacks and add possession treshold 
+  //check player that attacks and add treshold
   int index = getClosestPlayer();
 
-  if(index == 0){
+  if(index == 0) {
     int x_min = playerPosition[0][0] - MAX_HIT_RANGE_MM;
     int x_max = playerPosition[0][0] + MAX_HIT_RANGE_MM;
 
-    if (MIN_GOAL_Y_MM < ballData.y && ballData.y < MAX_GOAL_Y_MM 
+    if (MIN_GOAL_Y_MM < ballData.y && ballData.y < MAX_GOAL_Y_MM
     &&  x_min < ballData.x && ballData.x < x_max) {
     Serial.println("Shooting with Goalie !");
-    customStepper.executeInterpreter(
+    interpret.executeInterpreter(
       ROTATE1(-200)
-    );
-  } else {
-    int x_min = playerPosition[index][0] - MAX_HIT_RANGE_MM;
-    int x_max = playerPosition[index][0] + MAX_HIT_RANGE_MM;
-
-    if (MIN_ATT_Y_MM < ballData.y && ballData.y < MAX_ATT_Y_MM
-    && x_min < ballData.x && ballData.x < x_max) {
-    Serial.println("Shooting with Attacker !");
-    customStepper.executeInterpreter(
-      ROTATE2(-200)
     );
     }
   }
+
+  if (MIN_GOAL_Y_MM < ballData.y &&
+      ballData.y < MAX_GOAL_Y_MM) {
+    Serial.println("Shooting with Goalie !");
+    interpret.executeInterpreter(
+      ROTATE1(-200)
+    );
+  }
+
+  if (MIN_ATT_Y_MM < ballData.y &&
+      ballData.y < MAX_ATT_Y_MM) {
+    Serial.println("Shooting with Attacker !");
+    interpret.executeInterpreter(
+      ROTATE2(-200)
+    );
   }
 
   delay(500);
 }
-
 
 
 void setup() {
@@ -344,8 +381,9 @@ void setup() {
   playerPosition[2][0] = CV_TO_MM(PLAYER_2_X, SCALE_X);
   playerPosition[3][0] = CV_TO_MM(PLAYER_3_X, SCALE_X);
 
-  customStepper.setupSteppers();
-  customStepper.executeInterpreter(BEGIN());
+  interpret.setupSteppers();
+  delay(1000);
+  interpret.executeInterpreter(BEGIN());
 
 }
 
@@ -354,15 +392,27 @@ void loop() {
   if (!getBallData()){
      return;
   }
-   
-  Serial.println(currentFrame.y);
+
+  //Serial.println(currentFrame.y);
 
 
   ballData.x = CV_TO_MM(currentFrame.x, SCALE_X);
   ballData.y = CV_TO_MM(currentFrame.y, SCALE_Y);
 
-  Serial.println(currentFrame.y);
+  //Serial.println(currentFrame.y);
 
   moveField();
   checkAndShoot();
+
+
+  interpret.moveMotorsWithSensors();
+  while (interpret.stepperX.distanceToGo() != 0 ||
+         interpret.stepperY.distanceToGo() != 0 ||
+         interpret.stepperZ.distanceToGo() != 0 ||
+         interpret.stepperA.distanceToGo()) {
+    interpret.stepperX.run();
+    interpret.stepperY.run();
+    interpret.stepperA.run();
+    interpret.stepperZ.run();
+  }
 }
