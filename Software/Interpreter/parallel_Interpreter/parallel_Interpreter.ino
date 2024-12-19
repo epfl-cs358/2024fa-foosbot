@@ -38,6 +38,8 @@ int intLength(int value) {
 
 // Function to set stepper target positions with safety checks
 void setTarget(const char* cmd, int value) {
+  Serial.println(cmd);
+  Serial.println(value);
   if (strcmp(cmd, "MOVE1") == 0) {
     Serial.println("1");
     targetY += value;
@@ -62,7 +64,7 @@ void setTarget(const char* cmd, int value) {
     Serial.println("5");
     rangeEstimation();
   } else {
-    Serial.println("Invalid Command!");
+    Serial.print("Invalid Command! : ");
     Serial.println(cmd);
   }
 }
@@ -84,10 +86,8 @@ void rangeEstimation() {
   Serial.println(minY);
 
   // Move forward until sY_front is triggered
-  stepperY.move(fieldSize - 100);  //go fast close to the second sensor
-  while (digitalRead(sY_front) == LOW) {
-    stepperY.run();
-  }
+  stepperY.moveTo(fieldSize - 300);  //go fast close to the second sensor
+  stepperY.runToPosition();
   //and then goes really slowly to the sensor to define accurately how many steps are between the two sensors
   while (digitalRead(sY_front) == LOW) {
     stepperY.move(1);
@@ -98,12 +98,13 @@ void rangeEstimation() {
   Serial.println(maxY);
   //Center the stepper after estimation
   stepperY.moveTo((maxY + minY) / 2);
+  targetY = (maxY + minY) / 2;
   stepperY.runToPosition();
 
   // Estimate Z-axis range (MOVE2)
   Serial.println("Estimating Z-axis range...");
   // Move forward until sZ_front is triggered
-  stepperZ.move(-fieldSize - 2000);
+  stepperZ.move(-fieldSize - 1000);
   while (digitalRead(sZ_back) == LOW) {
     stepperZ.run();
   }
@@ -114,10 +115,8 @@ void rangeEstimation() {
   Serial.println(minZ);
 
   // Move backward until sZ_back is triggered
-  stepperZ.move(fieldSize - 100);  //go fast close to the second sensor
-  while (digitalRead(sZ_front) == LOW) {
-    stepperZ.run();
-  }
+  stepperZ.moveTo(fieldSize - 300);  //go fast close to the second sensor
+  stepperZ.runToPosition();
   //and then goes really slowly to the sensor to define accurately how many steps are between the two sensors
   while (digitalRead(sZ_front) == LOW) {
     stepperZ.move(1);
@@ -128,6 +127,7 @@ void rangeEstimation() {
   Serial.println(maxZ);
   // Center the stepper after estimation
   stepperZ.moveTo((maxZ + minZ) / 2);
+  targetZ = (maxZ + minZ) / 2;
   stepperZ.runToPosition();
   Serial.println("Range estimation completed.");
 }
@@ -136,12 +136,23 @@ void executeInterpreter(String command) {
   char indiv_Cmd[20];
   int value;
   int offset = 0;
-  const char* cmd_Line = command.c_str();
-  //Parse multiple commands
-  while (sscanf(cmd_Line + offset, "%s %d", indiv_Cmd, &value) == 2) {
-    setTarget(indiv_Cmd, value);
-    //set offset to next command log10(value)+1 allow to know a many numbers there is inside value
-    offset += strlen(indiv_Cmd) + 1 + intLength(value);
+
+  // Parse multiple commands
+  while (offset < command.length()) {
+    // Try to parse a command and value pair
+    int parsed = sscanf(command.c_str() + offset, "%s %d", indiv_Cmd, &value);
+
+    if (parsed == 2) {
+      // Valid command and value
+      setTarget(indiv_Cmd, value);
+      //Serial.println(indiv_Cmd);
+
+      // Update offset to skip the current command and value
+      offset += strlen(indiv_Cmd) + 2 + intLength(value);
+    } else {
+      // No valid command, break out of loop
+      break;
+    }
   }
 }
 
@@ -206,10 +217,10 @@ void setup() {
   Serial.begin(9600);
 
   // Initialize steppers
-  stepperY.setMaxSpeed(5000.0);
-  stepperY.setAcceleration(5000.0);
-  stepperZ.setMaxSpeed(5000.0);
-  stepperZ.setAcceleration(5000.0);
+  stepperY.setMaxSpeed(3000.0);
+  stepperY.setAcceleration(3000.0);
+  stepperZ.setMaxSpeed(3000.0);
+  stepperZ.setAcceleration(3000.0);
   stepperX.setMaxSpeed(5000.0);
   stepperX.setAcceleration(5000.0);
   stepperA.setMaxSpeed(5000.0);
@@ -227,6 +238,7 @@ void setup() {
 void loop() {
   if (Serial.available() > 0) {
     String command = Serial.readStringUntil('\n');  // Read and trim command
+    Serial.println(command);
     command.trim();
     executeInterpreter(command);
   }
