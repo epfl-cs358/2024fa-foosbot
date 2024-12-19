@@ -192,80 +192,86 @@ void ParallelInterpreter::executeInterpreter(String command){
 
 // Non-blocking Motor Control with Sensor Safety
 void ParallelInterpreter::moveMotorsWithSensors(){
+  
+  while (stepperX.distanceToGo() != 0 ||
+         stepperY.distanceToGo() != 0 ||
+         stepperZ.distanceToGo() != 0 ||
+         stepperA.distanceToGo()) {
 
-  // MOVE1 (stepperY)
-  if (stepperY.distanceToGo() != 0) {
-    if (
-      // Moving forward, not tripping sensor
-      (targetY > stepperY.currentPosition() && digitalRead(sY_front) == LOW) ||
-      // Moving backward, not tripping sensor
-      (targetY < stepperY.currentPosition() && digitalRead(sY_back) == LOW)) {
+    // MOVE1 (stepperY)
+    if (stepperY.distanceToGo() != 0) {
+      if (
+        // Moving forward, not tripping sensor
+        (targetY > stepperY.currentPosition() && digitalRead(sY_front) == LOW) ||
+        // Moving backward, not tripping sensor
+        (targetY < stepperY.currentPosition() && digitalRead(sY_back) == LOW)) {
 
-      // Continue running normally
-      stepperY.run();
+        // Continue running normally
+        stepperY.run();
 
-    } else {
+      } else {
 
-      stepperY.stop();  // Safety stop if sensor triggered
-      Serial.println("MOVE1 stopped due to sensor.");
+        stepperY.stop();  // Safety stop if sensor triggered
+        Serial.println("MOVE1 stopped due to sensor.");
 
-      // Automatically back off slightly to allow future movement
-      if (digitalRead(sY_front) == HIGH) {  // Front sensor triggered
+        // Automatically back off slightly to allow future movement
+        if (digitalRead(sY_front) == HIGH) {  // Front sensor triggered
 
-        stepperY.move(-10);                 // Back off slightly
-        stepperY.runToPosition();           // Ensure the back-off completes
+          stepperY.move(-10);                 // Back off slightly
+          stepperY.runToPosition();           // Ensure the back-off completes
 
-        Serial.println("MOVE1 backed off from front sensor.");
+          Serial.println("MOVE1 backed off from front sensor.");
 
-      } else if (digitalRead(sY_back) == HIGH) {  // Back sensor triggered
+        } else if (digitalRead(sY_back) == HIGH) {  // Back sensor triggered
 
-        stepperY.move(10);                        // Move forward slightly
-        stepperY.runToPosition();                 // Ensure the back-off completes
+          stepperY.move(10);                        // Move forward slightly
+          stepperY.runToPosition();                 // Ensure the back-off completes
 
-        Serial.println("MOVE1 backed off from back sensor.");
+          Serial.println("MOVE1 backed off from back sensor.");
+        }
       }
     }
-  }
 
-  // MOVE2 (stepperZ)
-  if (stepperZ.distanceToGo() != 0) {
-    if (
-      (targetZ > stepperZ.currentPosition() && digitalRead(sZ_front) == LOW) ||
-      (targetZ < stepperZ.currentPosition() && digitalRead(sZ_back) == LOW)) {
+    // MOVE2 (stepperZ)
+    if (stepperZ.distanceToGo() != 0) {
+      if (
+        (targetZ > stepperZ.currentPosition() && digitalRead(sZ_front) == LOW) ||
+        (targetZ < stepperZ.currentPosition() && digitalRead(sZ_back) == LOW)) {
 
-      stepperZ.run();  // Continue running normally
+        stepperZ.run();  // Continue running normally
 
-    } else {
+      } else {
 
-      stepperZ.stop();  // Safety stop if sensor triggered
-      Serial.println("MOVE2 stopped due to sensor.");
+        stepperZ.stop();  // Safety stop if sensor triggered
+        Serial.println("MOVE2 stopped due to sensor.");
 
-      // Automatically back off slightly to allow future movement
-      if (digitalRead(sZ_front) == HIGH) {  // Front sensor triggered
+        // Automatically back off slightly to allow future movement
+        if (digitalRead(sZ_front) == HIGH) {  // Front sensor triggered
 
-        stepperZ.move(-10);                 // Back off slightly
-        stepperZ.runToPosition();           // Ensure the back-off completes
+          stepperZ.move(-10);                 // Back off slightly
+          stepperZ.runToPosition();           // Ensure the back-off completes
 
-        Serial.println("MOVE2 backed off from front sensor.");
+          Serial.println("MOVE2 backed off from front sensor.");
 
-      } else if (digitalRead(sZ_back) == HIGH) {  // Back sensor triggered
+        } else if (digitalRead(sZ_back) == HIGH) {  // Back sensor triggered
 
-        stepperZ.move(10);                        // Move forward slightly
-        stepperZ.runToPosition();                 // Ensure the back-off completes
+          stepperZ.move(10);                        // Move forward slightly
+          stepperZ.runToPosition();                 // Ensure the back-off completes
 
-        Serial.println("MOVE2 backed off from back sensor.");
+          Serial.println("MOVE2 backed off from back sensor.");
+        }
       }
     }
-  }
 
-  // ROTATE1 (stepperX) - No sensors here
-  if (stepperX.distanceToGo() != 0) {
-    stepperX.run();  // Continue running normally
-  }
+    // ROTATE1 (stepperX) - No sensors here
+    if (stepperX.distanceToGo() != 0) {
+      stepperX.run();  // Continue running normally
+    }
 
-  // ROTATE2 (stepperA) - No sensors here
-  if (stepperA.distanceToGo() != 0) {
-    stepperA.run();  // Continue running normally
+    // ROTATE2 (stepperA) - No sensors here
+    if (stepperA.distanceToGo() != 0) {
+      stepperA.run();  // Continue running normally
+    }
   }
 }
 

@@ -406,7 +406,7 @@ void loop() {
 
 
   interpret.moveMotorsWithSensors();
-  while (interpret.stepperX.distanceToGo() != 0 ||
+  /*while (interpret.stepperX.distanceToGo() != 0 ||
          interpret.stepperY.distanceToGo() != 0 ||
          interpret.stepperZ.distanceToGo() != 0 ||
          interpret.stepperA.distanceToGo()) {
@@ -414,5 +414,5 @@ void loop() {
     interpret.stepperY.run();
     interpret.stepperA.run();
     interpret.stepperZ.run();
-  }
+  }*/
 }
