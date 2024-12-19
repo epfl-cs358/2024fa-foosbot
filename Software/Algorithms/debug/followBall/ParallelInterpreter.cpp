@@ -1,13 +1,13 @@
 #include "ParallelInterpreter.h"
 
-ParallelIntepreter::ParallelIntepreter(int yDir, int yStep,
-                                       int zDir, int zStep,
-                                       int aDir, int aStep,
-                                       int xDir, int xStep,
-                                       int enPin,
-                                       int sY_front, int sY_back,
-                                       int sZ_front, int sZ_back,
-                                       int fieldSize)
+ParallelInterpreter::ParallelInterpreter(int yDir, int yStep,
+                                         int zDir, int zStep,
+                                         int aDir, int aStep,
+                                         int xDir, int xStep,
+                                         int enPin,
+                                         int sY_front, int sY_back,
+                                         int sZ_front, int sZ_back,
+                                         int FIELD_SIZE)
     : stepperY(1, yStep, yDir), stepperZ(1, zStep, zDir),
       stepperX(1, xStep, xDir), stepperA(1, aStep, aDir)
 {
@@ -27,10 +27,10 @@ ParallelIntepreter::ParallelIntepreter(int yDir, int yStep,
   this->sZ_front = sZ_front;
   this->sZ_back  = sZ_back;
 
-  FIELD_SIZE = fieldSize;
+  FIELD_SIZE = FIELD_SIZE;
 }
 
-int ParallelIntepreter::intLength(int value) {
+int ParallelInterpreter::intLength(int value) {
 
   // Special case for 0
   if (value == 0) return 1;
@@ -44,9 +44,8 @@ int ParallelIntepreter::intLength(int value) {
   return length;
 }
 
-void ParallelIntepreter::setTarget(const char* cmd, int value){
+void ParallelInterpreter::setTarget(const char* cmd, int value){
   if (strcmp(cmd, "MOVE1") == 0) {
-    Serial.println("1");
 
     targetY += value;
     targetY  =
@@ -59,7 +58,6 @@ void ParallelIntepreter::setTarget(const char* cmd, int value){
     stepperY.moveTo(targetY);
 
   } else if (strcmp(cmd, "MOVE2") == 0) {
-    Serial.println("2");
 
     targetZ += value;
     targetZ  =
@@ -72,19 +70,16 @@ void ParallelIntepreter::setTarget(const char* cmd, int value){
     stepperZ.moveTo(targetZ);
 
   } else if (strcmp(cmd, "ROTATE1") == 0) {
-    Serial.println("3");
 
     targetX += value;
     stepperX.moveTo(targetX);
 
   } else if (strcmp(cmd, "ROTATE2") == 0) {
-    Serial.println("4");
 
     targetA += value;
     stepperA.moveTo(targetA);
 
   } else if (strcmp(cmd, "BEGIN") == 0) {
-    Serial.println("5");
     rangeEstimation();
 
   } else {
@@ -93,7 +88,7 @@ void ParallelIntepreter::setTarget(const char* cmd, int value){
   }
 }
 
-void ParallelIntepreter::rangeEstimation(){
+void ParallelInterpreter::rangeEstimation(){
   Serial.println("Starting range estimation...");
 
 
@@ -102,7 +97,7 @@ void ParallelIntepreter::rangeEstimation(){
   Serial.println("Estimating Y-axis range...");
 
   // Move backward until sY_back is triggered
-  stepperY.move(-fieldSize - 1000);
+  stepperY.move(-FIELD_SIZE - 1000);
   while (digitalRead(sY_back) == LOW) {
     stepperY.run();
   }
@@ -114,7 +109,7 @@ void ParallelIntepreter::rangeEstimation(){
   Serial.println(minY);
 
   // Move forward until sY_front is triggered
-  stepperY.move(fieldSize - 100); // Go fast close to the second sensor
+  stepperY.move(FIELD_SIZE - 100); // Go fast close to the second sensor
   while (digitalRead(sY_front) == LOW) {
     stepperY.run();
   }
@@ -131,6 +126,7 @@ void ParallelIntepreter::rangeEstimation(){
 
   //Center the stepper after estimation
   stepperY.moveTo((maxY + minY) / 2);
+  targetY = (maxY + minY) / 2;
   stepperY.runToPosition();
 
 
@@ -139,7 +135,7 @@ void ParallelIntepreter::rangeEstimation(){
   Serial.println("Estimating Z-axis range...");
 
   // Move forward until sZ_front is triggered
-  stepperZ.move(-fieldSize - 2000);
+  stepperZ.move(-FIELD_SIZE - 2000);
   while (digitalRead(sZ_back) == LOW) {
     stepperZ.run();
   }
@@ -151,7 +147,7 @@ void ParallelIntepreter::rangeEstimation(){
   Serial.println(minZ);
 
   // Move backward until sZ_back is triggered
-  stepperZ.move(fieldSize - 100); // Go fast close to the second sensor
+  stepperZ.move(FIELD_SIZE - 100); // Go fast close to the second sensor
   while (digitalRead(sZ_front) == LOW) {
     stepperZ.run();
   }
@@ -168,12 +164,15 @@ void ParallelIntepreter::rangeEstimation(){
 
   // Center the stepper after estimation
   stepperZ.moveTo((maxZ + minZ) / 2);
+  targetZ = (maxZ + minZ) / 2;
   stepperZ.runToPosition();
 
   Serial.println("Range estimation completed.");
 }
 
-void ParallelIntepreter::executeInterpreter(String command){
+void ParallelInterpreter::executeInterpreter(String command){
+  command.trim();
+
   char indiv_Cmd[20];
   int value;
   int offset = 0;
@@ -189,14 +188,11 @@ void ParallelIntepreter::executeInterpreter(String command){
 
       // Update offset to skip the current command and value
       offset += strlen(indiv_Cmd) + 2 + intLength(value);
-    } else {
-      // No valid command, break out of loop
-      break;
     }
   }
 }
 
-void ParallelIntepreter::moveMotorsWithSensors(){
+void ParallelInterpreter::moveMotorsWithSensors(){
 
   // MOVE1 (stepperY)
   if (stepperY.distanceToGo() != 0) {
@@ -274,14 +270,14 @@ void ParallelIntepreter::moveMotorsWithSensors(){
   }
 }
 
-void ParallelIntepreter::setupSteppers(){
+void ParallelInterpreter::setupSteppers(){
   Serial.begin(9600);
 
   // Initialize steppers
-  stepperY.setMaxSpeed    (5000.0);
-  stepperY.setAcceleration(5000.0);
-  stepperZ.setMaxSpeed    (5000.0);
-  stepperZ.setAcceleration(5000.0);
+  stepperY.setMaxSpeed    (3000.0);
+  stepperY.setAcceleration(3000.0);
+  stepperZ.setMaxSpeed    (3000.0);
+  stepperZ.setAcceleration(3000.0);
   stepperX.setMaxSpeed    (5000.0);
   stepperX.setAcceleration(5000.0);
   stepperA.setMaxSpeed    (5000.0);

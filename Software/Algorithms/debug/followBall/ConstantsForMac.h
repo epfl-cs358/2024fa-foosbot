@@ -31,5 +31,3 @@
 #define PLAYER_1_X    300
 #define PLAYER_2_X    696
 #define PLAYER_3_X    1060
-
-#define MAX_HIT_RANGE_MM 10 

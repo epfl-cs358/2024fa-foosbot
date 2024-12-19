@@ -374,7 +374,7 @@ if __name__ == "__main__":
             i = sys.argv.index(arg) + 1
             if (i < len(sys.argv) and not sys.argv[i  ].startswith('-')
                                   and not sys.argv[i+1].startswith('-')):
-                radii = (sys.argv[i], sys.argv[i+1])
+                radii = (int(sys.argv[i]), int(sys.argv[i+1]))
             else:
                 print("Not enough for argument for the radii.\n")
                 print("Terminating...")
