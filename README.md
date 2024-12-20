@@ -84,7 +84,7 @@ However, to simplify development and reduce costs, the prototype will use a smal
 - `CAD` : Contains all the CAD stl files as well as the dxf files for lasercutting
 - `Hardware` : Contains the electronic circuit diagram and a document with hardware component specifications
 - `Software` : Contains all the code
-  - `Software/Algorithms` : Contains the Arduino code for controlling the motors and handling the game logic
+  - `Software/Algorithms/followBall` : Contains the Arduino code for controlling the motors and handling the game logic
   - `Software/Camera/cv/python-webcam` : Contains the python code for the computer vision as well as the QR Markers to printout
 
 ### Final Result 
