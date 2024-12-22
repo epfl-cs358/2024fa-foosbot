@@ -89,7 +89,7 @@ However, to simplify development and reduce costs, the prototype will use a smal
 
 ### Final Result 
 
-https://github.com/user-attachments/assets/dd09006e-b9f9-418b-b552-d5e2579a633e
+https://github.com/user-attachments/assets/f8ba40bc-5658-4df2-8fb3-47cc1d8da43e
 
 ![Table](https://github.com/user-attachments/assets/bf46b7f8-2c9b-4224-9fdb-b37fdb968ca5)
 
@@ -115,8 +115,8 @@ You will need to buy:
 - [x] 2 _~1_ _meter_ GT2 _6mm_ belt
 - [x] 1 _1_ _meter_ WS2813 LED Strips
 - [x] 1 Bread board
-- [x] 2 Metal Bars with diameter _15_ _mm_ length _1200_mm
-- [x] 2 Metal Bars with diameter _8_ _mm_ length _1200_mm
+- [x] 2 Metal Bars with diameter _15_ _mm_ length _1200__mm_
+- [x] 2 Metal Bars with diameter _8_ _mm_ length _1200__mm_
 - [x] 4 Ball Bearings that allow for both rotational and linear motion
 - [x] 8 Wheels (Something like [this](https://www.zyltech.com/zyltech-20-series-wheel-pulley-bearing-for-2020-aluminum-extrusion-v-slot-compatible/))
 - [x] 2 Pully
@@ -266,7 +266,7 @@ Also note that the motor drivers on the CNC shield might head up a bit if used f
 You need to have [Arduino IDE](https://www.arduino.cc/en/software) installed, as well as the libraries
 
 ### Uploading Code
-1. Open the code for the Arduino in `/Software/Algorithms/beginner/beginner.ino`
+1. Open the code for the Arduino in `/Software/Algorithms/followBall/followBall.ino`
 2. Connect the Arduino via the USB Isolator to your laptop
 3. Press the upload button in the top left of the Arduino IDE
 
